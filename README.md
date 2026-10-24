@@ -1,93 +1,256 @@
-# Showcase
+# AFAW (Anti-Fragile Agentic Workflow)
 
-Transcend Hackathon Showcase workspace for @agustindiazcano (DevPost: agustindiazcano). Visit the [onboarding issue](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/work_items/1) to get started.
+**A deterministic, multi-agent methodology for AI-assisted software development.**
+
+Several coding agents working on one repository fail in predictable ways: they collide on branches and on shared context files, claim results they never measured, and write tests that pass whatever the code does. AFAW is a repository-level method and boilerplate that lets agents write code in parallel while deterministic tools decide whether the result is acceptable and a human approves every merge.
+
+*AFAW is the method; the code here is one way to implement it. See [what is core and what you can replace](#method-and-this-implementation).*
+
+**White paper (PDF): [`docs/paper/afaw.pdf`](docs/paper/afaw.pdf)** · LaTeX source: [`docs/paper/afaw.tex`](docs/paper/afaw.tex) · DOI [10.5281/zenodo.23050310](https://doi.org/10.5281/zenodo.23050310)
+
+**Live demo: [agustindiazcano.github.io/afaw-anti-fragile-agentic-workflow](https://agustindiazcano.github.io/afaw-anti-fragile-agentic-workflow/)** · this repository's own dashboard: [`/live/`](https://agustindiazcano.github.io/afaw-anti-fragile-agentic-workflow/live/)
+
+---
+
+## Demo dashboard
+
+A dashboard built by `scripts/build_state.py` from mock data: a fictional project whose every task and number is invented ([`examples/mock_dashboard.py`](examples/mock_dashboard.py)). It shows each traffic-light rule firing: CI failing, a blocker not done, no activity for three days, nothing measured.
+
+![Demo dashboard, top: progress, status tiles, tasks by status and tasks merged per day.](docs/screenshots/dashboard-overview.png)
+
+![Demo dashboard, board: tasks in progress, pending and in the backlog, with ages and traffic lights and the reason for each.](docs/screenshots/dashboard-board.png)
+
+<details>
+<summary>Dark mode</summary>
+
+![Demo dashboard in dark mode.](docs/screenshots/dashboard-overview-dark.png)
+
+</details>
+
+Build it locally: `python -m examples.mock_dashboard mock-output` and open `mock-output/index.html`.
+
+## Why use it
+
+- **It costs less.** Without it, an agent runs the whole test suite on your machine, the machine is slow, tests fail for reasons that have nothing to do with the code, and the agent retries for an hour. Every retry sends its whole context again: that is where the token bill goes. With AFAW the agent runs only the test it is writing; the cloud runs the rest in parallel and answers once. A few minutes of CI cost far less than an hour of an agent going in circles.
+- **It works alone and in a team.** Alone, you let the agents run and nobody checks them: they commit to the wrong branch, write tests that pass no matter what, and report results they never measured. The checks, the branch protection and the hooks do that reviewing for you.
+- **With 2 or 10 people, everyone sees what the agents did.** Each person runs their own agents, and without a shared record nobody knows what the others' agents changed, why, or where each task stands. Here every task, decision and status is in the same place and in the same format, for every person and every agent: the board, the generated `LASTCONTEXT.md` and the decision records. You set it up once, from the template.
+- **The project documents itself.** Every task leaves what was done, what is left and, for each decision, why it was taken. When agents do the work, that is usually lost: afterwards nobody knows what was done or why.
+- **A new agent understands the project in minutes.** Instead of reading every file from scratch, it reads one generated index (`LASTCONTEXT.md`) and follows links to the decisions it needs. Less reading means fewer tokens and less time, and the saving grows with the project.
+
+- **Fewer status meetings.** "What did you do, where does it stand, what's blocked, why was this decided": the board and the records already answer it, and an optional assistant can answer it in a chat. See [Ask the project](#optional-ask-the-project).
+
+These are the expected gains, not measured ones yet. The dashboard already records timings and CI cost, and the paper's evaluation protocol says how to measure all four.
+
+## Method and this implementation
+
+The method does not require these exact tools. Write your tests however you like, use any CI, skip mutation testing outside critical code. Some parts, though, are what make it work: remove them and the problem they solve comes back.
+
+| Core: remove it and the problem returns | Replaceable: same idea, another tool | Optional |
+|---|---|---|
+| Each task writes its own state files; shared views are derived. (One shared context file breaks as soon as two agents work at once.) | The CI system, the test framework | The dashboard and its charts |
+| Measured values, never written by the agent | The mutation engine | Mutation testing outside critical code |
+| Heavy checks in the cloud, not on the agent's machine | Hooks, for another agent or tool | Timings and CI cost |
+| One branch per task, no push to `main`, a human approves | The format of decision records | Per-role context files |
+| The red step checked by a tool, not reported by the agent | The language of the rules file | |
+| | The retrieval stack of the assistant | An assistant that answers from the records ([ask the project](#optional-ask-the-project)) |
+
+## Optional: ask the project
+
+Because everything is recorded as the work happens, you can put an assistant with RAG on top: it searches the project's records and answers questions in a chat. It is not part of the method, just an optional use of what the method already records.
+
+**What it replaces: status meetings.** "What did you do, where does it stand, what's blocked, why was this decided." The board, `LASTCONTEXT.md` and the decision records already answer that. The assistant answers the same questions any time, to anyone, without taking an hour from five people.
+
+**Why it works well here.** Every document is about one thing: one decision per ADR, one trap per gotcha, one delta per task. They split into clean pieces. The front matter says whether a decision is still in force, so the assistant can skip the ones that were replaced. `LASTCONTEXT.md` is the entry point. And every fact has a path, so each answer can cite where it came from and anyone can check it.
+
+**What it doesn't replace.**
+- **Meetings where things get decided.** Priorities, trade-offs, disagreements still need people. The records say what was decided, not what to decide. Those meetings do get shorter: nobody spends the first half working out where things stand.
+- **What nobody wrote down.** A decision made in a hallway and never turned into an ADR doesn't exist for the assistant.
+- **Records that went stale.** If an ADR stopped being true and nobody replaced it, the assistant answers with confidence and gets it wrong.
+
+**Two rules for the assistant.**
+- **Numbers are copied, not paraphrased.** Progress, lead time, CI cost: quote them from the derived views. An assistant that "summarizes" metrics can invent them.
+- **Read-only.** It answers; it never writes to the repository, opens pull requests or changes state.
+
+---
+
+## Index
+
+1. [Demo dashboard](#demo-dashboard)
+2. [Why use it](#why-use-it)
+3. [Method and this implementation](#method-and-this-implementation)
+4. [Optional: ask the project](#optional-ask-the-project)
+5. [Core principle](#core-principle-the-ai-decides-the-engine-measures)
+6. [Failure modes and mechanisms](#failure-modes-and-mechanisms)
+7. [System overview](#system-overview)
+8. [How it works](#how-it-works)
+9. [The life of a task](#the-life-of-a-task)
+10. [Directory structure](#directory-structure)
+11. [Getting started](#getting-started)
+12. [Daily workflow](#daily-workflow)
+13. [Scope and limits](#scope-and-limits)
+14. [Rebuilding the diagrams and the paper](#rebuilding-the-diagrams-and-the-paper)
+15. [Citation, author, license](#citation)
+
+---
+
+## Core principle: "The AI decides, the engine measures"
+
+A model proposes and writes code; its own assessment is never trusted. Every number (tests, types, coverage, mutation score, task timings, the traffic light) comes from a deterministic tool, and a value an agent could have made up is rejected where it would be declared.
+
+## Failure modes and mechanisms
+
+| Failure | Mechanism | What remains |
+|---|---|---|
+| Wrong-branch work | Step 0 (`git status`, `git branch`), one branch per task, one terminal per agent; a hook denies a push to `main` | Agents sharing one working tree can still overwrite uncommitted files |
+| Shared-state conflicts | Each task writes only its own files; shared views are derived on demand and never committed | Agents do not see unmerged work on other branches |
+| Unmeasured claims | Measured values are rejected in task files; `files_touched` must equal the diff; the red step is verified in CI | A person must still follow the CI link |
+| Vacuous tests | Red-first check; mutation testing on the diff; equivalent mutants accepted only by the human | Mutation score is not correctness |
+| Heavy local runs | Two tiers: single tests locally, everything else in CI, in parallel | CI queue latency and minutes |
+| Unreviewed integration | Hooks, CI checks, branch protection, human approval | Hooks are best-effort |
+
+## System overview
+
+![AFAW overview: the human opens one terminal per agent; each agent works on its own branch and runs only the test it is writing; CI runs every other check; the human approves every PR; derived views are built from main on demand.](docs/img/01-overview.svg)
+
+*Colors in all diagrams: blue = agent action, amber = human, green = CI or deterministic check, purple = state files, red = blocked.*
+
+## How it works
+
+### 1. Task files and derived state
+
+An agent writes only two files: its task file `state/tasks/task_NNN.json` (declared values: title, role, type, status, owner, priority, difficulty, dependencies, branch) and its delta `context/tasks/task_NNN_context.json` (`summary`, `next`, `files_touched`). Their shape is defined once, in `state/schemas/`.
+
+Everything shared is **derived, never committed**: `python -m scripts.build_state --ref origin/main` builds the pending view, the history of done tasks, the metrics, the dashboard and the `LASTCONTEXT.md` files into `build/`. Timestamps and CI results are measured from git and the CI API (`python -m scripts.collect_facts`), never declared; the traffic light is a rule:
+
+- 🔴 a task it depends on is not done, or CI fails on the latest commit of its branch
+- 🟡 in progress with no commit or CI run for more than `stale_days`
+- 🟢 otherwise; "no data" when nothing was measured
+
+![State and context: the agent writes only its delta and task file; CI checks them; after the merge the sources on main feed build_state.py, which derives the views into build/.](docs/img/03-state-and-context.svg)
+
+### 2. Project knowledge
+
+State says *what*; prose says *why*. Decisions are ADRs in `docs/adr/`, operational traps are gotchas in `docs/gotchas/` (templates in `docs/templates/`). The generated `LASTCONTEXT.md` indexes them with one line each, next to the current state, what waits on the human and the next tasks. A record leaves the index only for an explicit reason (superseded, deprecated, resolved, or **promoted** to a mechanism), never for its age, and a budget tells the human when to prune. See [ADR 0001](docs/adr/0001-record-decisions-as-adrs.md).
+
+### 3. Strict TDD in two tiers
+
+Locally, the agent runs only the test it is writing. CI runs everything else, including the **red-first check** (`python -m scripts.red_check`): each test a pull request adds must fail on the code before the change.
+
+![CI pipeline: path filters route a change to back-end, front-end, red-first, mutation and state checks in parallel; documents-only changes run nothing.](docs/img/04-ci-pipeline.svg)
+
+### 4. Mutation testing on the diff
+
+Only new or modified files are mutated. In critical modules a file below the minimum blocks the pull request. The gate is K / (N − E_human): only the human records an equivalent mutant, in `state/equivalent_mutants.json`, bound to the file's hash (`python -m scripts.mutation_gate`). The mutation engine itself is project-specific.
+
+![Mutation testing: baseline, mutants in parallel, re-run, fix survivors, human-only equivalences, block the PR when a mandatory file is below the minimum.](docs/img/05-mutation-testing.svg)
+
+### 5. Human authority
+
+No commits or pushes to `main`, no merge without an explicit human directive, and the human approves every pull request. Rules in `AGENTS.md` are advice, so they are also enforced by hooks, CI and branch protection.
+
+![Control layers: AGENTS.md, hooks, CI checks, branch protection, human approval.](docs/img/06-control-layers.svg)
+
+### 6. Dashboard
+
+A static HTML page (no scripts) with progress, tasks by status, tasks merged per day, the board with ages and lights, timing (agent time, review latency, lead time) and CI cost (runs, queue time, job minutes). `.github/workflows/dashboard.yml` rebuilds it on every push to `main`, every hour and on demand, and publishes it on GitHub Pages: the demo at the site root and this repository's own dashboard at `/live/`. A Pages site is public: do not publish the dashboard of a private project.
+
+## The life of a task
+
+![Life of a task: ask for a ROLE, read the generated context, step 0, branch, TDD with single local tests, commit, push, CI, delta and ADRs, PR, human approval, delete the branch.](docs/img/02-task-lifecycle.svg)
+
+## Directory structure
+
+```text
+.
+├── AGENTS.md                      # The rules: single source for every agent
+├── CLAUDE.md                      # Imports AGENTS.md
+├── PENDING.md                     # The human's roadmap (hook: never deleted or emptied)
+├── .claude/
+│   ├── settings.json              # Hook wiring
+│   ├── hooks/                     # session_start (builds and injects LASTCONTEXT.md),
+│   │                              # safety_guard (deny/ask), lint_check
+│   └── skills/                    # commit, ship, tests, push-dev, trash
+├── .github/
+│   ├── pull_request_template.md
+│   └── workflows/
+│       ├── checks.yml             # Every PR: task files, delta, red-first, docs, views
+│       ├── scripts-ci.yml         # Lint, types, tests (skipped on documents-only PRs)
+│       └── dashboard.yml          # Builds and publishes the dashboard
+├── state/
+│   ├── config.json                # Code folders, mutation settings, dashboard settings
+│   ├── schemas/                   # JSON Schemas: task, delta, config, equivalent mutants
+│   └── tasks/task_NNN.json        # One file per task (never deleted)
+├── context/tasks/                 # One delta per task
+├── docs/
+│   ├── adr/                       # Architecture decision records
+│   ├── gotchas/                   # Operational traps, closed as resolved or promoted
+│   ├── templates/                 # ADR and gotcha templates
+│   ├── diagrams/ and img/         # Graphviz sources and rendered figures
+│   ├── screenshots/               # Screenshots of the demo dashboard
+│   └── paper/                     # The white paper: afaw.pdf and its source afaw.tex
+├── scripts/
+│   ├── afaw_state/                # Model, facts, lights, durations, views, dashboard
+│   ├── build_state.py             # Derived views from a git ref
+│   ├── collect_facts.py           # Measured facts from git and the GitHub API
+│   ├── check_task_files.py        # Lifecycle, declared values only, unique ids
+│   ├── check_task_delta.py        # files_touched equals the diff (--write fills it)
+│   ├── check_docs.py              # ADRs, gotchas, links
+│   ├── red_check.py               # Added tests must fail on the old code
+│   ├── mutation_targets.py        # Mandatory and optional files to mutate
+│   ├── mutation_gate.py           # Score with human-accepted equivalences only
+│   ├── rules_to_tex.py            # The paper's appendix from AGENTS.md
+│   └── setup_protection.sh        # Branch protection and required checks
+├── examples/mock_dashboard.py     # The demo: dashboard and LASTCONTEXT.md from mock data
+├── src/                           # The project's code
+└── tests/tooling/                 # Tests of the scripts and hooks
+```
+
+`build/` (the derived views) is ignored by git.
 
 ## Getting started
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+GitHub does not copy branch protection, required checks or Pages settings to a repository created from a template.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+1. **Use the template**: GitHub → **Use this template**.
+2. **Configure** `state/config.json`: code folders, `mutation_critical_paths`, `mutation_min_score`, and the `dashboard` settings.
+3. **Protect `main`**: `bash scripts/setup_protection.sh` (needs the `gh` CLI) requires `lint`, `typecheck`, `tests` and `state-and-docs`, and blocks direct pushes.
+4. **Dashboard** (public repositories): Settings → Pages → Source: **GitHub Actions**.
+5. **Verify**: open a test pull request and check that the workflows run.
+6. **Start**: open a terminal per agent and answer the `ROLE:` question.
 
-## Add your files
+## Daily workflow
 
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file) or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+1. One terminal per agent; answer its `ROLE:`. The session-start hook injects the generated `LASTCONTEXT.md` and `PENDING.md`.
+2. The agent creates its branch, works with TDD running only its own test, and pushes; CI verifies the rest.
+3. At the end it writes `summary` and `next`, fills `files_touched` with `python -m scripts.check_task_delta --base origin/main --write task_NNN`, records any decision as an ADR, and asks before opening the pull request.
+4. You review and merge. Nothing else to approve: the views are derived.
+5. Ask for status at any time, or open the dashboard.
 
+## Scope and limits
+
+- The reference rules assume a Python backend (async, `pytest`, `mypy --strict`, Postgres, Terraform). Adapt sections 4–10 and 14–16 of `AGENTS.md` for another stack.
+- AFAW has not been validated in a controlled study and makes no claim about speed, cost or defect rates. The paper proposes an evaluation protocol; the dashboard's timings and CI cost are the raw material.
+- Mutation score measures how sensitive the tests are to changes, not whether the code meets its requirements.
+- The red-first check shows that a new test fails on the old code, not that it fails for the right reason.
+- Checks verify the ADRs that exist; a decision that was never recorded is left to the reviewer.
+- Documentation that stops being true misleads more than none. Derived views are rebuilt and decisions can be superseded, but nothing detects a decision record whose text went stale while nobody replaced it.
+
+## Rebuilding the diagrams and the paper
+
+```bash
+for f in docs/diagrams/*.dot; do n=$(basename "$f" .dot); dot -Tsvg "$f" -o "docs/img/$n.svg"; dot -Tpng -Gdpi=200 "$f" -o "docs/img/$n.png"; done
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase.git
-git branch -M main
-git push -uf origin main
-```
 
-## Integrate with your tools
+The paper: see [`docs/paper/README.md`](docs/paper/README.md). A pull request that changes `afaw.tex`, `AGENTS.md` or `docs/img/` must also commit the rebuilt `docs/paper/afaw.pdf`; CI checks it.
 
-* [Set up project integrations](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/settings/integrations)
+## Citation
 
-## Collaborate with your team
+**DOI:** [10.5281/zenodo.23050310](https://doi.org/10.5281/zenodo.23050310)
 
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+## Author
 
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+Agustin Diaz-Cano, MS Candidate, Information Systems Engineering (UTN). ORCID [0009-0001-4336-490X](https://orcid.org/0009-0001-4336-490X).
 
 ## License
-For open source projects, say how it is licensed.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+MIT
