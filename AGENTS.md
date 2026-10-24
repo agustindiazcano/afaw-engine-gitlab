@@ -5,6 +5,8 @@ Rules reusable in any project. `AGENTS.md` is the single source; `CLAUDE.md` imp
 ## 0. Language: always English
 > **ALWAYS RESPOND IN ENGLISH.** Every reply, explanation, commit message, PR title/description and code comment is written in English, regardless of the language the user writes in.
 
+**The whole project is in English:** source code, identifiers, comments, docstrings, documentation (README, ADRs, gotchas, white paper), state and context files, CI job names and log messages, Duo agent prompts and flow definitions, the web application and its API responses, and every commit, merge request and issue. A file in another language is a defect, whatever language the human uses in conversation.
+
 ## 1. Session start, tasks and context
 1. **In the first message, always ask the human for `ROLE:`** (which role this agent has in the project).
 2. At session start the hook builds the derived views from `origin/main` and injects `LASTCONTEXT.md` and `PENDING.md`. Without the hook, run `git fetch` and `python -m scripts.build_state --ref origin/main`, then read, in order: `README.md`, the reference documents listed in `LASTCONTEXT.md`, `build/state/context/global/LASTCONTEXT.md`, `build/state/context/roles/<role>/LASTCONTEXT.md`, and the ADRs and gotchas the task needs.
@@ -222,3 +224,10 @@ When the project status is requested, build the views from `origin/main` (`git f
 4. **Prefer a mechanism to a gotcha.** If a script, a configuration default, a test or a hook can prevent the trap, propose that mechanism and mark the gotcha `promoted` with `promoted_to`. A rule enforced by a mechanism no longer depends on being read.
 5. A record leaves `LASTCONTEXT.md` only for an explicit reason, never for its age: an ADR is `superseded` (by one that lists it in `supersedes`) or `deprecated`; a gotcha is `resolved` (with `resolved_by`) or `promoted`. Never delete a record.
 6. When the active records exceed `knowledge_budget` (in `state/config.json`), the dashboard and `LASTCONTEXT.md` say a review is due. The human prunes in a pull request; an agent never summarizes or deletes records on its own.
+
+## 21. GitLab Transcend and Duo Agent Platform rules (Path B extension)
+1. **Dual-forge fact collection (`collect_facts.py`):** measured facts (`started_at`, `pr_opened_at`, `first_green_at`, `merged_at`, `last_activity_at`, CI status and CI job minutes) are collected deterministically from either the GitHub API or the GitLab REST API v4 (`/api/v4/projects/:id/merge_requests` and `/pipelines`), never declared by an agent.
+2. **Nine-stage GitLab DevSecOps pipeline (`.gitlab-ci.yml`):** the repository covers all nine stages: `plan`, `create`, `verify`, `secure`, `govern`, `package`, `configure`, `release` and `monitor`. Every stage runs deterministic scripts or native GitLab security and compliance checks, and fails loudly on error.
+3. **Supervised autonomy and GitLab Duo agents:** Duo Custom Agents and Flows (Developer Flow, Code Review Flow, Fix CI/CD Pipeline Flow) execute multi-step post-code workflows: they run `red_check.py`, remediate pipeline failures, verify `files_touched` with `check_task_delta.py` and prepare merge requests. Human authority stays absolute: only a human approves and merges a merge request into `main` or records an accepted equivalent mutant in `state/equivalent_mutants.json`.
+4. **Read-only live service on Google Cloud Run:** the deployed web application serves the derived views (`build/index.html`, `LASTCONTEXT.md`, metrics) and the read-only project knowledge assistant. It never writes to the repository, never mutates state files and never paraphrases a measured number.
+5. **Licence:** the MIT `LICENSE` in the root stays intact; this repository extends the base project `afaw-anti-fragile-agentic-workflow` (remote `upstream`).
