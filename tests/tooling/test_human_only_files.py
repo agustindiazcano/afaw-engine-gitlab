@@ -36,16 +36,16 @@ def test_config_change_is_reported_only_for_mutation_and_gate_keys() -> None:
     ]
 
 
-def test_a_bot_user_is_not_human() -> None:
-    assert hof.is_human({"id": 7, "bot": True}, set()) is False
+def test_a_user_the_humans_filter_excludes_is_not_human() -> None:
+    assert hof.is_human([], set()) is False
 
 
-def test_a_listed_id_is_not_human_even_without_the_bot_flag() -> None:
-    assert hof.is_human({"id": 7, "bot": False}, {7}) is False
+def test_a_listed_id_is_not_human_even_when_gitlab_returns_it() -> None:
+    assert hof.is_human([{"id": 7}], {7}) is False
 
 
-def test_an_unlisted_user_without_the_bot_flag_is_human() -> None:
-    assert hof.is_human({"id": 8, "bot": False}, {7}) is True
+def test_an_unlisted_user_returned_by_the_humans_filter_is_human() -> None:
+    assert hof.is_human([{"id": 8}], {7}) is True
 
 
 def test_commit_identities_only_warn() -> None:
@@ -66,7 +66,7 @@ def _run(
     monkeypatch.setattr(hof, "commit_identities", lambda base, root: [])
     project.write("state/config.json", OLD_CONFIG)
 
-    def fake_fetch(url: str, token: str | None) -> dict[str, Any]:
+    def fake_fetch(url: str, token: str | None) -> Any:
         for key, value in users.items():
             if url.endswith(key):
                 return value
@@ -77,14 +77,17 @@ def _run(
         "CI_API_V4_URL": "https://gl/api/v4",
         "CI_PROJECT_ID": "1",
         "CI_MERGE_REQUEST_IID": "5",
-        "GITLAB_USER_ID": "8",
+        "GITLAB_USER_LOGIN": "pusher",
         **(env or {}),
     }.items():
         monkeypatch.setenv(key, value)
     return hof.main(["--root", str(project.root), "--base", "origin/main"])
 
 
-HUMAN = {"/projects/1/merge_requests/5": {"author": {"id": 8}}, "/users/8": {"id": 8, "bot": False}}
+MR = "/projects/1/merge_requests/5"
+PUSHER = "/users?username=pusher&humans=true"
+AUTHOR = "/users?username=author&humans=true"
+HUMAN = {MR: {"author": {"username": "author"}}, PUSHER: [{"id": 8}], AUTHOR: [{"id": 9}]}
 
 
 def test_no_protected_change_passes_without_calling_the_api(
@@ -103,11 +106,7 @@ def test_human_author_may_change_a_protected_file(
 def test_bot_author_changing_a_protected_file_fails_and_says_the_control_is_weak(
     project: Project, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    users = {
-        "/projects/1/merge_requests/5": {"author": {"id": 9}},
-        "/users/9": {"id": 9, "bot": True},
-        "/users/8": {"id": 8, "bot": False},
-    }
+    users = {**HUMAN, AUTHOR: []}
     assert _run(project, monkeypatch, [".gitlab-ci.yml"], users) == 1
     captured = capsys.readouterr()
     assert "WEAK" in captured.out and "PROBLEM" in captured.err
@@ -116,7 +115,7 @@ def test_bot_author_changing_a_protected_file_fails_and_says_the_control_is_weak
 def test_a_non_human_pusher_fails_even_with_a_human_author(
     project: Project, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    users = {**HUMAN, "/users/8": {"id": 8, "bot": True}}
+    users = {**HUMAN, PUSHER: []}
     assert _run(project, monkeypatch, ["AGENTS.md"], users) == 1
 
 
@@ -127,7 +126,7 @@ def test_unreadable_author_fails_closed(project: Project, monkeypatch: pytest.Mo
 def test_ids_from_the_group_variable_are_non_human(
     project: Project, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    assert _run(project, monkeypatch, ["AGENTS.md"], HUMAN, {"AFAW_BOT_USER_IDS": "8, 11"}) == 1
+    assert _run(project, monkeypatch, ["AGENTS.md"], HUMAN, {"AFAW_BOT_USER_IDS": "9, 11"}) == 1
 
 
 def test_output_is_text_not_json(

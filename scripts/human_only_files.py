@@ -9,8 +9,10 @@ Human-only files (AGENTS.md section 18.10): .gitlab-ci.yml, AGENTS.md,
 state/equivalent_mutants.json, deploy/, and the mutation and gate settings in state/config.json.
 
 "Non-human" is deterministic. The merge request author id and the pipeline user (the pusher)
-are the authoritative signals; either one is non-human when the GitLab user has bot=true or its
-id is in AFAW_BOT_USER_IDS (comma-separated, a group-level CI variable). Commit author names and
+are the authoritative signals. GitLab answers GET /users/:id only to signed-in users, so each
+is looked up by username with GET /users?username=...&humans=true, which leaves out bots and
+service accounts: a user that comes back empty, or whose id is in AFAW_BOT_USER_IDS
+(comma-separated, a group-level CI variable), is non-human. Commit author names and
 emails are forgeable: they only add a warning, never decide.
 
 Run in CI: python -m scripts.human_only_files --base origin/main
@@ -28,6 +30,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote
 
 from scripts.check_task_delta import changed_files
 
@@ -50,9 +53,9 @@ def protected_changes(
     return hits
 
 
-def is_human(user: dict[str, Any], bot_ids: set[int]) -> bool:
-    """A user is human unless GitLab flags it as a bot or its id is in the configured list."""
-    return not user.get("bot", False) and user.get("id") not in bot_ids
+def is_human(found: list[dict[str, Any]], bot_ids: set[int]) -> bool:
+    """Human when the humans-only lookup returned the user and its id is not a listed bot."""
+    return bool(found) and found[0].get("id") not in bot_ids
 
 
 def commit_warnings(identities: list[str]) -> list[str]:
@@ -64,12 +67,11 @@ def commit_warnings(identities: list[str]) -> list[str]:
     ]
 
 
-def fetch_json(url: str, token: str | None) -> dict[str, Any]:
+def fetch_json(url: str, token: str | None) -> Any:
     """GET a GitLab API URL as JSON, with the job token when there is one."""
     request = urllib.request.Request(url, headers={"JOB-TOKEN": token} if token else {})
     with urllib.request.urlopen(request, timeout=TIMEOUT) as response:  # noqa: S310
-        data: dict[str, Any] = json.loads(response.read().decode("utf-8"))
-    return data
+        return json.loads(response.read().decode("utf-8"))
 
 
 def config_at(base: str, root: Path) -> dict[str, Any]:
@@ -123,16 +125,19 @@ def main(argv: list[str] | None = None) -> int:
         sys.stderr.write("ERROR: CI_API_V4_URL and CI_PROJECT_ID are required to decide\n")
         return 2
     try:
-        ids = {"pusher": int(os.environ["GITLAB_USER_ID"])}
+        names = {"pusher": os.environ["GITLAB_USER_LOGIN"]}
         if iid:
             merge_request = fetch_json(f"{api}/projects/{project}/merge_requests/{iid}", token)
-            ids["merge request author"] = int(merge_request["author"]["id"])
-        users = {role: fetch_json(f"{api}/users/{uid}", token) for role, uid in ids.items()}
+            names["merge request author"] = str(merge_request["author"]["username"])
+        found = {
+            role: fetch_json(f"{api}/users?username={quote(name)}&humans=true", token)
+            for role, name in names.items()
+        }
     except (KeyError, ValueError, TypeError, urllib.error.URLError) as exc:
         sys.stderr.write(f"ERROR: could not identify who made this change ({exc!r})\n")
         return 2
     bot_ids = _bot_ids()
-    failed = [role for role, user in users.items() if not is_human(user, bot_ids)]
+    failed = [role for role, users in found.items() if not is_human(users, bot_ids)]
     for role in failed:
         sys.stderr.write(f"PROBLEM: the {role} is not human and changed a human-only file\n")
     return 1 if failed else 0
