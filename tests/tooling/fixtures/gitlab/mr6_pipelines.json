@@ -1,0 +1,38 @@
+[
+  {
+    "id": 2985416324,
+    "iid": 19,
+    "project_id": 88052530,
+    "sha": "9dffd345c738b39d6883c37f21270cfa297040f7",
+    "ref": "refs/merge-requests/6/head",
+    "status": "success",
+    "source": "merge_request_event",
+    "created_at": "2026-10-24T23:42:57.179Z",
+    "updated_at": "2026-10-24T23:47:18.966Z",
+    "web_url": "https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985416324"
+  },
+  {
+    "id": 2985414331,
+    "iid": 18,
+    "project_id": 88052530,
+    "sha": "8dd9560ceaa693416f78fbd513347076fc316603",
+    "ref": "refs/merge-requests/6/head",
+    "status": "success",
+    "source": "merge_request_event",
+    "created_at": "2026-10-24T23:40:54.318Z",
+    "updated_at": "2026-10-24T23:46:28.445Z",
+    "web_url": "https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985414331"
+  },
+  {
+    "id": 2985405371,
+    "iid": 17,
+    "project_id": 88052530,
+    "sha": "8dd9560ceaa693416f78fbd513347076fc316603",
+    "ref": "feat/task-011-duo-agent-flow",
+    "status": "success",
+    "source": "push",
+    "created_at": "2026-10-24T23:33:47.820Z",
+    "updated_at": "2026-10-24T23:39:13.501Z",
+    "web_url": "https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985405371"
+  }
+]

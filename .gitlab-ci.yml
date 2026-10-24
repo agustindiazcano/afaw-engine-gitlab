@@ -359,16 +359,9 @@ monitor:
       when: never
     - if: $CI_COMMIT_BRANCH
   script:
-    - |
-      FACTS=""
-      if [ -n "$GITHUB_REPOSITORY" ]; then
-        python -m scripts.collect_facts --ref HEAD --out build/facts.json
-        FACTS="--facts build/facts.json"
-      else
-        echo "NOTICE: scripts.collect_facts reads the GitLab REST API v4 only from task 010."
-        echo "Building the dashboard without measured facts; traffic lights show no data."
-      fi
-      python -m scripts.build_state --ref HEAD --out build/dashboard $FACTS
+    # GitLab sets CI_API_V4_URL and CI_PROJECT_ID; the project is public, so no token is sent.
+    - python -m scripts.collect_facts --ref HEAD --out build/facts.json
+    - python -m scripts.build_state --ref HEAD --out build/dashboard --facts build/facts.json
   artifacts:
     paths: [build/dashboard/]
     expire_in: 1 week

@@ -15,6 +15,9 @@ Facts for one task (produced by ``collect_facts.py``; any key may be missing)::
       "last_activity_at": ISO 8601, latest commit or CI run on the branch
       "ci_status":        "success" | "failure" | "pending", runs on the latest commit
       "ci": {"runs", "failed_runs", "jobs", "queue_seconds", "job_minutes"}
+            (a null job_minutes means a job reported no duration: not measured.
+             GitLab adds job_seconds, missing_durations, pipelines, retried_jobs,
+             pipeline_retries and retries.)
     }
 """
 
@@ -130,6 +133,8 @@ def ci_cost(facts: Mapping[str, Any] | None) -> dict[str, int] | None:
     missing = [k for k in CI_KEYS if k not in ci]
     if missing:
         raise ValueError(f"incomplete CI facts, missing: {', '.join(missing)}")
+    if any(ci[k] is None for k in CI_KEYS):
+        return None  # a null is a missing measurement, never a zero
     return {k: int(ci[k]) for k in CI_KEYS}
 
 

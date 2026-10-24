@@ -1,0 +1,12 @@
+{
+  "id": "task_010",
+  "title": "Collect facts with the GitLab REST API v4",
+  "role": "architect",
+  "type": "feature",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "feat/task-010-gitlab-facts",
+  "priority": 1,
+  "difficulty": 3,
+  "blocked_by": []
+}
