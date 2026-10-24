@@ -7,7 +7,6 @@ image: python:3.12 # the full image: the AFAW scripts need git
 setup_script:
   - python -m pip install --upgrade pip
   - pip install --group dev
-  - pip install -r src/afaw_web/requirements.txt
 
 cache:
   key:
