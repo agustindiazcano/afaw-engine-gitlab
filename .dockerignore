@@ -1,6 +1,7 @@
 .git
 .cache
-build
+build/*
+!build/web-data
 __pycache__
 *.pyc
 tests

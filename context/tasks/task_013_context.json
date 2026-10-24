@@ -1,0 +1,11 @@
+{
+  "task_id": "task_013",
+  "files_touched": [],
+  "summary": "In progress. Done so far: the read-only FastAPI service in src/afaw_web (GET only; /health, /api/state with the derived views verbatim, / demo dashboard, /live/ own dashboard, /api/ask deterministic keyword search that cites paths and copies lines verbatim; 503 when a view is missing), its service Dockerfile replacing the provisional tools image, the web_data CI job that assembles the baked-in data, package jobs that build afaw-web, and pinned glab (v1.124.0) and Buildah (v1.43.5) images, both tags checked in their registries. Verified in the docs on 2026-10-24: GitLab OIDC id_tokens (claims iss, sub, project_path, namespace_path, ref, ref_protected; GitLab.com issuer https://gitlab.com per its discovery document, while GitLab's Google page says the issuer needs a trailing slash: to be confirmed with a real token); Google Workload Identity Federation (OIDC provider fields, attribute mapping and condition, principalSet member formats, impersonation, credential configuration file); GitLab-managed Terraform state (http backend, Maintainer for write, Free tier); Terraform google_cloud_run_v2_service and the OIDC pool provider arguments. Pending: Terraform in deploy/, CI variables checks, deploy and monitor-live jobs, scale-to-zero config.",
+  "next": [
+    "Terraform bootstrap and service modules in deploy/",
+    "check_ci_config: require the GCP variables by name",
+    "deploy job on main only with Workload Identity Federation; monitor checks the live URL",
+    "Record scale to zero and the deploy settings in the config"
+  ]
+}

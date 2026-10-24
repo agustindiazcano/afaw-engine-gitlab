@@ -125,6 +125,22 @@ def test_package_builds_with_docker_and_falls_back_to_buildah(ci: dict[str, Any]
     assert any("PACKAGE_BUILDER" in str(r) for r in docker["rules"] + buildah["rules"])
 
 
+def test_package_builds_the_web_service_from_the_assembled_data(ci: dict[str, Any]) -> None:
+    for name in ("package_docker", "package_buildah"):
+        assert "web_data" in ci[name]["needs"]
+        assert "afaw-web:" in _script(ci[name])
+    assert "build/web-data/" in ci["web_data"]["artifacts"]["paths"]
+
+
+def test_quality_jobs_cover_the_service_sources(ci: dict[str, Any]) -> None:
+    assert "src" in _script(ci["typecheck"]) and "tests/web" in _script(ci["tests"])
+
+
+def test_every_image_is_pinned(ci: dict[str, Any]) -> None:
+    images = [ci["default"]["image"]] + [j["image"] for j in _jobs(ci).values() if "image" in j]
+    assert not [i for i in images if i.endswith(":latest") or ":" not in i.split("/")[-1]]
+
+
 def test_release_creates_a_gitlab_release_with_glab(ci: dict[str, Any]) -> None:
     release = ci["release"]
     assert "gitlab-org/cli" in release["image"]
