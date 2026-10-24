@@ -1,0 +1,12 @@
+{
+  "id": "task_008",
+  "title": "Document the hands-off merge policy: ADR, AGENTS.md, README and roadmap",
+  "role": "architect",
+  "type": "chore",
+  "status": "done",
+  "owner": "agent",
+  "branch": "docs/task-008-hands-off-policy",
+  "priority": 1,
+  "difficulty": 2,
+  "blocked_by": []
+}

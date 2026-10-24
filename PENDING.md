@@ -1,14 +1,24 @@
-# Roadmap (Example)
+# Roadmap
 
-This file contains the high-level roadmap and pending tasks for the project. Agents read this file to understand their next objectives.
+High-level roadmap and pending tasks of AFAW Hands-off, a derived variant of AFAW for the GitLab Transcend Hackathon "Life After Code" (deadline Monday Oct 27, 2026, 10:00 GMT-3). Agents read this file to understand their next objectives.
 
 **Do not delete this file.** Protect it with a workspace rule so agents never empty it. Update the roadmap as the project evolves.
 
-## Phase 1: Setup
-- [x] Create repository from template
-- [x] Configure branch protection
-- [ ] Implement initial data models
+## Phase 0: Done
+- [x] Task 007: test suite passes on Windows
+- [x] Import the repository into the GitLab showcase project
 
-## Phase 2: Features
-- [ ] Build backend API
-- [ ] Connect frontend UI
+## Phase 1: Valid submission
+- [x] Task 008: document the merge policy (ADR 0007, `AGENTS.md`, README, this roadmap)
+- [ ] Task 009: `.gitlab-ci.yml` with the nine stages (plan, create, verify, secure, govern, package, configure, release, monitor), GitLab SAST and secret detection in `secure`
+- [ ] Task 010: `collect_facts.py` with the GitLab REST API v4, GitHub kept working
+
+A valid submission exists after tasks 009 and 010.
+
+## Phase 2: The loop becomes real
+- [ ] Task 011: Duo agents and custom flows (read the current docs.gitlab.com pages first; record what was verified)
+- [ ] Task 012: guardrails and merge policy (human-only files, 3-attempt cap, auto-merge rule); report gaps in the GitLab tier
+
+## Phase 3: Live service and submission
+- [ ] Task 013: read-only FastAPI service (dashboard, `/health`, `/api/state`, `/api/ask`), Dockerfile, `deploy/`, release and deploy job on Cloud Run
+- [ ] Task 014: demo script (under 3 minutes), Devpost description, Path B explanation of what was added since Oct 5

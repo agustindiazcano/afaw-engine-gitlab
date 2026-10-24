@@ -2,13 +2,75 @@
 
 **A deterministic, multi-agent methodology for AI-assisted software development.**
 
-Several coding agents working on one repository fail in predictable ways: they collide on branches and on shared context files, claim results they never measured, and write tests that pass whatever the code does. AFAW is a repository-level method and boilerplate that lets agents write code in parallel while deterministic tools decide whether the result is acceptable and a human approves every merge.
+Several coding agents working on one repository fail in predictable ways: they collide on branches and on shared context files, claim results they never measured, and write tests that pass whatever the code does. AFAW is a repository-level method and boilerplate that lets agents write code in parallel while deterministic tools decide whether the result is acceptable and a human approves every merge (the Hands-off variant below moves that approval from each merge to the policy).
 
 *AFAW is the method; the code here is one way to implement it. See [what is core and what you can replace](#method-and-this-implementation).*
 
 **White paper (PDF): [`docs/paper/afaw.pdf`](docs/paper/afaw.pdf)** · LaTeX source: [`docs/paper/afaw.tex`](docs/paper/afaw.tex) · DOI [10.5281/zenodo.23050310](https://doi.org/10.5281/zenodo.23050310)
 
 **Live demo: [agustindiazcano.github.io/afaw-anti-fragile-agentic-workflow](https://agustindiazcano.github.io/afaw-anti-fragile-agentic-workflow/)** · this repository's own dashboard: [`/live/`](https://agustindiazcano.github.io/afaw-anti-fragile-agentic-workflow/live/)
+
+---
+
+## AFAW Hands-off: GitLab Transcend Hackathon variant
+
+> **Status: work in progress.** This section describes the target design. Only the items marked "done" below exist today; the rest is the plan in [`PENDING.md`](PENDING.md), and nothing here is claimed to run until its task is merged.
+
+*AFAW Hands-off* (working name) is a derived variant of [AFAW](https://github.com/agustindiazcano/afaw-anti-fragile-agentic-workflow), built for the GitLab Transcend Hackathon "Life After Code" (Path B, bring your own MIT project; tracks Best Hands-off Agent and Most Stages Covered, plus the Google Cloud Run bonus). The upstream project is credited and linked above, and the [MIT license](LICENSE) is unchanged.
+
+### What differs from the original
+
+| | AFAW (upstream) | AFAW Hands-off |
+|---|---|---|
+| Merge | A human approves every pull request | The human approves the **policy**; the deterministic engine approves **each merge** ([ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md)) |
+| Measuring | The AI decides, the engine measures | Unchanged: every number comes from a deterministic tool, never from an agent |
+| Forge | GitHub | GitLab (REST API v4), GitHub kept working |
+| Agents | Coding agents that open pull requests | GitLab Duo flows under a group service account, never a personal token |
+| Guardrails | Human reviews each diff | Human-only files, a cap of 3 automatic fixes per merge request, full green pipeline, no test edited to pass |
+
+### The nine stages
+
+| Stage | What runs | Task |
+|---|---|---|
+| plan | Task files and roadmap checks | 009 |
+| create | Merge request opened by the Developer Flow | 009, 011 |
+| verify | Tests, `red_check`, `mutation_gate` | 009 |
+| secure | GitLab SAST and secret detection | 009 |
+| govern | Human-only files check, delta and docs checks | 009, 012 |
+| package | Container image | 013 |
+| configure | Cloud Run configuration | 013 |
+| release | Tagged release | 013 |
+| monitor | `/health` and `/api/state` verification | 013 |
+
+### The loop
+
+```mermaid
+flowchart LR
+    I[Issue] --> D[Developer Flow opens MR]
+    D --> P[9-stage pipeline]
+    P -- failure --> F[Fix CI/CD Pipeline Flow<br/>max 3 attempts]
+    F --> P
+    P -- green --> R[Code Review Flow]
+    R --> G{Every gate green?}
+    G -- yes --> M[Automatic merge]
+    M --> L[Release and deploy to Cloud Run]
+    L --> O[Monitor: /health, /api/state]
+    O --> C[Summary comment on the issue]
+```
+
+### Added on or after Oct 5, 2026
+
+The base method was committed on Sep 29-30, 2026. Since Oct 5:
+
+| Date | Change | State |
+|---|---|---|
+| Oct 23 | English-only rule and the first GitLab Duo rules in `AGENTS.md` | done |
+| Oct 23 | Test suite passes on Windows (task 007) | done |
+| Oct 24 | Repository imported into the GitLab showcase project | done |
+| Oct 24 | Merge policy ADR, `AGENTS.md`, README and roadmap (task 008) | done |
+| pending | Pipeline, GitLab fact collection, Duo flows, guardrails, Cloud Run service (tasks 009-013) | planned |
+
+Live service (Google Cloud Run): _URL to be added when task 013 is deployed._
 
 ---
 
