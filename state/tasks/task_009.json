@@ -1,0 +1,12 @@
+{
+  "id": "task_009",
+  "title": "Add the nine-stage .gitlab-ci.yml with GitLab-native security jobs",
+  "role": "architect",
+  "type": "feature",
+  "status": "done",
+  "owner": "agent",
+  "branch": "ci/task-009-gitlab-pipeline",
+  "priority": 1,
+  "difficulty": 3,
+  "blocked_by": []
+}

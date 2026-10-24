@@ -10,7 +10,7 @@ High-level roadmap and pending tasks of AFAW Hands-off, a derived variant of AFA
 
 ## Phase 1: Valid submission
 - [x] Task 008: document the merge policy (ADR 0007, `AGENTS.md`, README, this roadmap)
-- [ ] Task 009: `.gitlab-ci.yml` with the nine stages (plan, create, verify, secure, govern, package, configure, release, monitor), GitLab SAST and secret detection in `secure`
+- [x] Task 009: `.gitlab-ci.yml` with the nine stages (plan, create, verify, secure, govern, package, configure, release, monitor), GitLab SAST and secret detection in `secure`
 - [ ] Task 010: `collect_facts.py` with the GitLab REST API v4, GitHub kept working
 
 A valid submission exists after tasks 009 and 010.
@@ -18,7 +18,14 @@ A valid submission exists after tasks 009 and 010.
 ## Phase 2: The loop becomes real
 - [ ] Task 011: Duo agents and custom flows (read the current docs.gitlab.com pages first; record what was verified)
 - [ ] Task 012: guardrails and merge policy (human-only files, 3-attempt cap, auto-merge rule); report gaps in the GitLab tier
+  - [ ] Fix the overclaim in `AGENTS.md` section 17.3 ("guarded by CI (the govern job)"): `human_only_files` is a weak backup control. Regenerate `docs/paper/afaw.pdf` in the same merge request; `paper_pdf` keeps requiring it.
+  - [ ] Add a TeX Live job to rebuild the paper PDF (there is no `paper_build` job until then).
 
 ## Phase 3: Live service and submission
 - [ ] Task 013: read-only FastAPI service (dashboard, `/health`, `/api/state`, `/api/ask`), Dockerfile, `deploy/`, release and deploy job on Cloud Run
 - [ ] Task 014: demo script (under 3 minutes), Devpost description, Path B explanation of what was added since Oct 5
+
+## FINAL: strong human-only-files control
+Do this last, only after the pipeline, the Duo flows and Cloud Run work. Until then `human_only_files` is a weak backup control.
+- [ ] Preferred: a pipeline execution policy in a separate private project (for example `afaw-policies`) linked from Secure > Policies. Our role may not allow creating policies, so first ask in #transcend-hackathon.
+- [ ] Fallback: CODEOWNERS with "Require approval from code owners" enabled on protected `main`. List `CODEOWNERS` itself, and keep the auto-merge account out of "Allowed to push and merge".
