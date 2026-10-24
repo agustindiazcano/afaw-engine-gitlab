@@ -161,6 +161,15 @@ paper_pdf:
       fi
       echo "OK: paper PDF in step with its sources."
 
+# WEAK backup control: this job is part of .gitlab-ci.yml, so the same merge request can edit
+# it away. It enforces nothing on its own. The strong control is deferred (PENDING.md, FINAL).
+# AFAW_BOT_USER_IDS is a group-level CI variable that task 011 fills with the service account.
+human_only_files:
+  stage: govern
+  extends: [.on_change, .base_ref]
+  script:
+    - python -m scripts.human_only_files --base "$BASE"
+
 equivalent_mutants_report:
   stage: govern
   extends: [.on_change, .base_ref]

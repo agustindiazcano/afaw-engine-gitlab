@@ -22,3 +22,8 @@ A valid submission exists after tasks 009 and 010.
 ## Phase 3: Live service and submission
 - [ ] Task 013: read-only FastAPI service (dashboard, `/health`, `/api/state`, `/api/ask`), Dockerfile, `deploy/`, release and deploy job on Cloud Run
 - [ ] Task 014: demo script (under 3 minutes), Devpost description, Path B explanation of what was added since Oct 5
+
+## FINAL: strong human-only-files control
+Do this last, only after the pipeline, the Duo flows and Cloud Run work. Until then `human_only_files` is a weak backup control.
+- [ ] Preferred: a pipeline execution policy in a separate private project (for example `afaw-policies`) linked from Secure > Policies. Our role may not allow creating policies, so first ask in #transcend-hackathon.
+- [ ] Fallback: CODEOWNERS with "Require approval from code owners" enabled on protected `main`. List `CODEOWNERS` itself, and keep the auto-merge account out of "Allowed to push and merge".

@@ -36,8 +36,8 @@ Several coding agents working on one repository fail in predictable ways: they c
 | create | `check_task_delta`, `build_state` | Merge requests opened by the Developer Flow (Duo) | 009, 011 |
 | verify | `ruff`, `mypy`, `pytest`, `red_check`, `mutation_ci` | `rules:changes` path filters, pipeline cache | 009 |
 | secure | none, by design | SAST template (Semgrep) and pipeline secret detection | 009 |
-| govern | `paper_pdf` and `equivalent_mutants_report` jobs | CODEOWNERS, push rules or pipeline execution policies, depending on the tier (see [ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md)) | 009, 012 |
-| package | `Dockerfile` of the AFAW tools | Container Registry; `docker:dind`, with Buildah as fallback | 009, 013 |
+| govern | `paper_pdf`, `equivalent_mutants_report` and `human_only_files` (a **weak** backup control: the same merge request can edit it away) | The strong control is deferred: a pipeline execution policy or CODEOWNERS with required approval, depending on the tier (see [ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md) and [`PENDING.md`](PENDING.md)) | 009, 012 |
+| package | `Dockerfile` of the AFAW tools (provisional until task 013) | Container Registry; `docker:dind`, with Buildah as fallback | 009, 013 |
 | configure | Cloud Run configuration | to be added | 013 |
 | release | none | `release:` keyword with `glab`: a GitLab Release per merge | 009 |
 | monitor | `collect_facts`, `build_state` | Job artifacts; `collect_facts` reads the GitLab REST API v4 from task 010 | 009, 010, 013 |

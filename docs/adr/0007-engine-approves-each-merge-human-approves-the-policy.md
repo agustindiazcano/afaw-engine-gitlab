@@ -31,8 +31,11 @@ The policy is enforced by these compensating controls, defined and implemented i
 1. **Human-only files:** `.gitlab-ci.yml`, `AGENTS.md`, `state/equivalent_mutants.json`, the
    mutation and gate settings in `state/config.json`, and `deploy/`. The strongest mechanism
    the GitLab tier offers is used (CODEOWNERS, push rules, protected paths). A `govern` job
-   that fails any merge request touching these files unless its author is human is the
-   fallback that always works. Gaps in the tier are reported, not assumed away.
+   (`human_only_files`) that fails any merge request touching these files unless a human made
+   it is a **weak** backup control only: it lives in `.gitlab-ci.yml`, so the same merge
+   request can edit it away, and it enforces nothing on its own. The strong control (a
+   pipeline execution policy in a separate project, or CODEOWNERS with required approval) is
+   deferred to the end of the roadmap. Gaps in the tier are reported, not assumed away.
 2. **Retry cap:** at most 3 automatic fix attempts per merge request; then the flow comments
    and stops. Flow runs are also capped, because the account has 500 GitLab Credits a month.
 3. **Full green pipeline:** merge requires every job green, including `red_check` and
