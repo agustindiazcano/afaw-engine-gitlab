@@ -188,6 +188,9 @@ def test_monitor_live_fails_when_the_service_does_not_answer(ci: dict[str, Any])
     assert "deploy_cloud_run" in job["needs"]
 
 
+@pytest.mark.characterization(
+    reason="guards a property the pipeline already had: it holds no Google Cloud identifier"
+)
 def test_no_google_cloud_identifier_is_written_in_the_pipeline() -> None:
     import re
 

@@ -75,4 +75,5 @@ def test_a_missing_variable_fails_loudly(tmp_path: Path, name: str) -> None:
 def test_a_rejected_exchange_fails_without_printing_a_token(tmp_path: Path) -> None:
     result = _run(tmp_path, ENV, final="")
     assert result.returncode != 0 and result.stdout == ""
+    assert "could not be impersonated" in result.stderr
     assert "FEDERATED" not in result.stderr and "id-token-value" not in result.stderr
