@@ -1,0 +1,12 @@
+{
+  "task_id": "task_007",
+  "files_touched": [
+    "tests/tooling/test_build_state_cli.py",
+    "tests/tooling/test_hooks.py",
+    "tests/tooling/test_mutation_gate.py"
+  ],
+  "summary": "Made the test suite pass on Windows and Linux (248 passed). Tests now read and write UTF-8 explicitly, write the mutation-gate fixture as bytes so the SHA-256 is not changed by CRLF translation, and pass the hook build command with forward-slash paths because shlex.split in POSIX mode drops backslashes. Only tests changed; the source is unchanged.",
+  "next": [
+    "Task 2: add GitLab REST API v4 support to scripts/collect_facts.py"
+  ]
+}

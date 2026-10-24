@@ -1,0 +1,12 @@
+{
+  "id": "task_007",
+  "title": "Fix the five Windows test failures (UTF-8 I/O, CRLF hashing, hook command paths)",
+  "role": "architect",
+  "type": "fix",
+  "status": "done",
+  "owner": "agent",
+  "branch": "fix/task-007-windows-utf8-tests",
+  "priority": 1,
+  "difficulty": 2,
+  "blocked_by": []
+}
