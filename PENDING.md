@@ -10,7 +10,7 @@ High-level roadmap and pending tasks of AFAW Hands-off, a derived variant of AFA
 
 ## Phase 1: Valid submission
 - [x] Task 008: document the merge policy (ADR 0007, `AGENTS.md`, README, this roadmap)
-- [ ] Task 009: `.gitlab-ci.yml` with the nine stages (plan, create, verify, secure, govern, package, configure, release, monitor), GitLab SAST and secret detection in `secure`
+- [x] Task 009: `.gitlab-ci.yml` with the nine stages (plan, create, verify, secure, govern, package, configure, release, monitor), GitLab SAST and secret detection in `secure`
 - [ ] Task 010: `collect_facts.py` with the GitLab REST API v4, GitHub kept working
 
 A valid submission exists after tasks 009 and 010.

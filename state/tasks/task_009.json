@@ -3,7 +3,7 @@
   "title": "Add the nine-stage .gitlab-ci.yml with GitLab-native security jobs",
   "role": "architect",
   "type": "feature",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "ci/task-009-gitlab-pipeline",
   "priority": 1,

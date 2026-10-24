@@ -70,7 +70,8 @@ The base method was committed on Sep 29-30, 2026. Since Oct 5:
 | Oct 23 | Test suite passes on Windows (task 007) | done |
 | Oct 24 | Repository imported into the GitLab showcase project | done |
 | Oct 24 | Merge policy ADR, `AGENTS.md`, README and roadmap (task 008) | done |
-| pending | Pipeline, GitLab fact collection, Duo flows, guardrails, Cloud Run service (tasks 009-013) | planned |
+| Oct 24 | Nine-stage GitLab pipeline, security gate and tools image (task 009) | done |
+| pending | GitLab fact collection, Duo flows, guardrails, Cloud Run service (tasks 010-013) | planned |
 
 Live service (Google Cloud Run): _URL to be added when task 013 is deployed._
 
