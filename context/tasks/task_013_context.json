@@ -1,13 +1,19 @@
 {
   "task_id": "task_013",
   "files_touched": [
+    "scripts/check_ci_config.py",
+    "scripts/check_live.py",
     "src/afaw_web/__init__.py",
     "src/afaw_web/app.py",
     "src/afaw_web/main.py",
     "src/afaw_web/requirements.txt",
     "src/afaw_web/search.py",
     "src/afaw_web/settings.py",
+    "tests/tooling/test_check_ci_config.py",
+    "tests/tooling/test_check_live.py",
+    "tests/tooling/test_gcp_access_token.py",
     "tests/tooling/test_gitlab_ci.py",
+    "tests/tooling/test_terraform_guardrails.py",
     "tests/web/__init__.py",
     "tests/web/conftest.py",
     "tests/web/test_app.py"
