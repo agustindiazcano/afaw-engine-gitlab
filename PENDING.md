@@ -18,6 +18,8 @@ A valid submission exists after tasks 009 and 010.
 ## Phase 2: The loop becomes real
 - [ ] Task 011: Duo agents and custom flows (read the current docs.gitlab.com pages first; record what was verified)
 - [ ] Task 012: guardrails and merge policy (human-only files, 3-attempt cap, auto-merge rule); report gaps in the GitLab tier
+  - [ ] Fix the overclaim in `AGENTS.md` section 17.3 ("guarded by CI (the govern job)"): `human_only_files` is a weak backup control. Regenerate `docs/paper/afaw.pdf` in the same merge request; `paper_pdf` keeps requiring it.
+  - [ ] Add a TeX Live job to rebuild the paper PDF (there is no `paper_build` job until then).
 
 ## Phase 3: Live service and submission
 - [ ] Task 013: read-only FastAPI service (dashboard, `/health`, `/api/state`, `/api/ask`), Dockerfile, `deploy/`, release and deploy job on Cloud Run

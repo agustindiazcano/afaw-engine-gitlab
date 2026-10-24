@@ -134,17 +134,31 @@ mutation_gate:
 # ---- secure: GitLab-native SAST and secret detection ---------------------------------------
 # The templates run in the test stage and, by default, only in branch pipelines. Their jobs are
 # moved to the secure stage and also run in merge request pipelines.
+# The scanner jobs fail only when the scanner itself breaks, not when it finds something, so
+# they no longer tolerate failure and security_gate reads their reports to decide.
 semgrep-sast:
   stage: secure
+  allow_failure: false
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH
 
 secret_detection:
   stage: secure
+  allow_failure: false
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH
+
+# Blocks on any secret finding and on Critical or High SAST findings; lower ones are printed.
+security_gate:
+  stage: secure
+  needs: [semgrep-sast, secret_detection]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH
+  script:
+    - python -m scripts.security_gate --sast gl-sast-report.json --secrets gl-secret-detection-report.json
 
 # ---- govern: checks that need no tooling image ---------------------------------------------
 paper_pdf:
@@ -181,16 +195,6 @@ equivalent_mutants_report:
         echo "state/equivalent_mutants.json changed in this merge request. Only the human may write it. Review every line:"
         git diff "$BASE...HEAD" -- state/equivalent_mutants.json
       fi
-
-# Not blocking, low priority: a manual placeholder for rebuilding the paper PDF, so the human
-# can commit it. It fails on purpose: it needs a TeX Live image, which is not set up yet.
-paper_build:
-  stage: govern
-  when: manual
-  allow_failure: true
-  script:
-    - echo "paper_build is not implemented yet; see docs/paper/README.md"
-    - exit 1
 
 # ---- package: the tools image in the GitLab Container Registry -----------------------------
 # docker:dind needs a privileged runner. If that is refused, set PACKAGE_BUILDER=buildah.
@@ -232,7 +236,13 @@ package_buildah:
     - buildah build -t "$CI_REGISTRY_IMAGE/afaw-tools:$CI_COMMIT_SHA" .
     - buildah push "$CI_REGISTRY_IMAGE/afaw-tools:$CI_COMMIT_SHA"
 
-# ---- configure: added by task 013 (Cloud Run configuration and deploy) ---------------------
+# ---- configure: the settings and CI variables the pipeline depends on ----------------------
+# Validates state/config.json against its schema and checks the CI variables by name only,
+# never printing a value. Task 013 adds the Cloud Run variables to scripts/check_ci_config.py.
+check_configuration:
+  stage: configure
+  script:
+    - python -m scripts.check_ci_config
 
 # ---- release: a GitLab Release for every commit that reaches the default branch -----------
 release:

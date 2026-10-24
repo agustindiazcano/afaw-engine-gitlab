@@ -134,3 +134,24 @@ def test_output_is_text_not_json(
 ) -> None:
     _run(project, monkeypatch, ["AGENTS.md"], HUMAN)
     assert not capsys.readouterr().out.lstrip().startswith("{")
+
+
+def test_an_unidentifiable_author_never_blocks_a_change_without_protected_files(
+    project: Project, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Fail-closed applies only when a human-only file changed; other merge requests pass."""
+    monkeypatch.setattr(hof, "changed_files", lambda base, root: ["src/a.py", "README.md"])
+    monkeypatch.setattr(hof, "config_at", lambda base, root: OLD_CONFIG)
+    monkeypatch.setattr(hof, "fetch_json", lambda url, token: pytest.fail("API was called"))
+    for var in ("CI_API_V4_URL", "CI_PROJECT_ID", "CI_MERGE_REQUEST_IID", "GITLAB_USER_LOGIN"):
+        monkeypatch.delenv(var, raising=False)
+    project.write("state/config.json", OLD_CONFIG)
+    assert hof.main(["--root", str(project.root), "--base", "origin/main"]) == 0
+    assert "nothing to check" in capsys.readouterr().out
+
+
+def test_a_flow_service_account_may_change_unprotected_files(
+    project: Project, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    users = {**HUMAN, AUTHOR: [], PUSHER: []}  # both are non-human (the flows' service account)
+    assert _run(project, monkeypatch, ["src/a.py", "tests/test_a.py"], users) == 0

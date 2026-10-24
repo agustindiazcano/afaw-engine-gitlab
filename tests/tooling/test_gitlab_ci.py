@@ -12,8 +12,6 @@ from tests.tooling.conftest import REPO_ROOT
 STAGES = [
     "plan", "create", "verify", "secure", "govern", "package", "configure", "release", "monitor",
 ]
-# Stages added by task 013 (Cloud Run); every other stage must have a real job today.
-DEFERRED = {"configure"}
 # Jobs whose script comes from an included GitLab template, not from this file.
 NATIVE = {"semgrep-sast", "secret_detection"}
 CI_FILE = REPO_ROOT / ".gitlab-ci.yml"
@@ -52,11 +50,9 @@ def test_declares_the_nine_stages_in_order(ci: dict[str, Any]) -> None:
     assert "test" in ci["stages"] and "test" not in {j["stage"] for j in _jobs(ci).values()}
 
 
-def test_every_stage_but_the_deferred_one_has_a_real_job(ci: dict[str, Any]) -> None:
+def test_every_stage_has_a_real_job(ci: dict[str, Any]) -> None:
     jobs = _jobs(ci)
     for stage in STAGES:
-        if stage in DEFERRED:
-            continue
         staged = {n: j for n, j in jobs.items() if j["stage"] == stage}
         assert staged, f"stage {stage} has no job"
         assert any(_is_real(n, j) for n, j in staged.items()), f"stage {stage} has no real job"
@@ -72,9 +68,30 @@ def test_native_security_templates_are_included(ci: dict[str, Any]) -> None:
     assert {"Jobs/SAST.gitlab-ci.yml", "Jobs/Secret-Detection.gitlab-ci.yml"} <= templates
 
 
-def test_native_security_jobs_run_in_the_secure_stage(ci: dict[str, Any]) -> None:
+def test_native_security_jobs_run_in_the_secure_stage_and_do_not_tolerate_failure(
+    ci: dict[str, Any],
+) -> None:
     for name in ("semgrep-sast", "secret_detection"):
         assert ci[name]["stage"] == "secure"
+        assert ci[name]["allow_failure"] is False
+
+
+def test_security_gate_reads_both_scanner_reports(ci: dict[str, Any]) -> None:
+    job = ci["security_gate"]
+    assert job["stage"] == "secure" and set(job["needs"]) == {"semgrep-sast", "secret_detection"}
+    script = _script(job)
+    assert "gl-sast-report.json" in script and "gl-secret-detection-report.json" in script
+
+
+def test_configure_has_a_real_job_that_checks_configuration(ci: dict[str, Any]) -> None:
+    assert "scripts.check_ci_config" in _script(ci["check_configuration"])
+    assert ci["check_configuration"]["stage"] == "configure"
+
+
+def test_no_placeholder_job_that_fails_on_purpose(ci: dict[str, Any]) -> None:
+    for name, job in _jobs(ci).items():
+        assert "not implemented" not in _script(job), f"{name} is a placeholder"
+    assert "paper_build" not in ci
 
 
 def test_merge_request_pipelines_do_not_duplicate_branch_pipelines(ci: dict[str, Any]) -> None:

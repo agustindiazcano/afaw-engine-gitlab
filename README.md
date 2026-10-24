@@ -35,14 +35,14 @@ Several coding agents working on one repository fail in predictable ways: they c
 | plan | `check_task_files`, `check_docs` | Merge request pipelines (`workflow:rules`) | 009 |
 | create | `check_task_delta`, `build_state` | Merge requests opened by the Developer Flow (Duo) | 009, 011 |
 | verify | `ruff`, `mypy`, `pytest`, `red_check`, `mutation_ci` | `rules:changes` path filters, pipeline cache | 009 |
-| secure | none, by design | SAST template (Semgrep) and pipeline secret detection | 009 |
+| secure | `security_gate` reads both reports and blocks on any secret or a Critical/High SAST finding | SAST template (Semgrep) and pipeline secret detection | 009 |
 | govern | `paper_pdf`, `equivalent_mutants_report` and `human_only_files` (a **weak** backup control: the same merge request can edit it away) | The strong control is deferred: a pipeline execution policy or CODEOWNERS with required approval, depending on the tier (see [ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md) and [`PENDING.md`](PENDING.md)) | 009, 012 |
 | package | `Dockerfile` of the AFAW tools (provisional until task 013) | Container Registry; `docker:dind`, with Buildah as fallback | 009, 013 |
-| configure | Cloud Run configuration | to be added | 013 |
+| configure | `check_ci_config`: `state/config.json` against its schema and the CI variables, by name only | CI/CD variables (masked and protected); Cloud Run configuration is added in task 013 | 009, 013 |
 | release | none | `release:` keyword with `glab`: a GitLab Release per merge | 009 |
 | monitor | `collect_facts`, `build_state` | Job artifacts; `collect_facts` reads the GitLab REST API v4 from task 010 | 009, 010, 013 |
 
-Verified in docs.gitlab.com (Oct 24, 2026): the SAST and secret-detection templates run in the `test` stage and only in branch pipelines by default, so `.gitlab-ci.yml` moves them to `secure` and also runs them in merge request pipelines. Basic Semgrep SAST and the secret-detection JSON report are in every tier; findings in the merge request and Advanced SAST need Ultimate. Kaniko is marked as no longer maintained, so Buildah is the fallback.
+`test` is a technical stage: the GitLab SAST and secret-detection templates require it to exist, and none of our jobs runs in it. The nine DevSecOps stages are the other nine. Verified in docs.gitlab.com (Oct 24, 2026): the SAST and secret-detection templates run in the `test` stage and only in branch pipelines by default, so `.gitlab-ci.yml` moves them to `secure` and also runs them in merge request pipelines. Basic Semgrep SAST and the secret-detection JSON report are in every tier; findings in the merge request and Advanced SAST need Ultimate. Kaniko is marked as no longer maintained, so Buildah is the fallback.
 
 ### The loop
 
