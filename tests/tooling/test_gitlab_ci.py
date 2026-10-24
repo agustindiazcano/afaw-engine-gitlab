@@ -125,6 +125,11 @@ def test_package_builds_with_docker_and_falls_back_to_buildah(ci: dict[str, Any]
     assert any("PACKAGE_BUILDER" in str(r) for r in docker["rules"] + buildah["rules"])
 
 
+def test_duo_configuration_is_validated_in_plan(ci: dict[str, Any]) -> None:
+    assert ci["duo_config"]["stage"] == "plan"
+    assert "scripts.check_duo_config" in _script(ci["duo_config"])
+
+
 def test_package_builds_the_web_service_from_the_assembled_data(ci: dict[str, Any]) -> None:
     for name in ("package_docker", "package_buildah"):
         assert "web_data" in ci[name]["needs"]

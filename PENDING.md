@@ -17,6 +17,9 @@ A valid submission exists after tasks 009 and 010.
 
 ## Phase 2: The loop becomes real
 - [ ] Task 011: Duo agents and custom flows (read the current docs.gitlab.com pages first; record what was verified)
+  - [x] Configuration in `.gitlab/duo/`, the workspace subagent, the custom flow and agent sources in `duo/`, and the `duo_config` check (see [`docs/duo.md`](docs/duo.md))
+  - [ ] Human: enable the foundational flows for the top-level group, create the custom agent and flow in the UI, add the triggers, set `AFAW_BOT_USER_IDS` (steps and required roles in `docs/duo.md`)
+  - [ ] First real sessions: Developer on an issue, a failed pipeline fixed by the Fix CI/CD Pipeline Flow, a review by the Code Review Flow; keep the failed pipelines in the history for the video
 - [ ] Task 012: guardrails and merge policy (human-only files, 3-attempt cap, auto-merge rule); report gaps in the GitLab tier
   - [ ] Add to `AGENTS.md` that an agent always reads `LASTCONTEXT.md` and `PENDING.md` before anything else (section 1.2 says it only for the session-start hook).
   - [ ] Fix the overclaim in `AGENTS.md` section 17.3 ("guarded by CI (the govern job)"): `human_only_files` is a weak backup control. Regenerate `docs/paper/afaw.pdf` in the same merge request; `paper_pdf` keeps requiring it.
