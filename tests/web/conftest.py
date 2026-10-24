@@ -8,9 +8,6 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from afaw_web.app import create_app
-from afaw_web.settings import Settings
-
 METRICS = {
     "as_of": "2026-10-24T19:48:38-03:00",
     "ci_per_done_task": {"job_minutes": {"median": 3.5}},
@@ -50,5 +47,12 @@ def data_dir(tmp_path: Path) -> Path:
 
 @pytest.fixture
 def client(data_dir: Path) -> TestClient:
-    """A test client over an application serving ``data_dir``."""
+    """A test client over an application serving ``data_dir``.
+
+    The service is imported here, not at the top: a conftest that cannot import aborts the whole
+    pytest session, and red_check needs that run to report on the code before the change.
+    """
+    from afaw_web.app import create_app
+    from afaw_web.settings import Settings
+
     return TestClient(create_app(Settings(data_dir=data_dir)))
