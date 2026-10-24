@@ -137,8 +137,62 @@ def test_quality_jobs_cover_the_service_sources(ci: dict[str, Any]) -> None:
 
 
 def test_every_image_is_pinned(ci: dict[str, Any]) -> None:
-    images = [ci["default"]["image"]] + [j["image"] for j in _jobs(ci).values() if "image" in j]
+    def name(image: Any) -> str:
+        return str(image["name"] if isinstance(image, dict) else image)
+
+    images = [name(ci["default"]["image"])]
+    images += [name(j["image"]) for j in _jobs(ci).values() if "image" in j]
     assert not [i for i in images if i.endswith(":latest") or ":" not in i.split("/")[-1]]
+
+
+def test_terraform_is_formatted_and_validated_in_configure(ci: dict[str, Any]) -> None:
+    job = ci["terraform_validate"]
+    assert job["stage"] == "configure" and "hashicorp/terraform:" in str(job["image"])
+    script = _script(job)
+    assert "fmt -check" in script and "validate" in script and "-backend=false" in script
+
+
+MAIN_ONLY = '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+
+
+@pytest.mark.parametrize("name", ["publish_image", "deploy_cloud_run", "monitor_live"])
+def test_the_google_cloud_jobs_run_on_main_only(ci: dict[str, Any], name: str) -> None:
+    assert [r["if"] for r in ci[name]["rules"]] == [MAIN_ONLY]
+
+
+def test_the_deploy_uses_workload_identity_and_no_key(ci: dict[str, Any]) -> None:
+    for name in ("publish_image", "deploy_cloud_run"):
+        tokens = ci[name]["id_tokens"]
+        assert tokens["GITLAB_OIDC_TOKEN"]["aud"] == "https://gitlab.com"
+        assert "deploy/gcp_access_token.sh" in _script(ci[name])
+    text = CI_FILE.read_text(encoding="utf-8")
+    assert "GOOGLE_APPLICATION_CREDENTIALS" not in text and "service_account_key" not in text
+
+
+def test_the_audience_matches_the_terraform_provider() -> None:
+    terraform = (REPO_ROOT / "deploy" / "terraform" / "variables.tf").read_text(encoding="utf-8")
+    assert 'default     = "https://gitlab.com"' in terraform
+
+
+def test_the_image_reaches_cloud_run_through_artifact_registry(ci: dict[str, Any]) -> None:
+    publish, deploy = ci["publish_image"], ci["deploy_cloud_run"]
+    assert "$GCP_ARTIFACT_REPOSITORY/afaw-web:$CI_COMMIT_SHA" in _script(publish)
+    assert "afaw-web:$CI_COMMIT_SHA" in _script(deploy) and "gcloud run deploy" in _script(deploy)
+    assert "publish_image" in deploy["needs"]
+    assert "latest" not in _script(publish) + _script(deploy)
+
+
+def test_monitor_live_fails_when_the_service_does_not_answer(ci: dict[str, Any]) -> None:
+    job = ci["monitor_live"]
+    assert "scripts.check_live" in _script(job) and "$GCP_SERVICE_URL" in _script(job)
+    assert "deploy_cloud_run" in job["needs"]
+
+
+def test_no_google_cloud_identifier_is_written_in_the_pipeline() -> None:
+    import re
+
+    text = CI_FILE.read_text(encoding="utf-8")
+    assert not re.search(r"project-[0-9a-f]{8}-|\d{12}|us-central1", text)
 
 
 def test_release_creates_a_gitlab_release_with_glab(ci: dict[str, Any]) -> None:

@@ -254,11 +254,28 @@ package_buildah:
 
 # ---- configure: the settings and CI variables the pipeline depends on ----------------------
 # Validates state/config.json against its schema and checks the CI variables by name only,
-# never printing a value. Task 013 adds the Cloud Run variables to scripts/check_ci_config.py.
+# never printing a value. The Google Cloud variables are protected, so they are required only on
+# protected refs (main), where the deploy runs.
 check_configuration:
   stage: configure
   script:
     - python -m scripts.check_ci_config
+
+# The Terraform in deploy/terraform is formatted and valid. It is applied by a human, never here.
+terraform_validate:
+  stage: configure
+  image:
+    name: hashicorp/terraform:1.16.7 # pinned; tag verified on Docker Hub
+    entrypoint: [""]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - changes:
+        paths: ["deploy/terraform/**/*"]
+        compare_to: refs/heads/main
+  script:
+    - terraform -chdir=deploy/terraform fmt -check -recursive
+    - terraform -chdir=deploy/terraform init -backend=false -input=false
+    - terraform -chdir=deploy/terraform validate
 
 # ---- release: a GitLab Release for every commit that reaches the default branch -----------
 release:
@@ -281,6 +298,51 @@ release:
     description: "Image `$CI_REGISTRY_IMAGE/afaw-web:$CI_COMMIT_SHA`, commit $CI_COMMIT_SHA."
     ref: "$CI_COMMIT_SHA"
 
+# ---- deploy to Cloud Run (same stage as the release) ---------------------------------------
+# Cloud Run cannot pull from the GitLab registry, so the image built in package is copied to
+# Artifact Registry. Authentication is Workload Identity Federation with the job's OIDC token
+# (aud matches the provider in deploy/terraform); no service-account key exists anywhere. The
+# Google Cloud variables are protected, so these jobs run only on main.
+publish_image:
+  stage: release
+  image: docker:24.0.5-cli
+  services:
+    - docker:24.0.5-dind
+  needs:
+    - job: package_docker
+      optional: true
+    - job: package_buildah
+      optional: true
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  id_tokens:
+    GITLAB_OIDC_TOKEN:
+      aud: https://gitlab.com
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - apk add --no-cache curl
+    - GCP_TOKEN="$(sh deploy/gcp_access_token.sh)"
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+    - echo "$GCP_TOKEN" | docker login -u oauth2accesstoken --password-stdin "${GCP_ARTIFACT_REPOSITORY%%/*}"
+    - docker pull "$CI_REGISTRY_IMAGE/afaw-web:$CI_COMMIT_SHA"
+    - docker tag "$CI_REGISTRY_IMAGE/afaw-web:$CI_COMMIT_SHA" "$GCP_ARTIFACT_REPOSITORY/afaw-web:$CI_COMMIT_SHA"
+    - docker push "$GCP_ARTIFACT_REPOSITORY/afaw-web:$CI_COMMIT_SHA"
+
+deploy_cloud_run:
+  stage: release
+  image: google/cloud-sdk:590.0.1 # pinned; tag verified on Docker Hub
+  needs: [publish_image]
+  id_tokens:
+    GITLAB_OIDC_TOKEN:
+      aud: https://gitlab.com
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - GCP_TOKEN="$(sh deploy/gcp_access_token.sh)"
+    - export CLOUDSDK_AUTH_ACCESS_TOKEN="$GCP_TOKEN"
+    - gcloud run deploy "$GCP_SERVICE_NAME" --image "$GCP_ARTIFACT_REPOSITORY/afaw-web:$CI_COMMIT_SHA" --region "$GCP_REGION" --project "$GCP_PROJECT_ID" --quiet
+
 # ---- monitor: measured facts and the dashboard ---------------------------------------------
 monitor:
   stage: monitor
@@ -302,3 +364,12 @@ monitor:
   artifacts:
     paths: [build/dashboard/]
     expire_in: 1 week
+
+# Fails loudly if the live service does not answer /health or does not serve the derived views.
+monitor_live:
+  stage: monitor
+  needs: [deploy_cloud_run]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - python -m scripts.check_live --url "$GCP_SERVICE_URL"

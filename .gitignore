@@ -34,3 +34,11 @@ docs/paper/*.out
 .claude/scheduled_tasks.lock
 .claude/settings.local.json
 mock-output/
+
+# Terraform
+deploy/terraform/.terraform/
+deploy/terraform/backend.hcl
+deploy/terraform/*.tfvars
+!deploy/terraform/*.tfvars.example
+deploy/terraform/*.tfstate*
+deploy/terraform/tfplan

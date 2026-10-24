@@ -1,0 +1,5 @@
+# Values are given as TF_VAR_* environment variables or a git-ignored terraform.tfvars.
+# gcp_project_id      = "<project id>"
+# region              = "<region>"
+# gitlab_project_id   = "<CI_PROJECT_ID>"
+# gitlab_namespace_id = "<CI_PROJECT_NAMESPACE_ID>"
