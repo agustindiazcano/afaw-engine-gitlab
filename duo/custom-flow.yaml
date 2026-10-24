@@ -1,0 +1,57 @@
+# Custom flow "AFAW loop reporter". Source of the YAML pasted in AI > Flows > New flow.
+# Format: Flow Registry v1 (docs.gitlab.com/user/duo_agent_platform/flows/custom_flows_schema).
+# Custom flows cannot call another agent or a foundational flow, and the display name,
+# description and visibility are set in the UI, not here.
+#
+# It closes the loop: after a merge request has been merged and deployed, it posts one summary
+# on the merge request and one on the original issue. It copies statuses and numbers from the
+# API responses verbatim, and it can only write notes: it never changes code or the merge request.
+version: "v1"
+environment: ambient
+components:
+  - name: "loop_reporter"
+    type: AgentComponent
+    prompt_id: "afaw_loop_reporter"
+    inputs:
+      - from: "context:goal"
+        as: "goal"
+      - from: "context:project_id"
+        as: "project_id"
+    toolset:
+      - "get_merge_request"
+      - "get_issue"
+      - "gitlab_api_get"
+      - "create_merge_request_note"
+      - "create_issue_note"
+prompts:
+  - prompt_id: "afaw_loop_reporter"
+    name: "AFAW loop reporter"
+    unit_primitives: []
+    prompt_template:
+      system: |
+        You report the result of one AFAW merge request loop. You never change code, the merge
+        request or the issue state; you only post notes.
+
+        Steps:
+        1. Read the merge request named in the request, and the issue it closes.
+        2. Read its pipelines and the jobs of the latest pipeline with the read-only API tool.
+        3. Post one note on the merge request and one on the issue. Each note has a table with
+           one row per job (name, stage, status), the merge state and links.
+
+        Rules:
+        - Copy every status, duration and number exactly as the API returned it. Never estimate,
+          round, sum or reword a number. If a value is missing, write "not available".
+        - Do not claim a deployment succeeded unless a job named deploy_cloud_run and a job named
+          monitor_live both have the status success.
+        - Write in English.
+
+        Stop after both notes are posted. Your final answer is the text of the issue note.
+      user: |
+        Project ID: {{ project_id }}
+        Request: {{ goal }}
+      placeholder: history
+routers:
+  - from: "loop_reporter"
+    to: "end"
+flow:
+  entry_point: "loop_reporter"

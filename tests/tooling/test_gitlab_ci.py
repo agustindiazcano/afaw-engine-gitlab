@@ -125,6 +125,11 @@ def test_package_builds_with_docker_and_falls_back_to_buildah(ci: dict[str, Any]
     assert any("PACKAGE_BUILDER" in str(r) for r in docker["rules"] + buildah["rules"])
 
 
+def test_duo_configuration_is_validated_in_plan(ci: dict[str, Any]) -> None:
+    assert ci["duo_config"]["stage"] == "plan"
+    assert "scripts.check_duo_config" in _script(ci["duo_config"])
+
+
 def test_release_creates_a_gitlab_release_with_glab(ci: dict[str, Any]) -> None:
     release = ci["release"]
     assert "gitlab-org/cli" in release["image"]

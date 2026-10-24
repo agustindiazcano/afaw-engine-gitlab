@@ -62,6 +62,14 @@ docs_check:
   script:
     - python -m scripts.check_docs
 
+# The Duo configuration files (agent config, review instructions, subagents, custom flow) use
+# only the keys, tools and limits that docs.gitlab.com documents.
+duo_config:
+  stage: plan
+  extends: [.python_dev]
+  script:
+    - python -m scripts.check_duo_config
+
 # ---- create: the change record and the derived views ---------------------------------------
 task_delta:
   stage: create

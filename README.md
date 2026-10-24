@@ -32,8 +32,8 @@ Several coding agents working on one repository fail in predictable ways: they c
 
 | Stage | AFAW script | GitLab-native feature | Task |
 |---|---|---|---|
-| plan | `check_task_files`, `check_docs` | Merge request pipelines (`workflow:rules`) | 009 |
-| create | `check_task_delta`, `build_state` | Merge requests opened by the Developer Flow (Duo) | 009, 011 |
+| plan | `check_task_files`, `check_docs`, `check_duo_config` | Merge request pipelines (`workflow:rules`) | 009, 011 |
+| create | `check_task_delta`, `build_state` | Merge requests opened by the Developer Flow (Duo), with the review rules and sandbox in `.gitlab/duo/` | 009, 011 |
 | verify | `ruff`, `mypy`, `pytest`, `red_check`, `mutation_ci` | `rules:changes` path filters, pipeline cache | 009 |
 | secure | `security_gate` reads both reports and blocks on any secret or a Critical/High SAST finding | SAST template (Semgrep) and pipeline secret detection | 009 |
 | govern | `paper_pdf`, `equivalent_mutants_report` and `human_only_files` (a **weak** backup control: the same merge request can edit it away) | The strong control is deferred: a pipeline execution policy or CODEOWNERS with required approval, depending on the tier (see [ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md) and [`PENDING.md`](PENDING.md)) | 009, 012 |
@@ -71,7 +71,8 @@ The base method was committed on Sep 29-30, 2026. Since Oct 5:
 | Oct 24 | Repository imported into the GitLab showcase project | done |
 | Oct 24 | Merge policy ADR, `AGENTS.md`, README and roadmap (task 008) | done |
 | Oct 24 | Nine-stage GitLab pipeline, security gate and tools image (task 009) | done |
-| pending | GitLab fact collection, Duo flows, guardrails, Cloud Run service (tasks 010-013) | planned |
+| Oct 24 | Duo configuration, a custom agent and a custom flow; what needs a person to enable them is in [`docs/duo.md`](docs/duo.md) (task 011) | in progress: files done, waiting for the human to enable the flows |
+| pending | GitLab fact collection, guardrails and the Cloud Run service (tasks 010, 012, 013) | planned |
 
 Live service (Google Cloud Run): _URL to be added when task 013 is deployed._
 
