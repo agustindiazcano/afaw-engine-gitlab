@@ -3,7 +3,7 @@
   "title": "Document the hands-off merge policy: ADR, AGENTS.md, README and roadmap",
   "role": "architect",
   "type": "chore",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "docs/task-008-hands-off-policy",
   "priority": 1,
