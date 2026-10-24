@@ -37,10 +37,10 @@ Several coding agents working on one repository fail in predictable ways: they c
 | verify | `ruff`, `mypy`, `pytest`, `red_check`, `mutation_ci` | `rules:changes` path filters, pipeline cache | 009 |
 | secure | `security_gate` reads both reports and blocks on any secret or a Critical/High SAST finding | SAST template (Semgrep) and pipeline secret detection | 009 |
 | govern | `paper_pdf`, `equivalent_mutants_report` and `human_only_files` (a **weak** backup control: the same merge request can edit it away) | The strong control is deferred: a pipeline execution policy or CODEOWNERS with required approval, depending on the tier (see [ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md) and [`PENDING.md`](PENDING.md)) | 009, 012 |
-| package | `Dockerfile` of the AFAW tools (provisional until task 013) | Container Registry; `docker:dind`, with Buildah as fallback | 009, 013 |
-| configure | `check_ci_config`: `state/config.json` against its schema and the CI variables, by name only | CI/CD variables (masked and protected); Cloud Run configuration is added in task 013 | 009, 013 |
-| release | none | `release:` keyword with `glab`: a GitLab Release per merge | 009 |
-| monitor | `collect_facts`, `build_state` | Job artifacts; `collect_facts` reads the GitLab REST API v4 from task 010 | 009, 010, 013 |
+| package | `Dockerfile` of the read-only web service (`src/afaw_web`) | GitLab Container Registry; `docker:dind`, with Buildah as fallback | 009, 013 |
+| configure | `check_ci_config`: `state/config.json` against its schema and the CI variables, by name only; `terraform fmt` and `validate` of `deploy/terraform` | Protected CI/CD variables | 009, 013 |
+| release | `gcp_access_token.sh`, `gcloud run deploy` | `release:` keyword with `glab` (a GitLab Release per merge); `id_tokens` with Workload Identity Federation to Artifact Registry and Cloud Run | 009, 013 |
+| monitor | `collect_facts`, `build_state`, `check_live` (fails if the live `/health` or `/api/state` does not answer) | Job artifacts; `collect_facts` reads the GitLab REST API v4 from task 010 | 009, 010, 013 |
 
 `test` is a technical stage: the GitLab SAST and secret-detection templates require it to exist, and none of our jobs runs in it. The nine DevSecOps stages are the other nine. Verified in docs.gitlab.com (Oct 24, 2026): the SAST and secret-detection templates run in the `test` stage and only in branch pipelines by default, so `.gitlab-ci.yml` moves them to `secure` and also runs them in merge request pipelines. Basic Semgrep SAST and the secret-detection JSON report are in every tier; findings in the merge request and Advanced SAST need Ultimate. Kaniko is marked as no longer maintained, so Buildah is the fallback.
 
@@ -71,10 +71,11 @@ The base method was committed on Sep 29-30, 2026. Since Oct 5:
 | Oct 24 | Repository imported into the GitLab showcase project | done |
 | Oct 24 | Merge policy ADR, `AGENTS.md`, README and roadmap (task 008) | done |
 | Oct 24 | Nine-stage GitLab pipeline, security gate and tools image (task 009) | done |
+| Oct 24 | Read-only web service and its Terraform for Cloud Run (task 013) | merged: waiting for the human to apply the Terraform and set the variables |
 | Oct 24 | Duo configuration, a custom agent and a custom flow; what needs a person to enable them is in [`docs/duo.md`](docs/duo.md) (task 011) | in progress: files done, waiting for the human to enable the flows |
-| pending | GitLab fact collection, guardrails and the Cloud Run service (tasks 010, 012, 013) | planned |
+| pending | GitLab fact collection and guardrails (tasks 010 and 012) | planned |
 
-Live service (Google Cloud Run): _URL to be added when task 013 is deployed._
+Live service (Google Cloud Run): _URL to be added when task 013 is deployed._ How it is set up, who may do what and the steps a human runs once are in [`docs/google-cloud.md`](docs/google-cloud.md).
 
 ---
 

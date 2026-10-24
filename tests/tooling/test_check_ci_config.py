@@ -47,3 +47,43 @@ def test_optional_variable_is_reported_not_required(
     project.write("state/config.json", {})
     assert _run(project, REQUIRED) == 0
     assert "AFAW_BOT_USER_IDS: not set (optional" in capsys.readouterr().out
+
+
+GCP = {
+    "GCP_PROJECT_ID": "p",
+    "GCP_REGION": "r",
+    "GCP_WORKLOAD_IDENTITY_PROVIDER": "w",
+    "GCP_DEPLOYER_SERVICE_ACCOUNT": "d",
+    "GCP_ARTIFACT_REPOSITORY": "a",
+    "GCP_SERVICE_NAME": "s",
+    "GCP_SERVICE_URL": "https://live.example",
+}
+
+
+def test_gcp_variables_are_required_on_protected_refs(
+    project: Project, capsys: pytest.CaptureFixture[str]
+) -> None:
+    project.write("state/config.json", {})
+    env = {**REQUIRED, "CI_COMMIT_REF_PROTECTED": "true"}
+    assert _run(project, env) == 1
+    err = capsys.readouterr().err
+    for name in GCP:
+        assert f"{name}: MISSING" in err
+
+
+def test_gcp_variables_pass_on_protected_refs_without_printing_values(
+    project: Project, capsys: pytest.CaptureFixture[str]
+) -> None:
+    project.write("state/config.json", {})
+    assert _run(project, {**REQUIRED, **GCP, "CI_COMMIT_REF_PROTECTED": "true"}) == 0
+    out = capsys.readouterr().out
+    assert "GCP_PROJECT_ID: set" in out and "live.example" not in out
+
+
+def test_gcp_variables_are_not_demanded_on_unprotected_refs(
+    project: Project, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Protected variables do not exist on branches and merge requests: say so, do not fail."""
+    project.write("state/config.json", {})
+    assert _run(project, REQUIRED) == 0
+    assert "GCP_PROJECT_ID: not checked (protected variable" in capsys.readouterr().out

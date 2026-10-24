@@ -1,0 +1,12 @@
+{
+  "id": "task_013",
+  "title": "Read-only web service and Cloud Run deployment",
+  "role": "architect",
+  "type": "feature",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "feat/task-013-cloud-run",
+  "priority": 1,
+  "difficulty": 4,
+  "blocked_by": []
+}

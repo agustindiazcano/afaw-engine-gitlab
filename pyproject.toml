@@ -3,7 +3,7 @@
 # into the project's pyproject.toml, or delete them if the project does not use Python.
 
 [dependency-groups]
-dev = ["pytest", "ruff", "mypy", "pyyaml", "types-PyYAML"]
+dev = ["pytest", "ruff", "mypy", "pyyaml", "types-PyYAML", "fastapi", "pydantic-settings", "httpx"]
 
 [tool.ruff]
 line-length = 100
@@ -17,7 +17,7 @@ python_version = "3.11"
 strict = true
 
 [tool.pytest.ini_options]
-pythonpath = ["."]
+pythonpath = [".", "src"]
 markers = [
     "characterization(reason): documents behavior the code already has; the red-first check skips it",
 ]

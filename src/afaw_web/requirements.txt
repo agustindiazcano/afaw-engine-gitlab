@@ -1,0 +1,6 @@
+# Runtime dependencies of the service image, pinned to the versions the tests ran against.
+fastapi==0.141.1
+starlette==1.7.0
+pydantic==2.12.5
+pydantic-settings==2.15.0
+uvicorn==0.40.0

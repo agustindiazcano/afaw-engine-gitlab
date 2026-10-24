@@ -21,11 +21,16 @@ A valid submission exists after tasks 009 and 010.
   - [ ] Human: enable the foundational flows for the top-level group, create the custom agent and flow in the UI, add the triggers, set `AFAW_BOT_USER_IDS` (steps and required roles in `docs/duo.md`)
   - [ ] First real sessions: Developer on an issue, a failed pipeline fixed by the Fix CI/CD Pipeline Flow, a review by the Code Review Flow; keep the failed pipelines in the history for the video
 - [ ] Task 012: guardrails and merge policy (human-only files, 3-attempt cap, auto-merge rule); report gaps in the GitLab tier
+  - [ ] Add to `AGENTS.md` that an agent always reads `LASTCONTEXT.md` and `PENDING.md` before anything else (section 1.2 says it only for the session-start hook).
   - [ ] Fix the overclaim in `AGENTS.md` section 17.3 ("guarded by CI (the govern job)"): `human_only_files` is a weak backup control. Regenerate `docs/paper/afaw.pdf` in the same merge request; `paper_pdf` keeps requiring it.
   - [ ] Add a TeX Live job to rebuild the paper PDF (there is no `paper_build` job until then).
 
 ## Phase 3: Live service and submission
 - [ ] Task 013: read-only FastAPI service (dashboard, `/health`, `/api/state`, `/api/ask`), Dockerfile, `deploy/`, release and deploy job on Cloud Run
+  - [x] Service in `src/afaw_web`, its image and the Terraform in `deploy/terraform` (plan: 11 to add, 0 to change, 0 to destroy)
+  - [ ] Human: run `terraform apply` and set the protected `GCP_*` CI/CD variables, as in [`docs/google-cloud.md`](docs/google-cloud.md)
+  - [ ] First run of the deploy on `main`: confirm the issuer string and the `ref_protected` type with a real token, then fill the live URL in the README
+  - [ ] Human: create the budget alert in the Google Cloud console
 - [ ] Task 014: demo script (under 3 minutes), Devpost description, Path B explanation of what was added since Oct 5
 
 ## FINAL: strong human-only-files control
