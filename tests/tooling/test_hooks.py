@@ -132,8 +132,9 @@ def _session(project: Path, runner: str) -> dict[str, str]:
 def test_session_start_injects_generated_lastcontext_and_pending(tmp_path: Path) -> None:
     (tmp_path / "PENDING.md").write_text("# Roadmap\n- ship v1.1\n", encoding="utf-8")
     view = tmp_path / "build/state/context/global/LASTCONTEXT.md"
+    python = Path(sys.executable).as_posix()
     runner = (
-        f"{sys.executable} -c \"import pathlib; p = pathlib.Path(r'{view}'); "
+        f"{python} -c \"import pathlib; p = pathlib.Path(r'{view.as_posix()}'); "
         "p.parent.mkdir(parents=True, exist_ok=True); p.write_text('# Last context\\nok\\n')\""
     )
     context = _session(tmp_path, runner)["context"]
@@ -146,7 +147,8 @@ def test_session_start_reports_a_failed_build_instead_of_stale_context(tmp_path:
     stale = tmp_path / "build/state/context/global/LASTCONTEXT.md"
     stale.parent.mkdir(parents=True)
     stale.write_text("# Last context\nSTALE\n", encoding="utf-8")
-    runner = f"{sys.executable} -c \"import sys; sys.stderr.write('bad task file'); sys.exit(1)\""
+    python = Path(sys.executable).as_posix()
+    runner = f"{python} -c \"import sys; sys.stderr.write('bad task file'); sys.exit(1)\""
     context = _session(tmp_path, runner)["context"]
     assert "could not build the derived views" in context
     assert "bad task file" in context

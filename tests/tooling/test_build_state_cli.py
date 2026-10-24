@@ -71,13 +71,15 @@ def test_builds_from_ref_not_working_tree(repo):
     result = build(repo)
     assert result.returncode == 0, result.stderr
     out = repo / "build/state"
-    pending = json.loads((out / "pending.json").read_text())
+    pending = json.loads((out / "pending.json").read_text(encoding="utf-8"))
     assert [r["title"] for r in pending] == ["Add endpoint"]
-    metrics = json.loads((out / "metrics.json").read_text())
+    metrics = json.loads((out / "metrics.json").read_text(encoding="utf-8"))
     assert metrics["as_of"] == "2026-09-30T12:00:00+00:00"
-    assert (out / "dashboard.html").read_text().startswith("<!doctype html>")
-    assert (out / "context/global/LASTCONTEXT.md").read_text().startswith("# Last context\n")
-    assert "task_001 · Add endpoint" in (out / "context/roles/backend/LASTCONTEXT.md").read_text()
+    assert (out / "dashboard.html").read_text(encoding="utf-8").startswith("<!doctype html>")
+    global_md = (out / "context/global/LASTCONTEXT.md").read_text(encoding="utf-8")
+    assert global_md.startswith("# Last context\n")
+    role_md = (out / "context/roles/backend/LASTCONTEXT.md").read_text(encoding="utf-8")
+    assert "task_001 · Add endpoint" in role_md
 
 
 def test_rebuild_is_byte_identical(repo):
@@ -91,7 +93,7 @@ def test_rebuild_is_byte_identical(repo):
 def test_as_of_can_be_given_explicitly(repo):
     result = build(repo, "--as-of", "2026-10-02T08:00:00Z")
     assert result.returncode == 0, result.stderr
-    metrics = json.loads((repo / "build/state/metrics.json").read_text())
+    metrics = json.loads((repo / "build/state/metrics.json").read_text(encoding="utf-8"))
     assert metrics["as_of"] == "2026-10-02T08:00:00+00:00"
 
 
@@ -142,12 +144,12 @@ e
 
 def test_knowledge_is_read_from_the_ref(repo):
     (repo / "docs/adr").mkdir(parents=True)
-    (repo / "docs/adr/0001-money-in-cents.md").write_text(ADR_TEXT)
+    (repo / "docs/adr/0001-money-in-cents.md").write_text(ADR_TEXT, encoding="utf-8")
     git(repo, "add", ".")
     git(repo, "commit", "-q", "-m", "adr")
     result = build(repo)
     assert result.returncode == 0, result.stderr
-    md = (repo / "build/state/context/global/LASTCONTEXT.md").read_text()
+    md = (repo / "build/state/context/global/LASTCONTEXT.md").read_text(encoding="utf-8")
     assert "- ADR 0001 · Money in cents — `docs/adr/0001-money-in-cents.md` (db)" in md
 
 
