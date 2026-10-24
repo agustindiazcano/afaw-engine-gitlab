@@ -3,7 +3,7 @@
 # into the project's pyproject.toml, or delete them if the project does not use Python.
 
 [dependency-groups]
-dev = ["pytest", "ruff", "mypy"]
+dev = ["pytest", "ruff", "mypy", "pyyaml", "types-PyYAML"]
 
 [tool.ruff]
 line-length = 100

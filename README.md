@@ -30,17 +30,19 @@ Several coding agents working on one repository fail in predictable ways: they c
 
 ### The nine stages
 
-| Stage | What runs | Task |
-|---|---|---|
-| plan | Task files and roadmap checks | 009 |
-| create | Merge request opened by the Developer Flow | 009, 011 |
-| verify | Tests, `red_check`, `mutation_gate` | 009 |
-| secure | GitLab SAST and secret detection | 009 |
-| govern | Human-only files check, delta and docs checks | 009, 012 |
-| package | Container image | 013 |
-| configure | Cloud Run configuration | 013 |
-| release | Tagged release | 013 |
-| monitor | `/health` and `/api/state` verification | 013 |
+| Stage | AFAW script | GitLab-native feature | Task |
+|---|---|---|---|
+| plan | `check_task_files`, `check_docs` | Merge request pipelines (`workflow:rules`) | 009 |
+| create | `check_task_delta`, `build_state` | Merge requests opened by the Developer Flow (Duo) | 009, 011 |
+| verify | `ruff`, `mypy`, `pytest`, `red_check`, `mutation_ci` | `rules:changes` path filters, pipeline cache | 009 |
+| secure | none, by design | SAST template (Semgrep) and pipeline secret detection | 009 |
+| govern | `paper_pdf` and `equivalent_mutants_report` jobs | CODEOWNERS, push rules or pipeline execution policies, depending on the tier (see [ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md)) | 009, 012 |
+| package | `Dockerfile` of the AFAW tools | Container Registry; `docker:dind`, with Buildah as fallback | 009, 013 |
+| configure | Cloud Run configuration | to be added | 013 |
+| release | none | `release:` keyword with `glab`: a GitLab Release per merge | 009 |
+| monitor | `collect_facts`, `build_state` | Job artifacts; `collect_facts` reads the GitLab REST API v4 from task 010 | 009, 010, 013 |
+
+Verified in docs.gitlab.com (Oct 24, 2026): the SAST and secret-detection templates run in the `test` stage and only in branch pipelines by default, so `.gitlab-ci.yml` moves them to `secure` and also runs them in merge request pipelines. Basic Semgrep SAST and the secret-detection JSON report are in every tier; findings in the merge request and Advanced SAST need Ultimate. Kaniko is marked as no longer maintained, so Buildah is the fallback.
 
 ### The loop
 

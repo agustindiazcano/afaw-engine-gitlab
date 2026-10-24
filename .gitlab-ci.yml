@@ -1,0 +1,267 @@
+# AFAW Hands-off: the nine GitLab DevSecOps stages. Every job runs a deterministic AFAW script
+# or a GitLab-native feature, and fails loudly; no job passes without having measured something.
+# Human-only file: only a human changes this file (AGENTS.md section 18.10).
+stages: [plan, create, verify, secure, govern, package, configure, release, monitor]
+
+# Merge request pipelines replace branch pipelines while a merge request is open, so a push does
+# not run everything twice (docs.gitlab.com/ci/yaml/workflow).
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
+    - if: $CI_COMMIT_TAG
+
+include:
+  - template: Jobs/SAST.gitlab-ci.yml
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+
+variables:
+  GIT_DEPTH: "0" # the scripts diff against the default branch and read the history
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  # Set to "buildah" (project CI/CD variable or a manual run) when privileged Docker-in-Docker
+  # is not allowed on the runners.
+  PACKAGE_BUILDER: "docker"
+
+default:
+  image: python:3.12 # the full image: the scripts need git
+  cache:
+    key:
+      files: [pyproject.toml]
+    paths: [.cache/pip]
+
+# Jobs that compare the branch with the default branch run on merge requests and on branches
+# other than the default one.
+.on_change:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+
+.base_ref:
+  before_script:
+    - git fetch origin "$CI_DEFAULT_BRANCH"
+    - export BASE="origin/$CI_DEFAULT_BRANCH"
+    - export HEAD_BRANCH="${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME:-$CI_COMMIT_BRANCH}"
+
+.python_dev:
+  before_script:
+    - python -m pip install --upgrade pip
+    - pip install --group dev
+
+# ---- plan: task files and project knowledge ------------------------------------------------
+task_files:
+  stage: plan
+  extends: [.on_change, .base_ref]
+  script:
+    - python -m scripts.check_task_files --base "$(git merge-base $BASE HEAD)" --head-branch "$HEAD_BRANCH" --target "$BASE"
+
+docs_check:
+  stage: plan
+  script:
+    - python -m scripts.check_docs
+
+# ---- create: the change record and the derived views ---------------------------------------
+task_delta:
+  stage: create
+  extends: [.on_change, .base_ref]
+  script:
+    - python -m scripts.check_task_delta --base "$BASE"
+
+derived_views:
+  stage: create
+  script:
+    - python -m scripts.build_state --ref HEAD --out build/state
+
+# ---- verify: lint, types, tests, red-first and the mutation gate ---------------------------
+lint:
+  stage: verify
+  extends: [.python_dev]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - changes: &code_paths
+        paths:
+          - "scripts/**/*"
+          - "tests/**/*"
+          - "examples/**/*"
+          - ".claude/hooks/**/*"
+          - "state/schemas/**/*"
+          - "state/config.json"
+          - "pyproject.toml"
+          - ".gitlab-ci.yml"
+        compare_to: refs/heads/main
+  script:
+    - ruff check scripts tests examples .claude/hooks
+
+typecheck:
+  stage: verify
+  extends: [.python_dev]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - changes: *code_paths
+  script:
+    - mypy --strict scripts
+
+tests:
+  stage: verify
+  extends: [.python_dev]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - changes: *code_paths
+  script:
+    - git config --global user.email "ci@example.com"
+    - git config --global user.name "CI"
+    - pytest tests/tooling -q
+
+red_check:
+  stage: verify
+  extends: [.on_change]
+  before_script:
+    - !reference [.python_dev, before_script]
+    - !reference [.base_ref, before_script]
+  script:
+    - python -m scripts.red_check --base "$BASE"
+
+mutation_gate:
+  stage: verify
+  extends: [.on_change, .base_ref]
+  script:
+    # The engine is specific to each project; with mandatory files and no results this fails.
+    - python -m scripts.mutation_ci --base "$BASE" --results build/mutation.json
+
+# ---- secure: GitLab-native SAST and secret detection ---------------------------------------
+# The templates run in the test stage and, by default, only in branch pipelines. Their jobs are
+# moved to the secure stage and also run in merge request pipelines.
+semgrep-sast:
+  stage: secure
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH
+
+secret_detection:
+  stage: secure
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH
+
+# ---- govern: checks that need no tooling image ---------------------------------------------
+paper_pdf:
+  stage: govern
+  extends: [.on_change, .base_ref]
+  script:
+    - |
+      changed=$(git diff --name-only "$BASE...HEAD")
+      if echo "$changed" | grep -qE '^(docs/paper/afaw\.tex|AGENTS\.md|docs/img/)' \
+         && ! echo "$changed" | grep -qx 'docs/paper/afaw.pdf'; then
+        echo "PROBLEM: the paper's sources changed but docs/paper/afaw.pdf did not."
+        echo "Rebuild it (docs/paper/README.md) and commit the PDF in this merge request."
+        exit 1
+      fi
+      echo "OK: paper PDF in step with its sources."
+
+equivalent_mutants_report:
+  stage: govern
+  extends: [.on_change, .base_ref]
+  script:
+    - |
+      if git diff --quiet "$BASE...HEAD" -- state/equivalent_mutants.json; then
+        echo "state/equivalent_mutants.json is unchanged."
+      else
+        echo "state/equivalent_mutants.json changed in this merge request. Only the human may write it. Review every line:"
+        git diff "$BASE...HEAD" -- state/equivalent_mutants.json
+      fi
+
+# Not blocking, low priority: a manual placeholder for rebuilding the paper PDF, so the human
+# can commit it. It fails on purpose: it needs a TeX Live image, which is not set up yet.
+paper_build:
+  stage: govern
+  when: manual
+  allow_failure: true
+  script:
+    - echo "paper_build is not implemented yet; see docs/paper/README.md"
+    - exit 1
+
+# ---- package: the tools image in the GitLab Container Registry -----------------------------
+# docker:dind needs a privileged runner. If that is refused, set PACKAGE_BUILDER=buildah.
+# Kaniko is not an option: GitLab's documentation marks it as no longer maintained.
+package_docker:
+  stage: package
+  image: docker:24.0.5-cli
+  services:
+    - docker:24.0.5-dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  rules:
+    - if: $PACKAGE_BUILDER == "buildah"
+      when: never
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+  script:
+    - docker build -t "$CI_REGISTRY_IMAGE/afaw-tools:$CI_COMMIT_SHA" .
+    - docker push "$CI_REGISTRY_IMAGE/afaw-tools:$CI_COMMIT_SHA"
+
+package_buildah:
+  stage: package
+  image: quay.io/buildah/stable
+  variables:
+    STORAGE_DRIVER: vfs
+    BUILDAH_FORMAT: docker
+  rules:
+    - if: $PACKAGE_BUILDER != "buildah"
+      when: never
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_BRANCH
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | buildah login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+  script:
+    - buildah build -t "$CI_REGISTRY_IMAGE/afaw-tools:$CI_COMMIT_SHA" .
+    - buildah push "$CI_REGISTRY_IMAGE/afaw-tools:$CI_COMMIT_SHA"
+
+# ---- configure: added by task 013 (Cloud Run configuration and deploy) ---------------------
+
+# ---- release: a GitLab Release for every commit that reaches the default branch -----------
+release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/cli:latest
+  needs:
+    - job: package_docker
+      optional: true
+    - job: package_buildah
+      optional: true
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - echo "Releasing v0.$CI_PIPELINE_IID, image $CI_REGISTRY_IMAGE/afaw-tools:$CI_COMMIT_SHA"
+  release:
+    tag_name: "v0.$CI_PIPELINE_IID"
+    name: "AFAW Hands-off v0.$CI_PIPELINE_IID"
+    description: "Image `$CI_REGISTRY_IMAGE/afaw-tools:$CI_COMMIT_SHA`, commit $CI_COMMIT_SHA."
+    ref: "$CI_COMMIT_SHA"
+
+# ---- monitor: measured facts and the dashboard ---------------------------------------------
+monitor:
+  stage: monitor
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: $CI_COMMIT_BRANCH
+  script:
+    - |
+      FACTS=""
+      if [ -n "$GITHUB_REPOSITORY" ]; then
+        python -m scripts.collect_facts --ref HEAD --out build/facts.json
+        FACTS="--facts build/facts.json"
+      else
+        echo "NOTICE: scripts.collect_facts reads the GitLab REST API v4 only from task 010."
+        echo "Building the dashboard without measured facts; traffic lights show no data."
+      fi
+      python -m scripts.build_state --ref HEAD --out build/dashboard $FACTS
+  artifacts:
+    paths: [build/dashboard/]
+    expire_in: 1 week
