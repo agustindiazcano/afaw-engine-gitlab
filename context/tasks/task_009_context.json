@@ -1,8 +1,10 @@
 {
   "task_id": "task_009",
   "files_touched": [
+    "scripts/human_only_files.py",
     "scripts/mutation_ci.py",
     "tests/tooling/test_gitlab_ci.py",
+    "tests/tooling/test_human_only_files.py",
     "tests/tooling/test_mutation_ci.py"
   ],
   "summary": "Added .gitlab-ci.yml with the nine stages and a real job in every stage except configure (Cloud Run, task 013). Verified in docs.gitlab.com on 2026-10-24: SAST and secret-detection templates (stage test, branch pipelines only by default, so the jobs are moved to secure and given MR rules); workflow:rules with CI_OPEN_MERGE_REQUESTS; release keyword with glab (release-cli is deprecated); docker:24.0.5 dind needs a privileged runner; Kaniko is marked no longer maintained, so Buildah is the package fallback (PACKAGE_BUILDER=buildah); CODEOWNERS compares with the target branch and needs Premium; push rules cannot block edits of existing files; pipeline execution policies need Ultimate. Added scripts/mutation_ci.py so the mutation gate prints NO MANDATORY FILES instead of an empty pass and fails when mandatory files have no engine results. Added a tools Dockerfile. Paper PDF decision: paper_pdf is the cheap git-diff check in govern; paper_build is a manual non-blocking placeholder because no TeX Live image is set up yet. Added scripts/human_only_files.py and the human_only_files govern job as a WEAK backup control (the same MR can edit it away; it enforces nothing on its own). A non-human is decided by the MR author id and the pusher (bot=true or an id in the group variable AFAW_BOT_USER_IDS, filled in task 011); commit author names only warn. It fails closed when it cannot identify them. The strong control (pipeline execution policy in a separate project, or CODEOWNERS with required approval) is deferred to the FINAL item of PENDING.md. The pipeline needs the test stage declared because the SAST templates require it. AGENTS.md section 17.3 still says these files are guarded by CI; reword it when the paper PDF can be rebuilt. collect_facts for GitLab is stubbed with an explicit notice until task 010.",
