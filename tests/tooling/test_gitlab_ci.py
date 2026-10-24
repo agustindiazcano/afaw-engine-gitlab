@@ -100,6 +100,10 @@ def test_merge_request_pipelines_do_not_duplicate_branch_pipelines(ci: dict[str,
     assert any(r.get("when") == "never" and "CI_OPEN_MERGE_REQUESTS" in r["if"] for r in rules)
 
 
+def test_release_tags_do_not_start_pipelines(ci: dict[str, Any]) -> None:
+    assert not any("CI_COMMIT_TAG" in r.get("if", "") for r in ci["workflow"]["rules"])
+
+
 def test_verify_jobs_run_the_afaw_gates(ci: dict[str, Any]) -> None:
     scripts = "\n".join(_script(j) for j in _jobs(ci).values() if j["stage"] == "verify")
     for expected in ("scripts.red_check", "scripts.mutation_ci", "pytest tests/tooling",
