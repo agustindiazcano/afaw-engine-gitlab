@@ -55,7 +55,7 @@ def test_unknown_status_fails_loudly() -> None:
 
 def _setup(project: Project, survivors: int, equivalents: list[dict[str, str]]) -> Path:
     (project.root / FILE).parent.mkdir(parents=True, exist_ok=True)
-    (project.root / FILE).write_text(SOURCE, encoding="utf-8")
+    (project.root / FILE).write_bytes(SOURCE.encode("utf-8"))  # no CRLF translation
     project.write("state/config.json", {"mutation_critical_paths": ["src/back/domain/"]})
     project.write("state/equivalent_mutants.json", {"mutants": equivalents})
     path = project.root / "mutation.json"
