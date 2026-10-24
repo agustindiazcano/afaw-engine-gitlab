@@ -1,7 +1,9 @@
 # AFAW Hands-off: the nine GitLab DevSecOps stages. Every job runs a deterministic AFAW script
 # or a GitLab-native feature, and fails loudly; no job passes without having measured something.
 # Human-only file: only a human changes this file (AGENTS.md section 18.10).
-stages: [plan, create, verify, secure, govern, package, configure, release, monitor]
+# The nine stages. "test" is declared only because the GitLab SAST and secret-detection templates
+# require it (docs.gitlab.com/user/application_security/sast); none of our jobs runs in it.
+stages: [plan, create, verify, test, secure, govern, package, configure, release, monitor]
 
 # Merge request pipelines replace branch pipelines while a merge request is open, so a push does
 # not run everything twice (docs.gitlab.com/ci/yaml/workflow).

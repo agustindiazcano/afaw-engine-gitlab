@@ -47,7 +47,9 @@ def _script(job: dict[str, Any]) -> str:
 
 
 def test_declares_the_nine_stages_in_order(ci: dict[str, Any]) -> None:
-    assert ci["stages"] == STAGES
+    # "test" is required by the GitLab SAST templates; no job of ours uses it.
+    assert [s for s in ci["stages"] if s != "test"] == STAGES
+    assert "test" in ci["stages"] and "test" not in {j["stage"] for j in _jobs(ci).values()}
 
 
 def test_every_stage_but_the_deferred_one_has_a_real_job(ci: dict[str, Any]) -> None:
