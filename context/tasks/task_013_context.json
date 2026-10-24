@@ -1,0 +1,27 @@
+{
+  "task_id": "task_013",
+  "files_touched": [
+    "scripts/check_ci_config.py",
+    "scripts/check_live.py",
+    "src/afaw_web/__init__.py",
+    "src/afaw_web/app.py",
+    "src/afaw_web/main.py",
+    "src/afaw_web/requirements.txt",
+    "src/afaw_web/search.py",
+    "src/afaw_web/settings.py",
+    "tests/tooling/test_check_ci_config.py",
+    "tests/tooling/test_check_live.py",
+    "tests/tooling/test_gcp_access_token.py",
+    "tests/tooling/test_gitlab_ci.py",
+    "tests/tooling/test_terraform_guardrails.py",
+    "tests/web/__init__.py",
+    "tests/web/conftest.py",
+    "tests/web/test_app.py"
+  ],
+  "summary": "Read-only web service and its Google Cloud deployment, ready for the human to apply. Service: src/afaw_web (GET only; /health, /api/state verbatim, / demo and /live/ dashboards, /api/ask deterministic keyword search that cites paths and copies lines verbatim, 503 when a view is missing), baked-in data assembled by the web_data job, image built in package. Terraform in deploy/terraform creates new resources only (Workload Identity pool and provider for GitLab, deployer and runtime service accounts, Artifact Registry repository, public Cloud Run service with min 0, max 2, 1 CPU, 512Mi, 30 s timeout, image ignored after the first apply); a partial GCS backend under a new prefix; no identifier is written in the repository. terraform init and plan against the real backend showed 11 to add, 0 to change, 0 to destroy; the human runs apply. CI: terraform_validate and check_configuration (Google Cloud variable names, required on protected refs only) in configure; publish_image and deploy_cloud_run (Workload Identity Federation through deploy/gcp_access_token.sh, no key) and monitor_live (scripts/check_live.py) on main only; glab, Buildah, Terraform and cloud-sdk images pinned, each tag checked in its registry. Verified in the docs on 2026-10-24: GitLab id_tokens and claim names, Google Workload Identity Federation (provider fields, attribute conditions, member formats, impersonation, credential flow), GitLab-managed Terraform state, Terraform arguments for the Cloud Run service and the pool provider. Decision on state: a GCS bucket under a new prefix instead of GitLab-managed state (reasons in ADR 0008). Not verified until the first run on main: the issuer string (discovery says https://gitlab.com, GitLab's Google page mentions a trailing slash), the type of ref_protected (the condition uses string() and fails closed), and the deploy jobs themselves. Scale-to-zero and the deploy settings are recorded in deploy/terraform/cloud_run.tf and docs/google-cloud.md. Documentation: docs/google-cloud.md, ADR 0008, README and PENDING.md.",
+  "next": [
+    "Human: terraform apply, set the protected GCP_* CI/CD variables (docs/google-cloud.md), create the budget alert",
+    "First run on main: confirm the issuer and ref_protected with a real token, then put the live URL in the README",
+    "Task 011: Duo agent and flow"
+  ]
+}
