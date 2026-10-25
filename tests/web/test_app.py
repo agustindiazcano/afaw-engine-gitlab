@@ -390,7 +390,14 @@ def test_the_interactive_docs_are_not_exposed(client: TestClient) -> None:
 def test_the_openapi_schema_names_the_app_and_lists_only_get_routes(client: TestClient) -> None:
     schema = client.get("/openapi.json").json()
     assert schema["info"]["title"] == "AFAW Hands-off"
-    assert set(schema["paths"]) == {"/health", "/api/state", "/", "/live/", "/api/ask"}
+    assert set(schema["paths"]) == {
+        "/health",
+        "/api/state",
+        "/api/version",
+        "/",
+        "/live/",
+        "/api/ask",
+    }
     assert all(set(methods) == {"get"} for methods in schema["paths"].values())
 
 
