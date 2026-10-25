@@ -1,0 +1,9 @@
+{
+  "task_id": "task_096",
+  "files_touched": [
+    "scripts/check_task_files.py",
+    "tests/tooling/test_check_task_files.py"
+  ],
+  "summary": "The success line of scripts/check_task_files.py is now 'OK: task file check passed (N task files checked).', where N counts the task files the check read from the working tree (the ones changed against the base). Exit codes and problem messages are unchanged. The test that asserted the old line is updated and two tests were added.",
+  "next": []
+}
