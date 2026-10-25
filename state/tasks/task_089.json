@@ -1,0 +1,13 @@
+{
+  "id": "task_089",
+  "title": "Correct the count of merges made by merge_guard to nine",
+  "role": "architect",
+  "type": "chore",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "docs/task-089-nine-guard-merges",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Documents and data only. The notes of every merge request were read from the GitLab API."
+}

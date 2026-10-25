@@ -1,0 +1,9 @@
+{
+  "task_id": "task_089",
+  "files_touched": [],
+  "summary": "The evidence table, the rules and coverage document and the experiments page said that merge_guard merged seven merge requests with no click. Reading the notes of every merged merge request from the API shows nine: !35, !43, !40, !18, !47, !17, !16, !54 and !65, each with the notes marked ready and enabled an automatic merge. Of them, !65 only added the task files of a nested repair of a planted defect and its task was cancelled. The data file gains the two rows and the page tile follows.",
+  "next": [
+    "Rewrite the Devpost and Path B texts and the README status tables to the final state",
+    "Add the Playwright end to end jobs"
+  ]
+}
