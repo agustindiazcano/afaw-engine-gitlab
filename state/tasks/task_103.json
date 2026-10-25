@@ -1,0 +1,13 @@
+{
+  "id": "task_103",
+  "title": "Professional, responsive UI for the demo notes app",
+  "role": "architect",
+  "type": "feature",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "duo/feature/44-notes-app-ui",
+  "priority": 2,
+  "difficulty": 2,
+  "blocked_by": [],
+  "notes": "Issue #44. The page moves to src/notes_app/static/index.html."
+}
