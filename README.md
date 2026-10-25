@@ -1,55 +1,57 @@
-# AFAW (Anti-Fragile Agentic Workflow)
+# AFAW Engine
 
-**A deterministic, multi-agent methodology for AI-assisted software development.**
+**Deterministic governance for AI coding agents across the post-code DevSecOps lifecycle, built on GitLab and GitLab Duo Agent Platform.**
 
-Several coding agents working on one repository fail in predictable ways: they collide on branches and on shared context files, claim results they never measured, and write tests that pass whatever the code does. AFAW is a repository-level method and boilerplate that lets agents write code in parallel while deterministic tools decide whether the result is acceptable and a human approves every merge (the Hands-off variant below moves that approval from each merge to the policy).
+AFAW Engine is the entry of the AFAW (Anti-Fragile Agentic Workflow) method to the GitLab Transcend Hackathon "Life After Code" (Devpost). Agents write and repair code, deterministic tools decide whether a change is acceptable, and the human approves the merge policy instead of every merge.
 
-*AFAW is the method; the code here is one way to implement it. See [what is core and what you can replace](#method-and-this-implementation).*
+- Hackathon: GitLab Transcend, "Life After Code" (Devpost: <DEVPOST_URL>)
+- Path: **B, Bring Your Own** (existing MIT project, imported to GitLab)
+- Autonomy track: **Best Hands-off Agent**
+- Also targeted: **Most Stages Covered**, **Google Cloud bonus** (Cloud Run)
+- Optional, only if measured: **Most Environmentally Impactful** (see [Sustainability](#sustainability))
+- Demo video: <DEMO_VIDEO_URL>
+- Live service (Google Cloud Run): <CLOUD_RUN_URL>
+- Source of truth: https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase (a mirror is kept at https://github.com/agustindiazcano/afaw-engine-gitlab)
+- Original project (MIT, upstream): https://github.com/agustindiazcano/afaw-anti-fragile-agentic-workflow
+- License: [MIT](LICENSE)
+- White paper: [`docs/paper/afaw.pdf`](docs/paper/afaw.pdf), DOI [10.5281/zenodo.23050310](https://doi.org/10.5281/zenodo.23050310)
 
-**White paper (PDF): [`docs/paper/afaw.pdf`](docs/paper/afaw.pdf)** · LaTeX source: [`docs/paper/afaw.tex`](docs/paper/afaw.tex) · DOI [10.5281/zenodo.23050310](https://doi.org/10.5281/zenodo.23050310)
-
-**Live demo: [agustindiazcano.github.io/afaw-anti-fragile-agentic-workflow](https://agustindiazcano.github.io/afaw-anti-fragile-agentic-workflow/)** · this repository's own dashboard: [`/live/`](https://agustindiazcano.github.io/afaw-anti-fragile-agentic-workflow/live/)
+> Status legend used in this document: **Done** (merged, evidence given), **Merged, not deployed** (code in `main`, needs a human step), **In progress**, **Planned**. Nothing marked Planned or In progress is claimed to work.
 
 ---
 
-## AFAW Hands-off: GitLab Transcend Hackathon variant
+## Problem
 
-> **Status: work in progress.** This section describes the target design. Only the items marked "done" below exist today; the rest is the plan in [`PENDING.md`](PENDING.md), and nothing here is claimed to run until its task is merged.
+Several coding agents on one repository fail in predictable ways: they collide on branches and shared context files, claim results they never measured, and write tests that pass whatever the code does. Once code generation is cheap, the open problem is everything after the code: review, security, tests, compliance, release and monitoring.
 
-*AFAW Hands-off* (working name) is a derived variant of [AFAW](https://github.com/agustindiazcano/afaw-anti-fragile-agentic-workflow), built for the GitLab Transcend Hackathon "Life After Code" (Path B, bring your own MIT project; tracks Best Hands-off Agent and Most Stages Covered, plus the Google Cloud Run bonus). The upstream project is credited and linked above, and the [MIT license](LICENSE) is unchanged.
+AFAW Engine runs that part with GitLab Duo flows, while deterministic tools (CI jobs, scripts, security scanners) decide what is acceptable. Principle: **the AI decides, the engine measures.** Every number comes from a deterministic tool, and a value an agent could have made up is rejected where it would be declared.
 
-### What differs from the original
+## Why use it
 
-| | AFAW (upstream) | AFAW Hands-off |
-|---|---|---|
-| Merge | A human approves every pull request | The human approves the **policy**; the deterministic engine approves **each merge** ([ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md)) |
-| Measuring | The AI decides, the engine measures | Unchanged: every number comes from a deterministic tool, never from an agent |
-| Forge | GitHub | GitLab (REST API v4), GitHub kept working |
-| Agents | Coding agents that open pull requests | GitLab Duo flows under a group service account, never a personal token |
-| Guardrails | Human reviews each diff | Human-only files, a cap of 3 automatic fixes per merge request, full green pipeline, no test edited to pass |
+Expected, not measured: no figure below has been measured yet.
 
-### The nine stages
+- **Fewer retries on the agent's machine.** The agent runs only the test it is writing; the pipeline runs the rest in parallel and answers once.
+- **One shared record.** Every task, decision and status has the same format for every person and every agent: the board, the generated `LASTCONTEXT.md` and the decision records.
+- **A new agent starts from one index.** It reads `LASTCONTEXT.md` and follows links to the decisions it needs, instead of reading every file.
+- **Fewer status meetings.** The board and the records answer what was done, what is blocked and why a decision was taken.
 
-| Stage | AFAW script | GitLab-native feature | Task |
+## What this variant changes (Hands-off)
+
+| | AFAW (upstream) | AFAW Engine (this repository) | Status |
 |---|---|---|---|
-| plan | `check_task_files`, `check_docs`, `check_duo_config` | Merge request pipelines (`workflow:rules`) | 009, 011 |
-| create | `check_task_delta`, `build_state` | Merge requests opened by the Developer Flow (Duo), with the review rules and sandbox in `.gitlab/duo/` | 009, 011 |
-| verify | `ruff`, `mypy`, `pytest`, `red_check`, `mutation_ci` | `rules:changes` path filters, pipeline cache | 009 |
-| secure | `security_gate` reads both reports and blocks on any secret or a Critical/High SAST finding | SAST template (Semgrep) and pipeline secret detection | 009 |
-| govern | `paper_pdf`, `equivalent_mutants_report` and `human_only_files` (a **weak** backup control: the same merge request can edit it away) | The strong control is deferred: a pipeline execution policy or CODEOWNERS with required approval, depending on the tier (see [ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md) and [`PENDING.md`](PENDING.md)) | 009, 012 |
-| package | `Dockerfile` of the read-only web service (`src/afaw_web`) | GitLab Container Registry; `docker:dind`, with Buildah as fallback | 009, 013 |
-| configure | `check_ci_config`: `state/config.json` against its schema and the CI variables, by name only; `terraform fmt` and `validate` of `deploy/terraform` | Protected CI/CD variables | 009, 013 |
-| release | `gcp_access_token.sh`, `gcloud run deploy` | `release:` keyword with `glab` (a GitLab Release per merge); `id_tokens` with Workload Identity Federation to Artifact Registry and Cloud Run | 009, 013 |
-| monitor | `collect_facts`, `build_state`, `check_live` (fails if the live `/health` or `/api/state` does not answer) | Job artifacts; `collect_facts` reads the GitLab REST API v4 (see [`docs/facts.md`](docs/facts.md)) | 009, 010, 013 |
+| Merge | A human approves every pull request | The human approves the **policy**; the deterministic engine approves **each merge** ([ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md)) | Policy documented; the automatic merge rule is Planned (task 012). Until then a human merges |
+| Measuring | The AI decides, the engine measures | Unchanged | Done |
+| Forge | GitHub | GitLab (REST API v4); the GitHub path is kept | Done for facts: they are read from the GitLab API ([`docs/facts.md`](docs/facts.md), task 010) |
+| Agents | Coding agents that open pull requests | GitLab Duo flows, configured to run under a group service account instead of a personal token ([`docs/duo.md`](docs/duo.md)) | Configuration merged; no flow has run yet |
+| Guardrails | Human reviews each diff | Human-only files (a weak control, see [limits](#guardrails-and-known-limits)) and a red-first check that a new test fails on the old code | Done |
+| | | Cap of 3 automatic fix attempts per merge request, merge only when the full pipeline is green | Planned (task 012) |
 
-`test` is a technical stage: the GitLab SAST and secret-detection templates require it to exist, and none of our jobs runs in it. The nine DevSecOps stages are the other nine. Verified in docs.gitlab.com (Oct 24, 2026): the SAST and secret-detection templates run in the `test` stage and only in branch pipelines by default, so `.gitlab-ci.yml` moves them to `secure` and also runs them in merge request pipelines. Basic Semgrep SAST and the secret-detection JSON report are in every tier; findings in the merge request and Advanced SAST need Ultimate. Kaniko is marked as no longer maintained, so Buildah is the fallback.
-
-### The loop
+The loop is the target design; the status of each link is in [Hands-off status](#hands-off-status):
 
 ```mermaid
 flowchart LR
     I[Issue] --> D[Developer Flow opens MR]
-    D --> P[9-stage pipeline]
+    D --> P[Nine-stage pipeline]
     P -- failure --> F[Fix CI/CD Pipeline Flow<br/>max 3 attempts]
     F --> P
     P -- green --> R[Code Review Flow]
@@ -60,24 +62,132 @@ flowchart LR
     O --> C[Summary comment on the issue]
 ```
 
-### Added on or after Oct 5, 2026
+## Hackathon requirements and status
 
-The base method was committed on Sep 29-30, 2026. Since Oct 5:
-
-| Date | Change | State |
+| Requirement | Status | Evidence |
 |---|---|---|
-| Oct 23 | English-only rule and the first GitLab Duo rules in `AGENTS.md` | done |
-| Oct 23 | Test suite passes on Windows (task 007) | done |
-| Oct 24 | Repository imported into the GitLab showcase project | done |
-| Oct 24 | Merge policy ADR, `AGENTS.md`, README and roadmap (task 008) | done |
-| Oct 24 | Nine-stage GitLab pipeline, security gate and tools image (task 009) | done |
-| Oct 24 | Read-only web service and its Terraform for Cloud Run (task 013) | merged: waiting for the human to apply the Terraform and set the variables |
-| Oct 24 | Duo configuration, a custom agent and a custom flow; what needs a person to enable them is in [`docs/duo.md`](docs/duo.md) (task 011) | in progress: files done, waiting for the human to enable the flows |
-| pending | GitLab fact collection and guardrails (tasks 010 and 012) | planned |
+| Uses GitLab Duo Agent Platform (agents, flows, MCP clients) | In progress | Configuration merged (task 011, [`docs/duo.md`](docs/duo.md)); no merge request or session produced by a flow exists yet |
+| Public GitLab project with all source, assets and instructions | Done | https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase (visibility public) |
+| MIT License visible in the repository | Done | [`LICENSE`](LICENSE); the project API reports the license key `mit` |
+| Visible CI/CD pipeline history showing the automation | Done | Pipelines of the project, including failed ones; the failures on `main` are explained in [limits](#guardrails-and-known-limits) |
+| Text description | Planned | Derived from this README |
+| Demo video under 3 minutes, YouTube, no third-party trademarks or copyrighted music | Planned | <DEMO_VIDEO_URL> |
+| Path B: what was added or changed since Oct 5, 2026 | Done | [Added since Oct 5](#added-on-or-after-oct-5-2026) |
+| Path B: deployed project URL, kept live until about Nov 16 | Merged, not deployed | <CLOUD_RUN_URL> |
+| Path B: URL of the original MIT project | Done | Link at the top |
+| Google Cloud bonus: deployment code in the repository and public URL | Merged, not deployed | `deploy/terraform` ([`cloud_run.tf`](deploy/terraform/cloud_run.tf)), [`docs/google-cloud.md`](docs/google-cloud.md) |
+| Most Environmentally Impactful (opt-in, SCI) | Planned, conditional | [Sustainability](#sustainability) |
 
-Live service (Google Cloud Run): _URL to be added when task 013 is deployed._ How it is set up, who may do what and the steps a human runs once are in [`docs/google-cloud.md`](docs/google-cloud.md).
+## The nine stages
 
----
+`.gitlab-ci.yml` defines 26 jobs. `test` is a technical stage: the GitLab SAST and secret-detection templates require it to exist, and none of our jobs runs in it. The nine DevSecOps stages are the other nine.
+
+| Stage | Jobs (script) | GitLab-native feature | Status | Tasks |
+|---|---|---|---|---|
+| plan | `task_files` (`check_task_files`), `docs_check` (`check_docs`), `duo_config` (`check_duo_config`) | Merge request pipelines (`workflow:rules`) | Done | 009, 011 |
+| create | `task_delta` (`check_task_delta`), `derived_views` and `web_data` (`build_state`) | Merge requests opened by the Developer Flow, review rules in `.gitlab/duo/` | In progress: the jobs run; no Developer Flow has run | 009, 011 |
+| verify | `lint` (`ruff`), `typecheck` (`mypy --strict`), `tests` (`pytest`), `red_check`, `mutation_gate` (`mutation_ci`) | `rules:changes` path filters, pipeline cache | Done | 009 |
+| secure | `semgrep-sast`, `secret_detection`, `security_gate` (blocks on any secret or a Critical or High SAST finding) | SAST template (Semgrep) and pipeline secret detection | Done | 009 |
+| govern | `paper_pdf`, `equivalent_mutants_report`, `human_only_files` (a **weak** backup control: the same merge request can edit it away) | Strong control deferred: pipeline execution policy or CODEOWNERS with required approval, depending on the tier | Done (weak); strong control Planned | 009, 012 |
+| package | `package_docker` (service `Dockerfile`); `package_buildah` as the fallback, selected with `PACKAGE_BUILDER=buildah` | GitLab Container Registry | Done for `package_docker`; the Buildah path has not run | 009, 013 |
+| configure | `check_configuration` (`check_ci_config`: config schema and CI variables, by name only), `terraform_validate` | Protected CI/CD variables | Merged, not deployed: `check_configuration` fails on `main` until a human sets the `GCP_*` variables | 009, 013 |
+| release | `release` (`glab`), `publish_image` and `deploy_cloud_run` (`gcp_access_token.sh`, `gcloud run deploy`) | `release:` keyword (a GitLab Release per pipeline on `main`); `id_tokens` with Workload Identity Federation | `release` Done; `publish_image` and `deploy_cloud_run` Merged, not deployed | 009, 013 |
+| monitor | `monitor` (`collect_facts`, `build_state`), `monitor_live` (`check_live`: fails if live `/health` or `/api/state` does not answer) | Job artifacts | `monitor` Done (it runs `collect_facts` on the GitLab API; it ran in a branch pipeline and is skipped on `main` while `main` is red); `monitor_live` Merged, not deployed | 009, 010, 013 |
+
+Verified in docs.gitlab.com (Oct 24, 2026): the SAST and secret-detection templates run in the `test` stage and only in branch pipelines by default, so `.gitlab-ci.yml` moves them to `secure` and also runs them in merge request pipelines. Basic Semgrep SAST and the secret-detection JSON report are in every tier; findings in the merge request and Advanced SAST need Ultimate. Kaniko is marked as no longer maintained, so Buildah is the fallback.
+
+## Hands-off status
+
+| Link of the loop | Status |
+|---|---|
+| Nine-stage pipeline with a real job in each stage | Done |
+| Security gate that blocks (reads both scanner reports) | Done |
+| GitLab Release created on `main` | Done (v0.9, v0.15 and v0.20) |
+| Custom agent and custom flow | Sources merged in `duo/`; they are created in the GitLab UI by a person ([`docs/duo.md`](docs/duo.md)). Not created yet |
+| Developer Flow opens a merge request from an issue | Planned. No such merge request exists |
+| Fix CI/CD Pipeline Flow repairs a failed pipeline | Planned. No such session or commit exists |
+| Code Review Flow comments on a merge request | Planned. No such session exists |
+| Cap of 3 automatic fix attempts per merge request | Planned (task 012) |
+| Automatic merge when every gate is green | Planned (task 012). Until then a human merges every merge request |
+| Deploy to Cloud Run and live monitor | Merged, not deployed |
+| Summary comment on the original issue | Planned. No documented event after a merge can start it ([`docs/duo.md`](docs/duo.md)) |
+
+## Features
+
+- **Verification gates:** red-first check (a new test must fail on the old code), mutation gate on the diff, lint, strict typing, tests, in parallel.
+- **Security gate:** GitLab SAST and secret detection, with a script that turns their reports into a blocking decision.
+- **Governance:** human-only files (`.gitlab-ci.yml`, `AGENTS.md`, `state/equivalent_mutants.json`, `deploy/`, and the mutation and gate settings in `state/config.json`), merge requests judged by the identity of their author and of the pusher, a task file and a delta per task, decision records (ADRs).
+- **Derived state:** task board, metrics, traffic lights, `LASTCONTEXT.md` and a static dashboard, rebuilt from git and the forge API and never committed. Reading the GitLab API is Done (task 010, [`docs/facts.md`](docs/facts.md)).
+- **Read-only service (`src/afaw_web`):** `/`, `/live/`, `/health`, `/api/state` (derived metrics verbatim), and `/api/ask`, a deterministic file search that cites paths and copies measured numbers verbatim. No language model call, GET only.
+- **Deploy:** Terraform for Cloud Run (public, minimum 0 and maximum 2 instances), Artifact Registry, Workload Identity Federation from GitLab OIDC, no JSON keys. Merged, not deployed.
+
+## Stack
+
+Python, pytest, mypy `--strict`, ruff, FastAPI, Docker, Terraform, GitLab CI/CD, GitLab Duo Agent Platform, GitLab Container Registry, Google Cloud Run, Artifact Registry, Workload Identity Federation.
+
+## Architecture
+
+```mermaid
+flowchart TB
+    subgraph GitLab
+        MR[Merge request] --> PIPE[Nine-stage pipeline]
+        DUO[Duo flows<br/>service account] --> MR
+        PIPE --> REG[Container Registry]
+        PIPE --> REL[GitLab Release]
+    end
+    PIPE -- OIDC id_token --> WIF[Workload Identity Federation]
+    WIF --> AR[Artifact Registry]
+    AR --> RUN[Cloud Run service<br/>read-only, public]
+    PIPE -- check_live --> RUN
+```
+
+## Guardrails and known limits
+
+- `human_only_files` is a weak control: it lives in `.gitlab-ci.yml`, so the same merge request can remove it. The strong control (a pipeline execution policy in a separate project, or CODEOWNERS with required approval) is planned and depends on the role and tier available.
+- `main` is red on purpose until a human runs `terraform apply` and sets the protected `GCP_*` CI/CD variables: `check_configuration` and `publish_image` fail without them, and `deploy_cloud_run`, `monitor` and `monitor_live` are then skipped. Steps: [`docs/google-cloud.md`](docs/google-cloud.md).
+- Security scanners do not block on lower severities; those are counted and printed.
+- The account has 500 GitLab Credits per month, which bounds how many flow runs fit ([ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md)).
+- `collect_facts` reads the GitLab REST API v4. Tasks 001 to 006 and 999 have no facts (their branches were never merge requests in this project), tasks 007 and 008 have no CI facts (no pipeline existed before the pipeline of task 009), and `started_at` of task 007 comes from the imported history, so its lead time is not a real working time. `monitor` is skipped on `main` while `main` is red.
+- Branch protection, approvals and group settings of the GitLab project are set by its maintainers; this repository does not verify them.
+- `/api/ask` is a deterministic search; it does not generate answers.
+- The paper PDF is not rebuilt in this repository's CI: changes to `AGENTS.md` are batched in one later merge request that also rebuilds `docs/paper/afaw.pdf`.
+- No claim about speed, cost, defect rate or carbon is made anywhere in this repository without a measurement.
+
+## Sustainability
+
+Design choice: the agent runs only the test it is writing, and the full check suite runs once in CI, instead of an agent running the whole suite locally and retrying with its whole context. The Cloud Run service is configured with a minimum of 0 instances and a maximum of 2.
+
+Intended metric: Software Carbon Intensity, `SCI = (O + M) per R` with `O = E x I`, as the Green Software Foundation specification defines it (E energy in kWh, I carbon intensity in gCO2eq per kWh, M embodied emissions, R the functional unit). Here R is one merged merge request. Inputs task 010 captures per merge request: CI job seconds and minutes, pipelines and retries (Done). Inputs we must assume and declare: runner power draw, grid carbon intensity, embodied emissions. The ISO number of the specification is not stated here because it was not confirmed.
+
+Status: **not yet measured.** Gains described anywhere in this README are expected, not measured. The Most Environmentally Impactful prize is opt-in and will only be requested if the experiment in the ADR (task 015, Planned) is completed with its assumptions listed.
+
+## Added on or after Oct 5, 2026
+
+The base method was committed on Sep 29 and 30, 2026. Since Oct 5, from `git log` and the merge requests of the project:
+
+| Date | Change | Evidence | Status |
+|---|---|---|---|
+| Oct 23 | English-only rule and first GitLab Duo rules in `AGENTS.md` | Commit `8f29bb3` | Done |
+| Oct 23 | Test suite passes on Windows (task 007) | Commit `2f696fe`, MR !1 | Done |
+| Oct 24 | Repository imported into the GitLab project | MR !2 | Done |
+| Oct 24 | Merge policy ADR 0007, README and roadmap (task 008) | MR !3 | Done |
+| Oct 24 | Nine-stage pipeline and security gate (task 009) | MR !4, release v0.9 | Done |
+| Oct 24 | Read-only service and Terraform for Cloud Run (task 013) | MR !5, release v0.15 | Merged, not deployed |
+| Oct 24 | Duo configuration, custom agent and flow sources (task 011) | MR !6, release v0.20 | Merged; the flows must be enabled by a person |
+| Oct 24 | GitLab fact collection (task 010) | MR !7, release v0.23 | Done |
+| pending | Merge guardrails and automatic merge rule (task 012) | | Planned |
+| pending | Demo script and Devpost text (task 014) | | Planned |
+| pending | SCI experiment (task 015) | | Planned, conditional |
+
+## Judging criteria
+
+| Criterion | Where to look |
+|---|---|
+| Technological implementation | `.gitlab-ci.yml` (nine stages, 26 jobs), `scripts/security_gate.py`, `scripts/human_only_files.py`, `deploy/terraform`, Workload Identity Federation without keys |
+| Design (end-to-end workflow) | [The loop](#what-this-variant-changes-hands-off) and [Hands-off status](#hands-off-status), stated link by link |
+| Potential impact | Governance of agent-written code for teams that already generate code and need review, security and release to keep up |
+| Innovation | Merge approval moved from each merge to the policy, with deterministic gates and identity checks as compensating controls ([ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md)) |
+| Presentation | Demo video <DEMO_VIDEO_URL> |
 
 ## Demo dashboard
 
@@ -96,227 +206,147 @@ A dashboard built by `scripts/build_state.py` from mock data: a fictional projec
 
 Build it locally: `python -m examples.mock_dashboard mock-output` and open `mock-output/index.html`.
 
-## Why use it
+## How to run it
 
-- **It costs less.** Without it, an agent runs the whole test suite on your machine, the machine is slow, tests fail for reasons that have nothing to do with the code, and the agent retries for an hour. Every retry sends its whole context again: that is where the token bill goes. With AFAW the agent runs only the test it is writing; the cloud runs the rest in parallel and answers once. A few minutes of CI cost far less than an hour of an agent going in circles.
-- **It works alone and in a team.** Alone, you let the agents run and nobody checks them: they commit to the wrong branch, write tests that pass no matter what, and report results they never measured. The checks, the branch protection and the hooks do that reviewing for you.
-- **With 2 or 10 people, everyone sees what the agents did.** Each person runs their own agents, and without a shared record nobody knows what the others' agents changed, why, or where each task stands. Here every task, decision and status is in the same place and in the same format, for every person and every agent: the board, the generated `LASTCONTEXT.md` and the decision records. You set it up once, from the template.
-- **The project documents itself.** Every task leaves what was done, what is left and, for each decision, why it was taken. When agents do the work, that is usually lost: afterwards nobody knows what was done or why.
-- **A new agent understands the project in minutes.** Instead of reading every file from scratch, it reads one generated index (`LASTCONTEXT.md`) and follows links to the decisions it needs. Less reading means fewer tokens and less time, and the saving grows with the project.
+Each command below was run on Oct 24, 2026 (Python 3.12).
 
-- **Fewer status meetings.** "What did you do, where does it stand, what's blocked, why was this decided": the board and the records already answer it, and an optional assistant can answer it in a chat. See [Ask the project](#optional-ask-the-project).
+```bash
+python -m pip install --group dev
+ruff check scripts tests examples .claude/hooks
+mypy --strict scripts src
+python -m pytest tests
+python -m scripts.check_docs
+python -m scripts.build_state --ref HEAD --out build/state
+python -m examples.mock_dashboard mock-output     # demo dashboard from mock data
+```
 
-These are the expected gains, not measured ones yet. The dashboard already records timings and CI cost, and the paper's evaluation protocol says how to measure all four.
+The read-only service reads the views that the `web_data` job assembles. To run it locally, from the repository root:
 
-## Method and this implementation
+```bash
+python -m scripts.build_state --ref HEAD --out build/web-data/live
+python -m examples.mock_dashboard build/web-data/demo
+mkdir -p build/web-data/docs && cp -r docs/adr docs/gotchas build/web-data/docs/
+PYTHONPATH=src AFAW_WEB_DATA_DIR=build/web-data python -m uvicorn afaw_web.main:app --port 8080
+```
 
-The method does not require these exact tools. Write your tests however you like, use any CI, skip mutation testing outside critical code. Some parts, though, are what make it work: remove them and the problem they solve comes back.
+Then open `http://localhost:8080/` and `http://localhost:8080/health`. Pipeline, deploy and one-time human steps: [`docs/google-cloud.md`](docs/google-cloud.md) and [`docs/duo.md`](docs/duo.md).
 
-| Core: remove it and the problem returns | Replaceable: same idea, another tool | Optional |
-|---|---|---|
-| Each task writes its own state files; shared views are derived. (One shared context file breaks as soon as two agents work at once.) | The CI system, the test framework | The dashboard and its charts |
-| Measured values, never written by the agent | The mutation engine | Mutation testing outside critical code |
-| Heavy checks in the cloud, not on the agent's machine | Hooks, for another agent or tool | Timings and CI cost |
-| One branch per task, no push to `main`, a human approves | The format of decision records | Per-role context files |
-| The red step checked by a tool, not reported by the agent | The language of the rules file | |
-| | The retrieval stack of the assistant | An assistant that answers from the records ([ask the project](#optional-ask-the-project)) |
+## Getting started (GitLab)
 
-## Optional: ask the project
+GitLab does not copy branch protection, CI/CD variables or Duo settings when a project is imported, so each step below is done once by a person with the role shown. The menu paths come from docs.gitlab.com (checked Oct 24, 2026) and from [`docs/google-cloud.md`](docs/google-cloud.md) and [`docs/duo.md`](docs/duo.md).
 
-Because everything is recorded as the work happens, you can put an assistant with RAG on top: it searches the project's records and answers questions in a chat. It is not part of the method, just an optional use of what the method already records.
+1. **Import:** **Create new** > **New project/repository** > **Import project** > **Repository by URL**, with the URL of this repository. A username and an access token are needed only for a private source.
+2. **Configure** `state/config.json`: code folders, `mutation_critical_paths`, `mutation_min_score` and the `dashboard` settings.
+3. **Protect `main`:** **Settings** > **Repository** > **Branch rules** > `main` > **Protect branch**. Set who may merge and who may push; nobody should push directly. What the project actually has set is not verified by this repository (see [limits](#guardrails-and-known-limits)).
+4. **CI/CD variables and Cloud Run:** a human runs `terraform apply` and adds the protected `GCP_*` variables under **Settings** > **CI/CD** > **Variables**, as in [`docs/google-cloud.md`](docs/google-cloud.md). Until then `main` is red.
+5. **Duo flows:** enable the foundational flows, create the custom agent and flow, and add the triggers, as in [`docs/duo.md`](docs/duo.md). Some of these need the Owner of the top-level group and a Premium or Ultimate tier.
+6. **Verify:** open a test merge request and check that the pipeline runs.
+7. **Start:** open a terminal per agent and answer the `ROLE:` question.
 
-**What it replaces: status meetings.** "What did you do, where does it stand, what's blocked, why was this decided." The board, `LASTCONTEXT.md` and the decision records already answer that. The assistant answers the same questions any time, to anyone, without taking an hour from five people.
+`.github/` and `scripts/setup_protection.sh` belong to the original GitHub project and do nothing on GitLab.
 
-**Why it works well here.** Every document is about one thing: one decision per ADR, one trap per gotcha, one delta per task. They split into clean pieces. The front matter says whether a decision is still in force, so the assistant can skip the ones that were replaced. `LASTCONTEXT.md` is the entry point. And every fact has a path, so each answer can cite where it came from and anyone can check it.
+## Daily workflow
 
-**What it doesn't replace.**
-- **Meetings where things get decided.** Priorities, trade-offs, disagreements still need people. The records say what was decided, not what to decide. Those meetings do get shorter: nobody spends the first half working out where things stand.
-- **What nobody wrote down.** A decision made in a hallway and never turned into an ADR doesn't exist for the assistant.
-- **Records that went stale.** If an ADR stopped being true and nobody replaced it, the assistant answers with confidence and gets it wrong.
+1. One terminal per agent; answer its `ROLE:`. The session-start hook injects the generated `LASTCONTEXT.md` and `PENDING.md`.
+2. The agent creates its branch, works with TDD running only its own test, and pushes; the pipeline verifies the rest.
+3. At the end it writes `summary` and `next`, fills `files_touched` with `python -m scripts.check_task_delta --base origin/main --write task_NNN`, records any decision as an ADR, and asks before opening the merge request. Use the name of your GitLab remote in place of `origin` if it differs.
+4. A person opens and merges the merge request. Until the automatic merge rule exists (task 012, Planned), every merge is a person's.
+5. Ask for status at any time, or open the dashboard.
 
-**Two rules for the assistant.**
-- **Numbers are copied, not paraphrased.** Progress, lead time, CI cost: quote them from the derived views. An assistant that "summarizes" metrics can invent them.
-- **Read-only.** It answers; it never writes to the repository, opens pull requests or changes state.
+## Project structure
 
----
-
-## Index
-
-1. [Demo dashboard](#demo-dashboard)
-2. [Why use it](#why-use-it)
-3. [Method and this implementation](#method-and-this-implementation)
-4. [Optional: ask the project](#optional-ask-the-project)
-5. [Core principle](#core-principle-the-ai-decides-the-engine-measures)
-6. [Failure modes and mechanisms](#failure-modes-and-mechanisms)
-7. [System overview](#system-overview)
-8. [How it works](#how-it-works)
-9. [The life of a task](#the-life-of-a-task)
-10. [Directory structure](#directory-structure)
-11. [Getting started](#getting-started)
-12. [Daily workflow](#daily-workflow)
-13. [Scope and limits](#scope-and-limits)
-14. [Rebuilding the diagrams and the paper](#rebuilding-the-diagrams-and-the-paper)
-15. [Citation, author, license](#citation)
-
----
-
-## Core principle: "The AI decides, the engine measures"
-
-A model proposes and writes code; its own assessment is never trusted. Every number (tests, types, coverage, mutation score, task timings, the traffic light) comes from a deterministic tool, and a value an agent could have made up is rejected where it would be declared.
-
-## Failure modes and mechanisms
-
-| Failure | Mechanism | What remains |
-|---|---|---|
-| Wrong-branch work | Step 0 (`git status`, `git branch`), one branch per task, one terminal per agent; a hook denies a push to `main` | Agents sharing one working tree can still overwrite uncommitted files |
-| Shared-state conflicts | Each task writes only its own files; shared views are derived on demand and never committed | Agents do not see unmerged work on other branches |
-| Unmeasured claims | Measured values are rejected in task files; `files_touched` must equal the diff; the red step is verified in CI | A person must still follow the CI link |
-| Vacuous tests | Red-first check; mutation testing on the diff; equivalent mutants accepted only by the human | Mutation score is not correctness |
-| Heavy local runs | Two tiers: single tests locally, everything else in CI, in parallel | CI queue latency and minutes |
-| Unreviewed integration | Hooks, CI checks, branch protection, human approval | Hooks are best-effort |
-
-## System overview
-
-![AFAW overview: the human opens one terminal per agent; each agent works on its own branch and runs only the test it is writing; CI runs every other check; the human approves every PR; derived views are built from main on demand.](docs/img/01-overview.svg)
-
-*Colors in all diagrams: blue = agent action, amber = human, green = CI or deterministic check, purple = state files, red = blocked.*
-
-## How it works
-
-### 1. Task files and derived state
-
-An agent writes only two files: its task file `state/tasks/task_NNN.json` (declared values: title, role, type, status, owner, priority, difficulty, dependencies, branch) and its delta `context/tasks/task_NNN_context.json` (`summary`, `next`, `files_touched`). Their shape is defined once, in `state/schemas/`.
-
-Everything shared is **derived, never committed**: `python -m scripts.build_state --ref origin/main` builds the pending view, the history of done tasks, the metrics, the dashboard and the `LASTCONTEXT.md` files into `build/`. Timestamps and CI results are measured from git and the CI API (`python -m scripts.collect_facts`), never declared; the traffic light is a rule:
-
-- 🔴 a task it depends on is not done, or CI fails on the latest commit of its branch
-- 🟡 in progress with no commit or CI run for more than `stale_days`
-- 🟢 otherwise; "no data" when nothing was measured
-
-![State and context: the agent writes only its delta and task file; CI checks them; after the merge the sources on main feed build_state.py, which derives the views into build/.](docs/img/03-state-and-context.svg)
-
-### 2. Project knowledge
-
-State says *what*; prose says *why*. Decisions are ADRs in `docs/adr/`, operational traps are gotchas in `docs/gotchas/` (templates in `docs/templates/`). The generated `LASTCONTEXT.md` indexes them with one line each, next to the current state, what waits on the human and the next tasks. A record leaves the index only for an explicit reason (superseded, deprecated, resolved, or **promoted** to a mechanism), never for its age, and a budget tells the human when to prune. See [ADR 0001](docs/adr/0001-record-decisions-as-adrs.md).
-
-### 3. Strict TDD in two tiers
-
-Locally, the agent runs only the test it is writing. CI runs everything else, including the **red-first check** (`python -m scripts.red_check`): each test a pull request adds must fail on the code before the change.
-
-![CI pipeline: path filters route a change to back-end, front-end, red-first, mutation and state checks in parallel; documents-only changes run nothing.](docs/img/04-ci-pipeline.svg)
-
-### 4. Mutation testing on the diff
-
-Only new or modified files are mutated. In critical modules a file below the minimum blocks the pull request. The gate is K / (N − E_human): only the human records an equivalent mutant, in `state/equivalent_mutants.json`, bound to the file's hash (`python -m scripts.mutation_gate`). The mutation engine itself is project-specific.
-
-![Mutation testing: baseline, mutants in parallel, re-run, fix survivors, human-only equivalences, block the PR when a mandatory file is below the minimum.](docs/img/05-mutation-testing.svg)
-
-### 5. Human authority
-
-No commits or pushes to `main`, no merge without an explicit human directive, and the human approves every pull request. Rules in `AGENTS.md` are advice, so they are also enforced by hooks, CI and branch protection.
-
-![Control layers: AGENTS.md, hooks, CI checks, branch protection, human approval.](docs/img/06-control-layers.svg)
-
-### 6. Dashboard
-
-A static HTML page (no scripts) with progress, tasks by status, tasks merged per day, the board with ages and lights, timing (agent time, review latency, lead time) and CI cost (runs, queue time, job minutes). `.github/workflows/dashboard.yml` rebuilds it on every push to `main`, every hour and on demand, and publishes it on GitHub Pages: the demo at the site root and this repository's own dashboard at `/live/`. A Pages site is public: do not publish the dashboard of a private project.
-
-## The life of a task
-
-![Life of a task: ask for a ROLE, read the generated context, step 0, branch, TDD with single local tests, commit, push, CI, delta and ADRs, PR, human approval, delete the branch.](docs/img/02-task-lifecycle.svg)
-
-## Directory structure
+Generated from `git ls-files` on Oct 24, 2026.
 
 ```text
 .
 ├── AGENTS.md                      # The rules: single source for every agent
 ├── CLAUDE.md                      # Imports AGENTS.md
-├── PENDING.md                     # The human's roadmap (hook: never deleted or emptied)
-├── .claude/
-│   ├── settings.json              # Hook wiring
-│   ├── hooks/                     # session_start (builds and injects LASTCONTEXT.md),
-│   │                              # safety_guard (deny/ask), lint_check
-│   └── skills/                    # commit, ship, tests, push-dev, trash
-├── .github/
-│   ├── pull_request_template.md
-│   └── workflows/
-│       ├── checks.yml             # Every PR: task files, delta, red-first, docs, views
-│       ├── scripts-ci.yml         # Lint, types, tests (skipped on documents-only PRs)
-│       └── dashboard.yml          # Builds and publishes the dashboard
-├── state/
-│   ├── config.json                # Code folders, mutation settings, dashboard settings
-│   ├── schemas/                   # JSON Schemas: task, delta, config, equivalent mutants
-│   └── tasks/task_NNN.json        # One file per task (never deleted)
+├── PENDING.md                     # The human's roadmap
+├── CODEOWNERS                     # Code owners (used once required approval is enabled)
+├── LICENSE                        # MIT
+├── Dockerfile                     # Image of the read-only service
+├── pyproject.toml                 # Dev dependency group and tool settings
+├── .gitlab-ci.yml                 # Nine-stage pipeline (human-only file)
+├── .gitlab/duo/                   # Duo review rules and sandbox configuration
+├── .agents/agents/                # Workspace subagent for Duo (afaw-reviewer)
+├── duo/                           # Custom agent and custom flow sources
+├── .claude/                       # Hooks (session start, safety guard, lint), settings, skills
+├── .github/                       # Upstream GitHub workflows, kept for the original project
+├── src/afaw_web/                  # Read-only FastAPI service
+├── src/back/, src/front/          # Empty placeholders of the template (.gitkeep only)
+├── deploy/                        # gcp_access_token.sh and Terraform for Cloud Run (human-only)
+├── state/                         # config.json, schemas/, tasks/task_NNN.json
 ├── context/tasks/                 # One delta per task
 ├── docs/
-│   ├── adr/                       # Architecture decision records
-│   ├── gotchas/                   # Operational traps, closed as resolved or promoted
+│   ├── adr/                       # Decision records (0001 to 0008)
+│   ├── gotchas/                   # Operational traps
+│   ├── diagrams/                  # Graphviz sources of the diagrams
+│   ├── img/, screenshots/         # Rendered diagrams and dashboard screenshots
 │   ├── templates/                 # ADR and gotcha templates
-│   ├── diagrams/ and img/         # Graphviz sources and rendered figures
-│   ├── screenshots/               # Screenshots of the demo dashboard
-│   └── paper/                     # The white paper: afaw.pdf and its source afaw.tex
-├── scripts/
-│   ├── afaw_state/                # Model, facts, lights, durations, views, dashboard
-│   ├── build_state.py             # Derived views from a git ref
-│   ├── collect_facts.py           # Measured facts from git and the GitLab or GitHub API
-│   ├── check_task_files.py        # Lifecycle, declared values only, unique ids
-│   ├── check_task_delta.py        # files_touched equals the diff (--write fills it)
-│   ├── check_docs.py              # ADRs, gotchas, links
-│   ├── red_check.py               # Added tests must fail on the old code
-│   ├── mutation_targets.py        # Mandatory and optional files to mutate
-│   ├── mutation_gate.py           # Score with human-accepted equivalences only
-│   ├── rules_to_tex.py            # The paper's appendix from AGENTS.md
-│   └── setup_protection.sh        # Branch protection and required checks
-├── examples/mock_dashboard.py     # The demo: dashboard and LASTCONTEXT.md from mock data
-├── src/                           # The project's code
-└── tests/tooling/                 # Tests of the scripts and hooks
+│   ├── duo.md                     # Duo setup and what needs a person
+│   ├── google-cloud.md            # Cloud Run setup and one-time human steps
+│   └── paper/                     # White paper (afaw.pdf, afaw.tex)
+├── scripts/                       # build_state, collect_facts, check_*, red_check,
+│                                  # mutation_ci, security_gate, human_only_files,
+│                                  # check_live, afaw_state/ (derived-state package)
+├── examples/mock_dashboard.py     # Demo dashboard from mock data
+└── tests/                         # tooling/ (scripts and hooks), web/ (service), back/, front/
 ```
 
-`build/` (the derived views) is ignored by git.
+`build/` is generated and ignored by git; it does not appear in the tree. Folders that do not exist yet: none; `src/back/` and `src/front/` exist but hold only a `.gitkeep`.
 
-## Getting started
+---
 
-GitHub does not copy branch protection, required checks or Pages settings to a repository created from a template.
+# The method (upstream AFAW)
 
-1. **Use the template**: GitHub → **Use this template**.
-2. **Configure** `state/config.json`: code folders, `mutation_critical_paths`, `mutation_min_score`, and the `dashboard` settings.
-3. **Protect `main`**: `bash scripts/setup_protection.sh` (needs the `gh` CLI) requires `lint`, `typecheck`, `tests` and `state-and-docs`, and blocks direct pushes.
-4. **Dashboard** (public repositories): Settings → Pages → Source: **GitHub Actions**.
-5. **Verify**: open a test pull request and check that the workflows run.
-6. **Start**: open a terminal per agent and answer the `ROLE:` question.
+The sections below are the original method, unchanged in substance. In this variant, "a human approves every PR" is replaced by the policy described above.
 
-## Daily workflow
+## Method and this implementation
 
-1. One terminal per agent; answer its `ROLE:`. The session-start hook injects the generated `LASTCONTEXT.md` and `PENDING.md`.
-2. The agent creates its branch, works with TDD running only its own test, and pushes; CI verifies the rest.
-3. At the end it writes `summary` and `next`, fills `files_touched` with `python -m scripts.check_task_delta --base origin/main --write task_NNN`, records any decision as an ADR, and asks before opening the pull request.
-4. You review and merge. Nothing else to approve: the views are derived.
-5. Ask for status at any time, or open the dashboard.
+The method does not require these exact tools. Some parts are what make it work: remove them and the problem they solve comes back.
 
-## Scope and limits
+| Core: remove it and the problem returns | Replaceable: same idea, another tool | Optional |
+|---|---|---|
+| Each task writes its own state files; shared views are derived | The CI system, the test framework | The dashboard and its charts |
+| Measured values, never written by the agent | The mutation engine | Mutation testing outside critical code |
+| Heavy checks in the cloud, not on the agent's machine | Hooks, for another agent or tool | Timings and CI cost |
+| One branch per task, no push to `main` | The format of decision records | Per-role context files |
+| The red step checked by a tool, not reported by the agent | The language of the rules file | An assistant that answers from the records |
 
-- The reference rules assume a Python backend (async, `pytest`, `mypy --strict`, Postgres, Terraform). Adapt sections 4–10 and 14–16 of `AGENTS.md` for another stack.
-- AFAW has not been validated in a controlled study and makes no claim about speed, cost or defect rates. The paper proposes an evaluation protocol; the dashboard's timings and CI cost are the raw material.
+## Failure modes and mechanisms
+
+| Failure | Mechanism | What remains |
+|---|---|---|
+| Wrong-branch work | Step 0 (`git status`, `git branch`), one branch per task; a hook denies a push to `main` | Agents sharing one working tree can overwrite uncommitted files |
+| Shared-state conflicts | Each task writes only its own files; shared views are derived and never committed | Agents do not see unmerged work on other branches |
+| Unmeasured claims | Measured values rejected in task files; `files_touched` must equal the diff; red step verified in CI | A person must still follow the CI link |
+| Vacuous tests | Red-first check; mutation testing on the diff; equivalent mutants accepted only by the human | Mutation score is not correctness |
+| Heavy local runs | Two tiers: single tests locally, everything else in CI, in parallel | CI queue latency and minutes |
+| Unreviewed integration | Hooks, CI checks, branch protection, merge policy | Hooks are best-effort; branch protection is a setting of the forge |
+
+## How it works
+
+1. **Task files and derived state.** An agent writes only `state/tasks/task_NNN.json` and `context/tasks/task_NNN_context.json`. Everything shared is derived by `python -m scripts.build_state`, never committed. Timestamps and CI results are measured from git and the forge API. Traffic light: red when a dependency is not done or CI fails on the latest commit of the branch; yellow when in progress with no commit or CI run for more than `stale_days`; green otherwise; "no data" when nothing was measured.
+2. **Project knowledge.** State says what, prose says why: ADRs in `docs/adr/`, gotchas in `docs/gotchas/`, indexed in the generated `LASTCONTEXT.md`.
+3. **Strict TDD in two tiers.** Locally the agent runs only the test it is writing; CI runs the rest, including the red-first check (`python -m scripts.red_check`).
+4. **Mutation testing on the diff.** Only new or modified files are mutated; the gate is K / (N - E_human), where only the human records an equivalent mutant.
+5. **Human authority over the policy.** Rules in `AGENTS.md` are advice, so they are also enforced by hooks, CI and protected branches.
+6. **Dashboard.** A static page with progress, board, timing and CI cost, built from derived state.
+
+Diagrams: [`docs/diagrams.md`](docs/diagrams.md), rendered in `docs/img/`. Rebuild: `for f in docs/diagrams/*.dot; do n=$(basename "$f" .dot); dot -Tsvg "$f" -o "docs/img/$n.svg"; done`. A merge request that changes `afaw.tex`, `AGENTS.md` or `docs/img/` must also commit the rebuilt `docs/paper/afaw.pdf`.
+
+## Scope and limits of the method
+
+- The reference rules assume a Python backend (async, pytest, `mypy --strict`, Postgres, Terraform).
+- The method has not been validated in a controlled study and makes no claim about speed, cost or defect rates.
 - Mutation score measures how sensitive the tests are to changes, not whether the code meets its requirements.
 - The red-first check shows that a new test fails on the old code, not that it fails for the right reason.
 - Checks verify the ADRs that exist; a decision that was never recorded is left to the reviewer.
-- Documentation that stops being true misleads more than none. Derived views are rebuilt and decisions can be superseded, but nothing detects a decision record whose text went stale while nobody replaced it.
+- Documentation that stops being true misleads more than none; nothing detects a stale decision record that nobody replaced.
 
-## Rebuilding the diagrams and the paper
+## Citation and author
 
-```bash
-for f in docs/diagrams/*.dot; do n=$(basename "$f" .dot); dot -Tsvg "$f" -o "docs/img/$n.svg"; dot -Tpng -Gdpi=200 "$f" -o "docs/img/$n.png"; done
-```
-
-The paper: see [`docs/paper/README.md`](docs/paper/README.md). A pull request that changes `afaw.tex`, `AGENTS.md` or `docs/img/` must also commit the rebuilt `docs/paper/afaw.pdf`; CI checks it.
-
-## Citation
-
-**DOI:** [10.5281/zenodo.23050310](https://doi.org/10.5281/zenodo.23050310)
-
-## Author
-
-Agustin Diaz-Cano, MS Candidate, Information Systems Engineering (UTN). ORCID [0009-0001-4336-490X](https://orcid.org/0009-0001-4336-490X).
+DOI [10.5281/zenodo.23050310](https://doi.org/10.5281/zenodo.23050310). Author: Agustin Diaz-Cano, MS Candidate, Information Systems Engineering (UTN). ORCID [0009-0001-4336-490X](https://orcid.org/0009-0001-4336-490X).
 
 ## License
 
