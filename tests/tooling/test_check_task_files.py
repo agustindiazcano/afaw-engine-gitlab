@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 from scripts.check_task_files import check
 from tests.tooling.helpers import make_task
 
@@ -80,6 +82,37 @@ def test_branch_must_be_the_pull_request_branch():
         {P1: make_task(status="in_progress", branch="feat/other")},
     )
     assert any("is not this pull request's branch" in e for e in check("base", "feat/x", run, read))
+
+
+def test_a_mirror_pull_request_may_carry_tasks_of_other_branches():
+    # sync/* pull requests copy what GitLab already merged: several tasks, each with its own branch
+    run, read = fake(
+        f"M\t{P1}\n",
+        {P1: make_task(status="pending")},
+        {P1: make_task(status="done", branch="feat/other")},
+    )
+    assert check("base", "sync/gitlab-main", run, read) == []
+
+
+def test_a_mirror_pull_request_is_still_held_to_every_other_rule():
+    run, read = fake(
+        f"M\t{P1}\n",
+        {P1: make_task(status="done", branch="feat/other")},
+        {P1: make_task(status="in_progress", branch="feat/other")},  # done is final
+    )
+    errors = check("base", "sync/gitlab-main", run, read)
+    assert errors and not any("is not this pull request's branch" in e for e in errors)
+
+
+@pytest.mark.characterization(reason="the rule already applies to every other branch name")
+def test_only_the_sync_prefix_is_a_mirror():
+    run, read = fake(
+        f"M\t{P1}\n",
+        {P1: make_task(status="pending")},
+        {P1: make_task(status="done", branch="feat/other")},
+    )
+    for name in ("feat/sync/x", "synchronize", "sync"):
+        assert any("is not this pull request's branch" in e for e in check("base", name, run, read))
 
 
 def test_human_task_is_not_bound_to_the_branch():
