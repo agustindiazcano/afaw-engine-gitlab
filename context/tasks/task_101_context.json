@@ -1,0 +1,11 @@
+{
+  "task_id": "task_101",
+  "files_touched": [
+    "scripts/check_live.py",
+    "tests/tooling/test_check_live.py"
+  ],
+  "summary": "scripts/check_live.py gains an optional --json PATH. It writes the base URL, the expected sha (or null), the HTTP status of /health, /api/state and each --page (null when a path never answered) and a boolean ok. The file is written whether the check passes or fails and the exit code is unchanged. Three new tests fail on the old code (red_check) and one characterization test pins that no file is written without the flag.",
+  "next": [
+    "Optionally upload the JSON file as a CI artifact from the monitor job (a human-only .gitlab-ci.yml change)"
+  ]
+}
