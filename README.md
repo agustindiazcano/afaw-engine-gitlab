@@ -26,6 +26,15 @@ Several coding agents on one repository fail in predictable ways: they collide o
 
 AFAW Engine runs that part with GitLab Duo flows, while deterministic tools (CI jobs, scripts, security scanners) decide what is acceptable. Principle: **the AI decides, the engine measures.** Every number comes from a deterministic tool, and a value an agent could have made up is rejected where it would be declared.
 
+## Why use it
+
+Expected, not measured: no figure below has been measured yet.
+
+- **Fewer retries on the agent's machine.** The agent runs only the test it is writing; the pipeline runs the rest in parallel and answers once.
+- **One shared record.** Every task, decision and status has the same format for every person and every agent: the board, the generated `LASTCONTEXT.md` and the decision records.
+- **A new agent starts from one index.** It reads `LASTCONTEXT.md` and follows links to the decisions it needs, instead of reading every file.
+- **Fewer status meetings.** The board and the records answer what was done, what is blocked and why a decision was taken.
+
 ## What this variant changes (Hands-off)
 
 | | AFAW (upstream) | AFAW Engine (this repository) | Status |
@@ -180,6 +189,23 @@ The base method was committed on Sep 29 and 30, 2026. Since Oct 5, from `git log
 | Innovation | Merge approval moved from each merge to the policy, with deterministic gates and identity checks as compensating controls ([ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md)) |
 | Presentation | Demo video <DEMO_VIDEO_URL> |
 
+## Demo dashboard
+
+A dashboard built by `scripts/build_state.py` from mock data: a fictional project whose every task and number is invented ([`examples/mock_dashboard.py`](examples/mock_dashboard.py)). It shows each traffic-light rule firing: CI failing, a blocker not done, no activity for three days, nothing measured.
+
+![Demo dashboard, top: progress, status tiles, tasks by status and tasks merged per day.](docs/screenshots/dashboard-overview.png)
+
+![Demo dashboard, board: tasks in progress, pending and in the backlog, with ages and traffic lights and the reason for each.](docs/screenshots/dashboard-board.png)
+
+<details>
+<summary>Dark mode</summary>
+
+![Demo dashboard in dark mode.](docs/screenshots/dashboard-overview-dark.png)
+
+</details>
+
+Build it locally: `python -m examples.mock_dashboard mock-output` and open `mock-output/index.html`.
+
 ## How to run it
 
 Each command below was run on Oct 24, 2026 (Python 3.12).
@@ -204,6 +230,28 @@ PYTHONPATH=src AFAW_WEB_DATA_DIR=build/web-data python -m uvicorn afaw_web.main:
 ```
 
 Then open `http://localhost:8080/` and `http://localhost:8080/health`. Pipeline, deploy and one-time human steps: [`docs/google-cloud.md`](docs/google-cloud.md) and [`docs/duo.md`](docs/duo.md).
+
+## Getting started (GitLab)
+
+GitLab does not copy branch protection, CI/CD variables or Duo settings when a project is imported, so each step below is done once by a person with the role shown. The menu paths come from docs.gitlab.com (checked Oct 24, 2026) and from [`docs/google-cloud.md`](docs/google-cloud.md) and [`docs/duo.md`](docs/duo.md).
+
+1. **Import:** **Create new** > **New project/repository** > **Import project** > **Repository by URL**, with the URL of this repository. A username and an access token are needed only for a private source.
+2. **Configure** `state/config.json`: code folders, `mutation_critical_paths`, `mutation_min_score` and the `dashboard` settings.
+3. **Protect `main`:** **Settings** > **Repository** > **Branch rules** > `main` > **Protect branch**. Set who may merge and who may push; nobody should push directly. What the project actually has set is not verified by this repository (see [limits](#guardrails-and-known-limits)).
+4. **CI/CD variables and Cloud Run:** a human runs `terraform apply` and adds the protected `GCP_*` variables under **Settings** > **CI/CD** > **Variables**, as in [`docs/google-cloud.md`](docs/google-cloud.md). Until then `main` is red.
+5. **Duo flows:** enable the foundational flows, create the custom agent and flow, and add the triggers, as in [`docs/duo.md`](docs/duo.md). Some of these need the Owner of the top-level group and a Premium or Ultimate tier.
+6. **Verify:** open a test merge request and check that the pipeline runs.
+7. **Start:** open a terminal per agent and answer the `ROLE:` question.
+
+`.github/` and `scripts/setup_protection.sh` belong to the original GitHub project and do nothing on GitLab.
+
+## Daily workflow
+
+1. One terminal per agent; answer its `ROLE:`. The session-start hook injects the generated `LASTCONTEXT.md` and `PENDING.md`.
+2. The agent creates its branch, works with TDD running only its own test, and pushes; the pipeline verifies the rest.
+3. At the end it writes `summary` and `next`, fills `files_touched` with `python -m scripts.check_task_delta --base origin/main --write task_NNN`, records any decision as an ADR, and asks before opening the merge request. Use the name of your GitLab remote in place of `origin` if it differs.
+4. A person opens and merges the merge request. Until the automatic merge rule exists (task 012, Planned), every merge is a person's.
+5. Ask for status at any time, or open the dashboard.
 
 ## Project structure
 
