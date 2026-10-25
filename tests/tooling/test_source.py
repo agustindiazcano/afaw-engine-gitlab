@@ -33,6 +33,9 @@ def fake_git(tree, files, commit_time="2026-10-25T12:30:00+00:00\n"):
     return run
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_git_runner_runs_git_and_returns_its_stdout(monkeypatch):
     seen = {}
 
@@ -46,6 +49,9 @@ def test_git_runner_runs_git_and_returns_its_stdout(monkeypatch):
     assert seen["kwargs"] == {"check": True, "capture_output": True, "text": True}
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_git_runner_raises_when_git_fails(monkeypatch):
     def fake_run(cmd, **kwargs):
         raise subprocess.CalledProcessError(128, cmd)
@@ -55,18 +61,27 @@ def test_git_runner_raises_when_git_fails(monkeypatch):
         git_runner(["show", "main:missing"])
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_load_parses_json_at_the_ref():
     run = fake_git([], {"a.json": '{"k": 1}'})
     assert _load(run, "origin/main", "a.json") == {"k": 1}
     assert run.calls == [["show", "origin/main:a.json"]]
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_load_names_the_path_and_ref_of_invalid_json():
     run = fake_git([], {"a.json": "{not json"})
     with pytest.raises(ValueError, match=r"^a\.json at origin/main is not valid JSON: "):
         _load(run, "origin/main", "a.json")
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_list_files_filters_by_suffix_and_sorts():
     run = fake_git(["f/b.json", "f/a.json", "f/readme.md"], {})
     assert list_files(run, "ref", "f") == ["f/a.json", "f/b.json"]
@@ -74,10 +89,16 @@ def test_list_files_filters_by_suffix_and_sorts():
     assert run.calls[0] == ["ls-tree", "-r", "--name-only", "ref", "--", "f"]
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_list_files_of_an_empty_folder_is_empty():
     assert list_files(fake_git([], {}), "ref", "f") == []
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_read_source_collects_tasks_deltas_knowledge_config_and_time():
     t1, t2 = make_task("task_001"), make_task("task_002")
     delta = {"summary": "s"}
@@ -117,6 +138,9 @@ def test_read_source_collects_tasks_deltas_knowledge_config_and_time():
     assert ["log", "-1", "--format=%cI", "origin/main"] in run.calls
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_read_source_without_config_or_files_uses_defaults():
     run = fake_git([], {})
     result = read_source("origin/main", run)
@@ -126,11 +150,17 @@ def test_read_source_without_config_or_files_uses_defaults():
     assert result["config"] == {}
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_read_source_config_without_dashboard_section_is_empty():
     run = fake_git(["state/config.json"], {"state/config.json": json.dumps({"x": 1})})
     assert read_source("ref", run)["config"] == {}
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_read_source_reads_every_file_from_the_given_ref():
     run = fake_git(
         ["state/tasks/task_001.json", "state/config.json", ADR],
@@ -145,6 +175,9 @@ def test_read_source_reads_every_file_from_the_given_ref():
     assert shown and all(arg.startswith("abc123:") for arg in shown)
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_read_source_rejects_an_invalid_task_file():
     run = fake_git(["state/tasks/task_001.json"], {"state/tasks/task_001.json": "oops"})
     with pytest.raises(ValueError, match="state/tasks/task_001.json at ref is not valid JSON"):

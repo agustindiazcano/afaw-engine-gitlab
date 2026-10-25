@@ -184,11 +184,17 @@ def raw_fake(diff, base_texts, head_texts, existing=()):
     return run, lambda path: head_texts[path]
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_files_that_are_not_json_are_ignored():
     run, read = raw_fake("A\tstate/tasks/README.md\nD\tstate/tasks/notes.txt\n", {}, {})
     assert check("base", None, run, read) == []
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_invalid_json_in_the_head_file_is_reported_and_checking_continues():
     run, read = raw_fake(f"A\t{P1}\n", {}, {P1: "{broken"})
     errors = check("base", "feat/x", run, read)
@@ -196,21 +202,33 @@ def test_invalid_json_in_the_head_file_is_reported_and_checking_continues():
     assert errors[0].startswith(f"{P1}: not valid JSON: ")
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_a_task_file_that_is_not_an_object_is_reported_once():
     run, read = raw_fake(f"A\t{P1}\n", {}, {P1: "[1, 2]"})
     assert check("base", None, run, read) == [f"{P1}: task file must be a JSON object"]
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_a_missing_target_id_check_is_skipped_without_a_target():
     run, read = raw_fake(f"A\t{P1}\n", {}, {P1: json.dumps(make_task())}, existing={P1})
     assert check("base", None, run, read) == []
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_new_task_with_a_free_id_passes_the_target_check():
     run, read = raw_fake(f"A\t{P1}\n", {}, {P1: json.dumps(make_task())})
     assert check("base", None, run, read, target="origin/main") == []
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_target_is_checked_for_added_files_only():
     run, read = raw_fake(
         f"M\t{P1}\n",
@@ -221,6 +239,9 @@ def test_target_is_checked_for_added_files_only():
     assert check("base", None, run, read, target="origin/main") == []
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_unchanged_status_on_a_modified_task_is_allowed():
     run, read = fake(
         f"M\t{P1}\n",
@@ -230,12 +251,18 @@ def test_unchanged_status_on_a_modified_task_is_allowed():
     assert check("base", "feat/x", run, read) == []
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_unreadable_base_file_is_treated_as_a_new_task():
     # git show fails on the base: no previous status, so "cancelled" is rejected as a start state
     run, read = fake(f"M\t{P1}\n", {}, {P1: make_task(status="cancelled")})
     assert any("cannot start as cancelled" in e for e in check("base", None, run, read))
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_invalid_json_on_the_base_side_is_treated_as_unreadable():
     run, read = raw_fake(
         f"M\t{P1}\n", {P1: "not json"}, {P1: json.dumps(make_task(status="cancelled"))}
@@ -243,11 +270,17 @@ def test_invalid_json_on_the_base_side_is_treated_as_unreadable():
     assert any("cannot start as cancelled" in e for e in check("base", None, run, read))
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_base_file_that_is_not_an_object_is_treated_as_unreadable():
     run, read = raw_fake(f"M\t{P1}\n", {P1: "[1]"}, {P1: json.dumps(make_task(status="cancelled"))})
     assert any("cannot start as cancelled" in e for e in check("base", None, run, read))
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_base_with_a_non_string_status_is_reported_as_invalid():
     run, read = fake(
         f"M\t{P1}\n",
@@ -257,6 +290,9 @@ def test_base_with_a_non_string_status_is_reported_as_invalid():
     assert check("base", None, run, read) == [f"{P1}: invalid status: 7"]
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_base_without_an_owner_defaults_to_agent():
     run, read = fake(
         f"M\t{P1}\n",
@@ -266,6 +302,9 @@ def test_base_without_an_owner_defaults_to_agent():
     assert any("owner and status cannot change" in e for e in check("base", None, run, read))
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_base_with_an_unknown_owner_skips_the_owner_rule():
     run, read = fake(
         f"M\t{P1}\n",
@@ -275,6 +314,9 @@ def test_base_with_an_unknown_owner_skips_the_owner_rule():
     assert check("base", None, run, read) == []
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_owner_change_with_the_same_status_is_allowed():
     run, read = fake(
         f"M\t{P1}\n",
@@ -284,12 +326,18 @@ def test_owner_change_with_the_same_status_is_allowed():
     assert check("base", None, run, read) == []
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_legacy_blocked_status_reads_as_pending():
     old = {"id": "task_001", "status": "blocked", "owner": "agent"}
     run, read = fake(f"M\t{P1}\n", {P1: old}, {P1: make_task(status="backlog")})
     assert check("base", None, run, read) == []
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_agent_task_that_stays_done_may_keep_another_branch():
     run, read = fake(
         f"M\t{P1}\n",
@@ -299,6 +347,9 @@ def test_agent_task_that_stays_done_may_keep_another_branch():
     assert check("base", "feat/x", run, read) == []
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_without_a_head_branch_the_branch_rule_is_skipped():
     run, read = fake(
         f"M\t{P1}\n",
@@ -308,6 +359,9 @@ def test_without_a_head_branch_the_branch_rule_is_skipped():
     assert check("base", None, run, read) == []
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_branch_error_message_names_both_branches():
     run, read = fake(
         f"M\t{P1}\n",
@@ -319,6 +373,9 @@ def test_branch_error_message_names_both_branches():
     ]
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_several_changed_files_are_all_checked():
     p2 = "state/tasks/task_002.json"
     run, read = raw_fake(
@@ -333,6 +390,9 @@ def test_several_changed_files_are_all_checked():
     ]
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_diff_is_requested_between_base_and_head_for_the_task_folder():
     seen = []
 
@@ -347,6 +407,9 @@ def test_diff_is_requested_between_base_and_head_for_the_task_folder():
 # --- main() --------------------------------------------------------------------------------
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_main_passes_its_arguments_to_check_and_reports_ok(monkeypatch, capsys):
     captured = {}
 
@@ -368,6 +431,9 @@ def test_main_passes_its_arguments_to_check_and_reports_ok(monkeypatch, capsys):
     assert captured["run"] is check_task_files.git_runner
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_main_defaults_head_branch_and_target_to_none(monkeypatch):
     captured = {}
 
@@ -380,6 +446,9 @@ def test_main_defaults_head_branch_and_target_to_none(monkeypatch):
     assert captured == {"head_branch": None, "target": None}
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_main_lists_every_problem_on_stderr_and_exits_1(monkeypatch, capsys):
     monkeypatch.setattr(check_task_files, "check", lambda *a, **k: ["first", "second"])
     code = check_task_files.main(["--base", "abc"])
@@ -389,6 +458,9 @@ def test_main_lists_every_problem_on_stderr_and_exits_1(monkeypatch, capsys):
     assert out.out == ""
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_main_requires_a_base(capsys):
     with pytest.raises(SystemExit) as exc:
         check_task_files.main([])
@@ -396,6 +468,9 @@ def test_main_requires_a_base(capsys):
     assert "--base" in capsys.readouterr().err
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_main_reads_head_files_from_the_working_tree(monkeypatch, tmp_path):
     (tmp_path / "t.json").write_text('{"ünï": 1}', encoding="utf-8")
     read = {}
