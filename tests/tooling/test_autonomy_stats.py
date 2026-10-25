@@ -55,8 +55,19 @@ def test_summarize_counts_each_group() -> None:
     s = summarize(rows)
     assert (s["total"], s["merged"], s["closed"], s["opened"]) == (5, 3, 1, 1)
     assert s["agent_only"] == 3 and s["agent_only_merged"] == 2
-    assert s["auto_merged"] == 1
+    assert s["guard_merged"] == 1
     assert s["median_minutes_agent_only_merged"] == 45.0
+
+
+def test_a_human_merge_request_with_an_automatic_merge_is_not_a_guard_merge() -> None:
+    rows = [classify(_mr(1), _commits(HUMAN), [_note("enabled an automatic merge")])]
+    assert summarize(rows)["guard_merged"] == 0
+
+
+def test_an_agent_merge_request_closed_with_the_note_is_not_a_guard_merge() -> None:
+    closed = _mr(1, "closed", merged=None)
+    rows = [classify(closed, _commits(BOT), [_note("enabled an automatic merge")])]
+    assert summarize(rows)["guard_merged"] == 0
 
 
 def test_summarize_of_nothing_reports_no_median() -> None:

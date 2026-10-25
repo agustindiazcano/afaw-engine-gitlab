@@ -45,6 +45,29 @@ A job `branch_overlap` in merge request pipelines lists the other open merge req
 the same files or the same task id (API `changes`), and fails with the list. It does not merge
 anything. This is the part of the "three-way merge" that a pipeline can decide deterministically.
 
+## Auditing what an agent says
+
+What is checked by code today, so an agent is never believed on its word:
+
+| Claim | Check | Where |
+|---|---|---|
+| "I wrote a test that fails first" | The test is run on the old code | `red_check` |
+| "My tests are good" | Changed files are mutated and the tests must notice | `mutation_gate` (AST-level mutants via mutmut) |
+| "These are the files I touched" | `files_touched` must equal the diff | `check_task_delta` |
+| "This took N minutes, CI is green" | Rejected in task files; measured values come from the API | `check_task_files`, `collect_facts` |
+| "I did not change the rules" | Human-only files and the identity of author and pusher | `human_only_files`, `merge_guard` |
+| "No secret, no vulnerability" | Scanner reports turned into a decision | `security_gate` |
+| "It works when deployed" | The live service must report the commit; Playwright uses it | `monitor_live`, `deploy_demo_app`, `e2e_live` |
+
+Not checked today, and the plan for each:
+
+| Gap | Plan |
+|---|---|
+| A repair merge request claims to fix a failure: nobody checks that the job that failed now passes | A job `repair_check` in merge request pipelines: when the description or the issue names a failed job, require that job to be green in this pipeline. Deterministic, reads the API |
+| Numbers written in documents | `check_docs` extension: a figure listed in `docs/data/experiments.json` must match where it is quoted |
+| The AFAW auditor agent (source in `duo/custom-agent.md`, read-only) was never created in the UI and never ran | Create it and run it on one merge request as an experiment; its verdict is advice, the gates decide |
+| Prose claims in merge request descriptions | Not checkable by code; they are not used as evidence anywhere |
+
 ## Order
 
 | # | Step | Depends on |
