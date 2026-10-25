@@ -55,6 +55,9 @@ A valid submission exists after tasks 009 and 010.
 - [ ] Orchestrator (scrum) agent: reads the same derived views as the dashboard (`build/state/pending.json`, `LASTCONTEXT.md`, metrics), picks the next task by priority and light, and files the issue. Design first as an ADR: deterministic selection in code, the agent only writes the issue text
 - [ ] Context handoff rule: when an agent session reaches a context threshold it writes the prompt for the next session (what is done, what is pending, what to read first) to a file, clears, and the new session reads that file first. Design first as an ADR; the mechanism is a hook plus a `state/handoff/` file, never a secret in it
 
+## FINAL, last of all: new white paper
+- [ ] Write a new white paper for AFAW Engine (hands-off automation end to end: CI/CD, testing, security, deployment, self-repair and observability) and cite the original AFAW paper (DOI 10.5281/zenodo.23050310) instead of editing it. Write it only after the experiments, the telemetry report and the evidence table are final, so every figure in it is measured. `docs/paper/afaw.pdf` stays as the original; the new one goes in its own folder, and `paper_pdf` must keep passing
+
 ## Low priority: security hardening
 Recorded on 2026-10-25. None of these blocks the loop; do them after it works.
 - [ ] Revoke the personal token `automerge` (scope `api`, expires 2027-01-31): it was pasted in a conversation
