@@ -11,7 +11,9 @@ instead of at the first flow run. The sources (verified on 2026-10-24):
   - tool names: .../agents/tools
 
 The custom flow may write notes only: it never changes code or the merge request, because the
-merge decision belongs to the deterministic engine (ADR 0007).
+merge decision belongs to the deterministic engine (ADR 0007). The custom agents of duo/ (the
+AFAW auditor and the AFAW planner) may use only the tools of their allow list, none of the
+forbidden tools and none of the IDE-only tools, which a Web UI session does not have.
 
 Run in CI: python -m scripts.check_duo_config
 Exit codes: 0 ok, 1 a problem was found.
@@ -31,6 +33,8 @@ AGENT_CONFIG = ".gitlab/duo/agent-config.yml"
 REVIEW_INSTRUCTIONS = ".gitlab/duo/mr-review-instructions.yaml"
 SUBAGENT_DIR = ".agents/agents"
 CUSTOM_FLOW = "duo/custom-flow.yaml"
+AUDITOR_SPEC = "duo/custom-agent.md"
+PLANNER_SPEC = "duo/custom-planner.md"
 
 # Tools documented on docs.gitlab.com/user/duo_agent_platform/agents/tools.
 DOCUMENTED_TOOLS = frozenset(
@@ -63,6 +67,34 @@ FLOW_FORBIDDEN_TOOLS = frozenset(
     """create_commit create_branch create_merge_request update_merge_request update_issue
     create_issue create_file_with_contents edit_file mkdir run_command run_git_command
     add_merge_request_reviewers submit_mr_review set_discussion_resolved""".split()
+)
+
+# Custom agents (duo/custom-agent.md, duo/custom-planner.md), created in the GitLab UI. Tools
+# verified on docs.gitlab.com/user/duo_agent_platform/agents/tools on 2026-10-25.
+AUDITOR_TOOLS = frozenset(
+    """get_merge_request list_merge_request_diffs build_review_merge_request_context
+    list_all_merge_request_notes list_mr_discussions get_pipeline_errors
+    get_pipeline_failing_jobs get_job_logs ci_linter get_repository_file get_repository_files
+    list_repository_tree gitlab_blob_search get_commit get_commit_diff list_commits get_issue
+    list_issues list_security_findings get_security_finding_details list_vulnerabilities
+    gitlab_api_get get_commit_comments get_failing_bridge_jobs get_issue_note
+    gitlab_issue_search""".split()
+)
+AUDITOR_OPTIONAL_TOOLS = frozenset({"create_merge_request_note", "create_merge_request_diff_note"})
+PLANNER_TOOLS = frozenset(
+    """create_plan add_new_task set_task_status get_plan get_issue list_issues
+    get_repository_file list_repository_tree create_issue_note""".split()
+)
+# Never given to a custom agent: they change code, the merge request, an issue or a
+# vulnerability, or run tests.
+AGENT_FORBIDDEN_TOOLS = frozenset(
+    """create_commit create_branch create_merge_request update_merge_request create_issue
+    update_issue confirm_vulnerability dismiss_vulnerability revert_to_detected_vulnerability
+    update_vulnerability_severity submit_mr_review set_discussion_resolved run_tests""".split()
+)
+# Available only in the IDE; a custom agent used from the Web UI does not have them.
+IDE_ONLY_TOOLS = frozenset(
+    {"find_files", "grep", "read_file", "read_files", "list_dir", "run_command"}
 )
 
 FLOW_KEYS = {"version", "environment", "components", "prompts", "routers", "flow"}
@@ -178,6 +210,38 @@ def check_subagent(filename: str, text: str) -> list[str]:
         problems.append(f"{filename}: the prompt must be 1 to 10000 characters")
     if len(text.encode("utf-8")) > SUBAGENT_MAX_FILE_BYTES:
         problems.append(f"{filename}: file is over 64 KB")
+    return problems
+
+
+def _tool_row(text: str, label: str) -> list[str] | None:
+    """The backticked tool names of the ``| label | ... |`` row of a spec, None if absent."""
+    for line in text.splitlines():
+        cells = [c.strip() for c in line.strip().strip("|").split("|", 1)]
+        if len(cells) == 2 and cells[0] == label:
+            return re.findall(r"`([A-Za-z0-9_]+)`", cells[1])
+    return None
+
+
+def check_agent_spec(
+    filename: str, text: str, allowed: frozenset[str], optional: frozenset[str]
+) -> list[str]:
+    """Problems of a custom agent spec: its tools must follow the allow and forbidden lists."""
+    required = _tool_row(text, "Tools")
+    if required is None:
+        return [f"{filename}: no Tools row in the field table"]
+    extra = _tool_row(text, "Optional tools") or []
+    problems: list[str] = []
+    rows = (("Tools", required, allowed), ("Optional tools", extra, optional))
+    for row, tools, permitted in rows:
+        for tool in tools:
+            if tool in AGENT_FORBIDDEN_TOOLS:
+                problems.append(f"{filename}: {tool!r} is forbidden for a custom agent")
+            elif tool in IDE_ONLY_TOOLS:
+                problems.append(f"{filename}: {tool!r} is IDE-only and not used")
+            elif tool not in DOCUMENTED_TOOLS:
+                problems.append(f"{filename}: unknown tool {tool!r}")
+            elif tool not in permitted:
+                problems.append(f"{filename}: {tool!r} is not in the allow list of the {row} row")
     return problems
 
 
@@ -297,6 +361,17 @@ def main(argv: list[str] | None = None) -> int:
         problems += check_flow(_load(flow_path), flow_path.stat().st_size)
     else:
         problems.append(f"{CUSTOM_FLOW} does not exist")
+    for rel, allowed, optional in (
+        (AUDITOR_SPEC, AUDITOR_TOOLS, AUDITOR_OPTIONAL_TOOLS),
+        (PLANNER_SPEC, PLANNER_TOOLS, frozenset[str]()),
+    ):
+        spec_path = root / rel
+        if spec_path.is_file():
+            problems += check_agent_spec(
+                rel, spec_path.read_text(encoding="utf-8"), allowed, optional
+            )
+        else:
+            problems.append(f"{rel} does not exist")
     agents = sorted((root / SUBAGENT_DIR).glob("*.md")) if (root / SUBAGENT_DIR).is_dir() else []
     if not agents:
         problems.append(f"{SUBAGENT_DIR} has no subagent")
