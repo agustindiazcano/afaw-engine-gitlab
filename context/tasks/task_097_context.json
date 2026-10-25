@@ -1,0 +1,11 @@
+{
+  "task_id": "task_097",
+  "files_touched": [
+    "scripts/security_gate.py",
+    "tests/tooling/test_security_gate.py"
+  ],
+  "summary": "scripts/security_gate.py gains an optional --summary-json PATH argument. When given, it writes a JSON file with the number of secret findings and the number of SAST findings per severity ({\"secrets\": N, \"sast\": {severity: N}}). The file is written before the decision, so it exists also when the gate blocks; the decision and the exit code do not change. If a report is unreadable the gate still exits 2 and writes no file. Six tests with small synthetic reports were added; red_check confirmed that five failed on the old code and the sixth is declared as a characterization test.",
+  "next": [
+    "Consume the summary file in a CI job or in the dashboard if it turns out to be useful"
+  ]
+}
