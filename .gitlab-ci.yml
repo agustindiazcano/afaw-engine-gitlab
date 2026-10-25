@@ -390,7 +390,7 @@ deploy_cloud_run:
   script:
     - GCP_TOKEN="$(sh deploy/gcp_access_token.sh)"
     - export CLOUDSDK_AUTH_ACCESS_TOKEN="$GCP_TOKEN"
-    - gcloud run deploy "$GCP_SERVICE_NAME" --image "$GCP_ARTIFACT_REPOSITORY/afaw-web:$CI_COMMIT_SHA" --region "$GCP_REGION" --project "$GCP_PROJECT_ID" --quiet
+    - gcloud run deploy "$GCP_SERVICE_NAME" --image "$GCP_ARTIFACT_REPOSITORY/afaw-web:$CI_COMMIT_SHA" --update-env-vars "AFAW_COMMIT_SHA=$CI_COMMIT_SHA,AFAW_RELEASE_TAG=v0.$CI_PIPELINE_IID" --region "$GCP_REGION" --project "$GCP_PROJECT_ID" --quiet
 
 # ---- monitor: measured facts and the dashboard ---------------------------------------------
 monitor:
@@ -414,7 +414,7 @@ monitor_live:
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   script:
-    - python -m scripts.check_live --url "$GCP_SERVICE_URL"
+    - python -m scripts.check_live --url "$GCP_SERVICE_URL" --expect-sha "$CI_COMMIT_SHA" --page / --page /experiments/ --page /environment/
 
 # Counts the automatic fix attempts of the merge request (cap of 3) and applies the merge rule.
 # It merges only when the CI/CD variable AFAW_AUTO_MERGE is exactly "true" and AFAW_MERGE_TOKEN

@@ -1,0 +1,13 @@
+{
+  "id": "task_086",
+  "title": "The deploy tells the service its commit and the monitor proves it; the pages are checked too",
+  "role": "architect",
+  "type": "feature",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "feat/task-086-deploy-proves-its-commit",
+  "priority": 1,
+  "difficulty": 2,
+  "blocked_by": [],
+  "notes": "Edits .gitlab-ci.yml, a human-only file: opened by a person. /api/version answered unknown on the live service and the pages of task_080 could be a 404 after a deploy with nobody noticing."
+}
