@@ -37,14 +37,19 @@ def test_state_is_503_when_a_view_is_missing(data_dir: Path) -> None:
     assert response.status_code == 503
 
 
-def test_root_serves_the_demo_dashboard(client: TestClient) -> None:
+def test_root_serves_this_repositorys_real_dashboard(client: TestClient) -> None:
     response = client.get("/")
+    assert response.status_code == 200 and "live dashboard" in response.text
+    assert "demo dashboard" not in response.text
+
+
+def test_the_demo_with_invented_data_moved_to_its_own_path(client: TestClient) -> None:
+    response = client.get("/demo/")
     assert response.status_code == 200 and "demo dashboard" in response.text
 
 
-def test_live_serves_this_repositorys_dashboard(client: TestClient) -> None:
-    response = client.get("/live/")
-    assert response.status_code == 200 and "live dashboard" in response.text
+def test_the_old_live_path_still_serves_the_same_real_dashboard(client: TestClient) -> None:
+    assert client.get("/live/").text == client.get("/").text
 
 
 def test_ask_cites_the_file_and_copies_the_line_verbatim(client: TestClient) -> None:
@@ -82,14 +87,14 @@ def test_ask_rejects_a_missing_or_oversized_question(
 
 
 @pytest.mark.parametrize("method", ["post", "put", "patch", "delete"])
-@pytest.mark.parametrize("path", ["/", "/live/", "/health", "/api/state", "/api/ask"])
+@pytest.mark.parametrize("path", ["/", "/demo/", "/live/", "/health", "/api/state", "/api/ask"])
 def test_the_service_is_read_only(client: TestClient, method: str, path: str) -> None:
     assert getattr(client, method)(path).status_code == 405
 
 
 def test_requests_never_change_the_data_directory(client: TestClient, data_dir: Path) -> None:
     before = sorted((p, p.stat().st_mtime_ns) for p in data_dir.rglob("*") if p.is_file())
-    for path in ("/", "/live/", "/health", "/api/state", "/api/ask?q=mutation"):
+    for path in ("/", "/demo/", "/live/", "/health", "/api/state", "/api/ask?q=mutation"):
         client.get(path)
     assert before == sorted((p, p.stat().st_mtime_ns) for p in data_dir.rglob("*") if p.is_file())
 
@@ -98,7 +103,12 @@ def test_requests_never_change_the_data_directory(client: TestClient, data_dir: 
     reason="the 503 for a missing page already existed; the test pins it so a change is noticed"
 )
 @pytest.mark.parametrize(
-    ("path", "missing"), [("/", "demo/index.html"), ("/live/", "live/dashboard.html")]
+    ("path", "missing"),
+    [
+        ("/demo/", "demo/index.html"),
+        ("/live/", "live/dashboard.html"),
+        ("/", "live/dashboard.html"),
+    ],
 )
 def test_a_missing_page_is_503_and_names_the_file(data_dir: Path, path: str, missing: str) -> None:
     (data_dir / missing).unlink()
@@ -256,8 +266,8 @@ def test_a_healthy_request_logs_nothing(
 @pytest.mark.characterization(
     reason="the code already did this; the test pins it so a change is noticed"
 )
-def test_root_serves_the_demo_page_verbatim_as_html(client: TestClient) -> None:
-    response = client.get("/")
+def test_demo_serves_the_demo_page_verbatim_as_html(client: TestClient) -> None:
+    response = client.get("/demo/")
     assert response.text == "<html>demo dashboard</html>"
     assert response.headers["content-type"].startswith("text/html")
 
@@ -278,16 +288,17 @@ def test_pages_are_read_as_utf8(data_dir: Path) -> None:
     (data_dir / "demo" / "index.html").write_text("<p>métrica ñ ✓</p>", encoding="utf-8")
     (data_dir / "live" / "dashboard.html").write_text("<p>tâche ü ✓</p>", encoding="utf-8")
     client = _client(data_dir)
-    assert client.get("/").text == "<p>métrica ñ ✓</p>"
+    assert client.get("/demo/").text == "<p>métrica ñ ✓</p>"
+    assert client.get("/").text == "<p>tâche ü ✓</p>"
     assert client.get("/live/").text == "<p>tâche ü ✓</p>"
 
 
 @pytest.mark.characterization(
     reason="the code already did this; the test pins it so a change is noticed"
 )
-def test_root_is_503_naming_the_missing_demo_page(data_dir: Path) -> None:
+def test_demo_is_503_naming_the_missing_demo_page(data_dir: Path) -> None:
     (data_dir / "demo" / "index.html").unlink()
-    response = _client(data_dir).get("/")
+    response = _client(data_dir).get("/demo/")
     assert response.status_code == 503
     assert response.json() == {"status": "unavailable", "missing": ["demo/index.html"]}
 
@@ -307,10 +318,11 @@ def test_live_is_503_naming_the_missing_live_page(data_dir: Path) -> None:
 )
 def test_each_page_works_without_the_other(data_dir: Path) -> None:
     (data_dir / "demo" / "index.html").unlink()
+    assert _client(data_dir).get("/").status_code == 200
     assert _client(data_dir).get("/live/").status_code == 200
     (data_dir / "demo" / "index.html").write_text("<html>demo</html>", encoding="utf-8")
     (data_dir / "live" / "dashboard.html").unlink()
-    assert _client(data_dir).get("/").status_code == 200
+    assert _client(data_dir).get("/demo/").status_code == 200
 
 
 @pytest.mark.characterization(
@@ -408,6 +420,7 @@ def test_the_openapi_schema_names_the_app_and_lists_only_get_routes(client: Test
         "/api/state",
         "/api/version",
         "/",
+        "/demo/",
         "/live/",
         "/api/ask",
     }

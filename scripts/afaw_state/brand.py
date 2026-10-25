@@ -134,9 +134,9 @@ def nav() -> str:
     """The top bar: logo, name and the links to the views and the repository."""
     return (
         '<header class="top"><nav aria-label="Main">'
-        f'<a class="brand" href="/live/">{LOGO}<span>{NAME}</span></a>'
-        '<a class="item" href="/live/">Dashboard</a>'
-        '<a class="item" href="/">Demo</a>'
+        f'<a class="brand" href="/">{LOGO}<span>{NAME}</span></a>'
+        '<a class="item" href="/">Dashboard</a>'
+        '<a class="item" href="/demo/">Demo (invented data)</a>'
         '<a class="item" href="/api/state">State API</a>'
         f'<a class="item" href="{REPOSITORY}/-/blob/main/docs/submission/evidence.md">Evidence</a>'
         '<span class="spacer"></span>'

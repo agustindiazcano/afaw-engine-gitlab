@@ -45,7 +45,8 @@ def test_the_nav_has_the_name_and_an_inline_logo(html: str) -> None:
 def test_the_nav_links_to_the_views_and_the_repository(html: str) -> None:
     nav = re.search(r"<nav.*?</nav>", html, re.S)
     assert nav is not None
-    for target in ('href="/live/"', 'href="/api/state"', "gitlab.com/gitlab-ai-hackathon"):
+    targets = ('href="/"', 'href="/demo/"', 'href="/api/state"', "gitlab.com/gitlab-ai-hackathon")
+    for target in targets:
         assert target in nav.group(0)
 
 
