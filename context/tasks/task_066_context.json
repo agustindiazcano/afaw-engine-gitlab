@@ -1,0 +1,9 @@
+{
+  "task_id": "task_066",
+  "files_touched": [],
+  "summary": "The first Duo runs were small. The plan adds three tracks with oracles that a model cannot argue with: EXP-10 repair of three defects planted on purpose and caught by existing tests, EXP-11 two non-trivial tools built from a specification and judged by acceptance tests kept out of the repository, EXP-12 test writing judged by coverage and the mutation score. Records the coverage before and after the five test merge requests (86 to 94 percent, 586 to 776 tests, five repairs out of five after red_check failed) and says what GitLab does and does not expose (credits by hand, no token counts).",
+  "next": [
+    "Fill the EXP-10, EXP-11 and EXP-12 tables when the runs end",
+    "Run the chaos faults C1 to C9 and the service load"
+  ]
+}

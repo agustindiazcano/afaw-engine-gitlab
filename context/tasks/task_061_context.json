@@ -1,0 +1,10 @@
+{
+  "task_id": "task_061",
+  "files_touched": [],
+  "summary": "Records what ran on 2026-10-25, each row read from the GitLab API: issue #12 assigned to the Developer Flow through the API, merge request !35 made by the flow, merge_guard taking it out of Draft and setting the merge (job 17450929965), the merge at 18:47:26 UTC and the release, deploy and monitor of the merge commit (pipeline 2986982832, all success); and !29, whose red_check failed and was repaired by a Duo session started by a note. The level table now says Hands-off is partly demonstrated: the feature path ran once with no click, the autoheal path, the automatic review and the summary on the issue have not run. The identity of the undraft and of the merge is the token of a person.",
+  "next": [
+    "Run the autoheal path with request_fix after task_060 is merged and record it",
+    "Record the coverage and mutation numbers of the five test merge requests once they are merged",
+    "Decide on 2026-10-26 14:00 between Hands-off and Supervised from this table"
+  ]
+}

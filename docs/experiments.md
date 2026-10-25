@@ -29,6 +29,9 @@ estimate (`AGENTS.md` section 2.2). Rows are added only after the experiment ran
 | EXP-06 | Chaos | Do the gates and the guard hold when things break on purpose? | Not run |
 | EXP-07 | Service load | How does the live service behave under load, and what does it cost? | Not run |
 | EXP-08 | Agent quality | How good are the Duo flows on standard small tasks? | Not run |
+| EXP-10 | Real repair | Does Duo fix defects that real tests catch, with no test weakened? | Running: three planted defects |
+| EXP-11 | Hard build, hidden tests | Can Duo build a non-trivial tool from a specification and pass tests it cannot see? | Running: issues #13 and #14 |
+| EXP-12 | Test writing with a measured effect | Do the tests Duo writes raise coverage and the mutation score? | Coverage measured; mutation running |
 | EXP-09 | Environmental benchmark | What is the SCI of one merged merge request, and what do the optimizations save? | Partly: one measured optimization, no SCI yet |
 
 ### EXP-01 Happy path
@@ -101,6 +104,45 @@ emissions. No SCI figure is published until the assumptions are written next to 
 | Merge request | Job seconds | Retries | Credits | E (kWh) | SCI (gCO2eq per MR) |
 |---|---|---|---|---|---|
 | !26 | not run | not run | by hand | not run | not run |
+
+## Plan v2: real work, not toys
+
+The first runs were small (a note file, one-line tests). Duo had used 59.67 of the 500 monthly
+GitLab Credits (read by the human, 2026-10-25 about 16:30 GMT-3). The plan below uses harder
+tasks with an oracle that a model cannot argue with: a pipeline, a test suite or a number.
+
+| Track | Task | Oracle | What is recorded |
+|---|---|---|---|
+| Repair (EXP-10) | Three defects planted on purpose in real modules, each caught by an existing test: the cap of fix attempts (`merge_guard`), the check of a service-account address (`service_accounts`), the gated mutation score (`mutation_gate`). Pushed to `demo/bug-*` branches with no merge request: `request_fix` opens the issue | The pipeline of the fix passes; the diff touches only the defect; no test is deleted, skipped or weakened (read from the diff); at most 3 attempts | Time from push to issue, to merge request, to green; attempts; files and lines changed; credits |
+| Hard build (EXP-11) | `scripts/sci_estimate.py` (SCI formula with validation and a CLI) and `scripts/cost_summary.py` (parse the cost log, group, sum, treat unknown as missing). Issues #13 and #14, with a full specification | Acceptance tests written before the run and kept out of the repository; `red_check`; `mutation_gate` | Hidden tests passed of total; mutation score of the new file; attempts; credits |
+| Test writing (EXP-12) | Five issues raising coverage of the weakest files (#7 to #11), with the baseline in the text | Line and branch coverage measured on `main` before and after; mutation score measured in CI on a branch that touches the file | Before and after per file; tests added; repairs needed |
+| Chaos (EXP-06) | Faults C1 to C9 | The pass rules of the table above | Result per fault |
+| Service load (EXP-07) | Short, small load on the live service | p50, p95, error rate, instances | Table above |
+
+The tools of EXP-11 are also the instruments of EXP-09: `cost_summary` turns the cost log into the
+benchmark table and `sci_estimate` turns CI seconds into energy and carbon with the assumptions
+printed next to the result.
+
+### EXP-12 results: coverage on `main`, before and after the five test merge requests
+
+Measured locally with `python -m pytest --cov=src --cov=scripts --cov-branch` on 2026-10-25.
+
+| File | Before | After |
+|---|---|---|
+| `scripts/red_check.py` | 50 % | 99 % |
+| `scripts/check_docs.py` | 0 % | 100 % |
+| `scripts/build_state.py` | 0 % | 100 % |
+| `scripts/afaw_state/source.py` | 34 % | 100 % |
+| `scripts/check_task_files.py` | 72 % | 97 % |
+| `src/afaw_web/app.py` | 94 % | 100 % |
+| `src/afaw_web/main.py` | 0 % | 0 % (its merge request has conflicts) |
+| Total, `src/` and `scripts/` | 86 % | 94 % |
+| Tests in the suite | 586 | 776 |
+
+All five merge requests failed `red_check` at first, which is expected for tests of code that
+already exists, and a Duo session started by a note repaired each one by declaring the tests as
+characterization: five repairs out of five. The conflict of the sixth was passed to Duo too.
+
 
 ## How to add a row
 

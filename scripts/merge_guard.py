@@ -45,6 +45,7 @@ from scripts.service_accounts import is_service_account_email
 CAP = 3
 REQUIRED_JOBS = ("red_check", "mutation_gate", "security_gate")
 GUARD_JOB = "merge_guard"
+AUXILIARY_JOBS = (GUARD_JOB, "request_fix")  # they report on the pipeline; they never judge it
 DRAFT_REASON = "merge request is a draft"
 _DRAFT_MARKER = re.compile(r"^\s*(?:draft:|\[draft\]|\(draft\))\s*", re.IGNORECASE)
 TIMEOUT = 30
@@ -128,7 +129,7 @@ def merge_verdict(
     else:
         if pipeline["sha"] != mr["sha"]:
             reasons.append("the latest pipeline is not for the head commit")
-        others = [j for j in jobs if j["name"] != GUARD_JOB]
+        others = [j for j in jobs if j["name"] not in AUXILIARY_JOBS]
         reasons += [f"{j['name']} is {j['status']}" for j in others if j["status"] != "success"]
         present = {j["name"] for j in others}
         reasons += [
