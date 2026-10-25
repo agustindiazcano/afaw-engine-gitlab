@@ -1,0 +1,13 @@
+{
+  "id": "task_090",
+  "title": "Rewrite the Devpost and Path B texts and the README status tables to the measured state",
+  "role": "architect",
+  "type": "chore",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "docs/task-090-final-texts",
+  "priority": 1,
+  "difficulty": 2,
+  "blocked_by": [],
+  "notes": "Documents only. Every claim is taken from docs/submission/evidence.md and the GitLab API read in the same session."
+}

@@ -67,10 +67,10 @@ flowchart LR
 
 | Requirement | Status | Evidence |
 |---|---|---|
-| Uses GitLab Duo Agent Platform (agents, flows, MCP clients) | In progress | Configuration merged (task 011, [`docs/duo.md`](docs/duo.md)); the Developer Flow produced three merge requests (!16, !17, !18, all Draft with 20 green jobs); the Fix CI/CD Pipeline Flow ran once, by hand, and only commented; no flow was started by a trigger yet ([evidence](docs/submission/evidence.md)) |
+| Uses GitLab Duo Agent Platform (agents, flows, MCP clients) | Done for the Developer Flow, in progress for the rest | The Developer Flow, started by assigning an issue through the API, opened merge requests that `merge_guard` merged; the Fix CI/CD Pipeline Flow ran once, by hand, and only commented; the Code Review Flow never ran ([evidence](docs/submission/evidence.md)) |
 | Public GitLab project with all source, assets and instructions | Done | https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase (visibility public) |
 | MIT License visible in the repository | Done | [`LICENSE`](LICENSE); the project API reports the license key `mit` |
-| Visible CI/CD pipeline history showing the automation | Done | Pipelines of the project, including failed ones; the failures on `main` are explained in [limits](#guardrails-and-known-limits) |
+| Visible CI/CD pipeline history showing the automation | Done | Pipelines of the project, including failed ones, and the repairs that followed them; the failures on `main` are explained in [limits](#guardrails-and-known-limits) |
 | Text description | In progress | Derived from this README; see [`docs/submission/devpost.md`](docs/submission/devpost.md) and [`docs/submission/rules-and-coverage.md`](docs/submission/rules-and-coverage.md) |
 | Demo video under 3 minutes, YouTube, no third-party trademarks or copyrighted music | Planned | <DEMO_VIDEO_URL> |
 | Path B: what was added or changed since Oct 5, 2026 | Done | [Added since Oct 5](#added-on-or-after-oct-5-2026) |
@@ -81,7 +81,7 @@ flowchart LR
 
 ## The nine stages
 
-`.gitlab-ci.yml` defines 26 jobs. `test` is a technical stage: the GitLab SAST and secret-detection templates require it to exist, and none of our jobs runs in it. The nine DevSecOps stages are the other nine.
+`.gitlab-ci.yml` defines 29 jobs, plus the jobs of the SAST and secret-detection templates. `test` is a technical stage: the GitLab SAST and secret-detection templates require it to exist, and none of our jobs runs in it. The nine DevSecOps stages are the other nine.
 
 | Stage | Jobs (script) | GitLab-native feature | Status | Tasks |
 |---|---|---|---|---|
@@ -105,12 +105,12 @@ Verified in docs.gitlab.com (Oct 24, 2026): the SAST and secret-detection templa
 | Security gate that blocks (reads both scanner reports) | Done |
 | GitLab Release created on `main` | Done (v0.9, v0.15 and v0.20) |
 | Custom agent and custom flow | Sources merged in `duo/`; they are created in the GitLab UI by a person ([`docs/duo.md`](docs/duo.md)). The agent **AFAW merge agent** exists in the AI Catalog (id 1019706, version 1.1.0, seven read-and-note tools, no merge tool because Duo has none); the triage flow (`duo/triage-flow.yaml`) is not created yet |
-| Developer Flow opens a merge request from an issue | Ran four times by hand: !16, !17, !18 ([evidence](docs/submission/evidence.md)). Assigning an issue through the API also starts it (issue #6, 2026-10-25). Its merge requests are Draft |
-| Fix CI/CD Pipeline Flow repairs a failed pipeline | Ran once, started by a person: it commented and made no commit. Not started by a trigger yet |
+| Developer Flow opens a merge request from an issue | Ran: !16, !17, !18 and later ones ([evidence](docs/submission/evidence.md)). Assigning an issue through the API starts it with no click (issues #6 and #12). Its merge requests are Draft |
+| A failed pipeline is repaired | Ran: the `request_fix` job opens an issue for the Developer Flow account; Duo repaired planted defects and one real defect, merged by the guard ([`experiments.md`](docs/experiments.md)). The Fix CI/CD Pipeline Flow itself ran once, by hand, and only commented |
 | Code Review Flow comments on a merge request | Planned. No such session exists; it does not run on Draft merge requests |
-| Cap of 3 automatic fix attempts per merge request | Merged (task 012, `merge_guard`); never reached on a real merge request |
-| Automatic merge when every gate is green | Merged (task 012): continuous deployment when `AFAW_AUTO_MERGE=true` with `AFAW_MERGE_TOKEN`, continuous delivery otherwise ([`docs/autohealing.md`](docs/autohealing.md)). Never run on a real merge request; every merge so far was a person's |
-| Deploy to Cloud Run and live monitor | Done (applied and run once by a person; the deploy job itself runs on every pipeline of `main`) |
+| Cap of 3 automatic fix attempts per merge request | Merged (task 012, `merge_guard`); held in the chaos case C3; no real repair needed a second attempt |
+| Draft cleared and merge requested when every gate is green | Ran nine times by `merge_guard` with `AFAW_AUTO_MERGE=true`, using the token of a person (`AFAW_MERGE_TOKEN`), so GitLab shows that person's name on the notes. It merges nothing unless a person turns it on ([`docs/autohealing.md`](docs/autohealing.md)) |
+| Release, deploy to Cloud Run and live monitor | Done, including after an automatic merge (pipeline 2986982832); `monitor_live` proves the commit |
 | Summary comment on the original issue | Planned. No documented event after a merge can start a flow; a deterministic CI job with a project access token could post it ([`docs/duo.md`](docs/duo.md)) |
 
 ## Demo app
@@ -191,7 +191,7 @@ The base method was committed on Sep 29 and 30, 2026. Since Oct 5, from `git log
 
 | Criterion | Where to look |
 |---|---|
-| Technological implementation | `.gitlab-ci.yml` (nine stages, 26 jobs), `scripts/security_gate.py`, `scripts/human_only_files.py`, `deploy/terraform`, Workload Identity Federation without keys |
+| Technological implementation | `.gitlab-ci.yml` (nine stages, 29 jobs), `scripts/security_gate.py`, `scripts/human_only_files.py`, `deploy/terraform`, Workload Identity Federation without keys |
 | Design (end-to-end workflow) | [The loop](#what-this-variant-changes-hands-off) and [Hands-off status](#hands-off-status), stated link by link |
 | Potential impact | Governance of agent-written code for teams that already generate code and need review, security and release to keep up |
 | Innovation | Merge approval moved from each merge to the policy, with deterministic gates and identity checks as compensating controls ([ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md)) |
