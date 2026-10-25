@@ -293,6 +293,7 @@ def test_a_failure_on_a_branch_named_by_a_person_opens_no_issue(ref, capsys):
     assert "not asked" in capsys.readouterr().out
 
 
+@pytest.mark.characterization(reason="documents the branches the flow was always asked about")
 @pytest.mark.parametrize("ref", ["main", "demo/task-28-lint", "duo/fix/3-x"])
 def test_main_planted_demo_and_flow_branches_are_repaired(ref):
     api = FakeApi([job("lint", "failed")])
