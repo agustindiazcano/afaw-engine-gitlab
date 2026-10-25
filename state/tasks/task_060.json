@@ -1,0 +1,13 @@
+{
+  "id": "task_060",
+  "title": "request_fix: a failed pipeline asks the Duo Developer Flow to repair it",
+  "role": "architect",
+  "type": "feature",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "feat/task-060-request-fix",
+  "priority": 1,
+  "difficulty": 3,
+  "blocked_by": [],
+  "notes": "The autoheal entry without triggers: a mention in a merge request note, or an issue assigned to the flow. Edits .gitlab-ci.yml, a human-only file: a human opens and merges it."
+}

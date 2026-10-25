@@ -4,6 +4,7 @@
 
 AFAW Engine is the entry of the AFAW (Anti-Fragile Agentic Workflow) method to the GitLab Transcend Hackathon "Life After Code" (Devpost). Agents write and repair code, deterministic tools decide whether a change is acceptable, and the human approves the merge policy instead of every merge.
 
+- Author: **Agustin Diaz-Cano** ([www.agustindiazcano.com](https://www.agustindiazcano.com/))
 - Hackathon: GitLab Transcend, "Life After Code" (Devpost: <DEVPOST_URL>)
 - Path: **B, Bring Your Own** (existing MIT project, imported to GitLab)
 - Autonomy track: **Best Hands-off Agent**
@@ -39,12 +40,12 @@ Expected, not measured: no figure below has been measured yet.
 
 | | AFAW (upstream) | AFAW Engine (this repository) | Status |
 |---|---|---|---|
-| Merge | A human approves every pull request | The human approves the **policy**; the deterministic engine approves **each merge** ([ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md)) | Policy documented; the automatic merge rule is Planned (task 012). Until then a human merges |
+| Merge | A human approves every pull request | The human approves the **policy**; the deterministic engine approves **each merge** ([ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md)) | Policy documented; the automatic merge rule is merged (task 012, `merge_guard`) and has never run on a real merge request. Every merge so far was a person's |
 | Measuring | The AI decides, the engine measures | Unchanged | Done |
 | Forge | GitHub | GitLab (REST API v4); the GitHub path is kept | Done for facts: they are read from the GitLab API ([`docs/facts.md`](docs/facts.md), task 010) |
-| Agents | Coding agents that open pull requests | GitLab Duo flows, configured to run under a group service account instead of a personal token ([`docs/duo.md`](docs/duo.md)) | Configuration merged; no flow has run yet |
+| Agents | Coding agents that open pull requests | GitLab Duo flows, configured to run under a group service account instead of a personal token ([`docs/duo.md`](docs/duo.md)) | Configuration merged; the Developer Flow ran four times and opened !16, !17 and !18; the Fix CI/CD Pipeline Flow ran once by hand ([evidence](docs/submission/evidence.md)) |
 | Guardrails | Human reviews each diff | Human-only files (a weak control, see [limits](#guardrails-and-known-limits)) and a red-first check that a new test fails on the old code | Done |
-| | | Cap of 3 automatic fix attempts per merge request, merge only when the full pipeline is green | Planned (task 012) |
+| | | Cap of 3 automatic fix attempts per merge request, merge only when the full pipeline is green | Code and tests merged (task 012); never run on a real merge request |
 
 The loop is the target design; the status of each link is in [Hands-off status](#hands-off-status):
 
@@ -66,11 +67,11 @@ flowchart LR
 
 | Requirement | Status | Evidence |
 |---|---|---|
-| Uses GitLab Duo Agent Platform (agents, flows, MCP clients) | In progress | Configuration merged (task 011, [`docs/duo.md`](docs/duo.md)); no merge request or session produced by a flow exists yet |
+| Uses GitLab Duo Agent Platform (agents, flows, MCP clients) | In progress | Configuration merged (task 011, [`docs/duo.md`](docs/duo.md)); the Developer Flow produced three merge requests (!16, !17, !18, all Draft with 20 green jobs); the Fix CI/CD Pipeline Flow ran once, by hand, and only commented; no flow was started by a trigger yet ([evidence](docs/submission/evidence.md)) |
 | Public GitLab project with all source, assets and instructions | Done | https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase (visibility public) |
 | MIT License visible in the repository | Done | [`LICENSE`](LICENSE); the project API reports the license key `mit` |
 | Visible CI/CD pipeline history showing the automation | Done | Pipelines of the project, including failed ones; the failures on `main` are explained in [limits](#guardrails-and-known-limits) |
-| Text description | Planned | Derived from this README |
+| Text description | In progress | Derived from this README; see [`docs/submission/devpost.md`](docs/submission/devpost.md) and [`docs/submission/rules-and-coverage.md`](docs/submission/rules-and-coverage.md) |
 | Demo video under 3 minutes, YouTube, no third-party trademarks or copyrighted music | Planned | <DEMO_VIDEO_URL> |
 | Path B: what was added or changed since Oct 5, 2026 | Done | [Added since Oct 5](#added-on-or-after-oct-5-2026) |
 | Path B: deployed project URL, kept live until about Nov 16 | Done | https://afaw-handsoff-ljm5hefnsq-uc.a.run.app (`/health` answered `ok` on Oct 24, 2026) |
@@ -85,7 +86,7 @@ flowchart LR
 | Stage | Jobs (script) | GitLab-native feature | Status | Tasks |
 |---|---|---|---|---|
 | plan | `task_files` (`check_task_files`), `docs_check` (`check_docs`), `duo_config` (`check_duo_config`) | Merge request pipelines (`workflow:rules`) | Done | 009, 011 |
-| create | `task_delta` (`check_task_delta`), `derived_views` and `web_data` (`build_state`) | Merge requests opened by the Developer Flow, review rules in `.gitlab/duo/` | In progress: the jobs run; no Developer Flow has run | 009, 011 |
+| create | `task_delta` (`check_task_delta`), `derived_views` and `web_data` (`build_state`) | Merge requests opened by the Developer Flow, review rules in `.gitlab/duo/` | Done for the Developer Flow started by a person (!16 to !18); not started by a trigger or by a template yet | 009, 011 |
 | verify | `lint` (`ruff`), `typecheck` (`mypy --strict`), `tests` (`pytest`), `red_check`, `mutation_gate` (`mutation_ci`) | `rules:changes` path filters, pipeline cache | Done | 009 |
 | secure | `semgrep-sast`, `secret_detection`, `security_gate` (blocks on any secret or a Critical or High SAST finding) | SAST template (Semgrep) and pipeline secret detection | Done | 009 |
 | govern | `paper_pdf`, `equivalent_mutants_report`, `human_only_files` (a **weak** backup control: the same merge request can edit it away) | Strong control deferred: pipeline execution policy or CODEOWNERS with required approval, depending on the tier | Done (weak); strong control Planned | 009, 012 |
@@ -103,21 +104,21 @@ Verified in docs.gitlab.com (Oct 24, 2026): the SAST and secret-detection templa
 | Nine-stage pipeline with a real job in each stage | Done |
 | Security gate that blocks (reads both scanner reports) | Done |
 | GitLab Release created on `main` | Done (v0.9, v0.15 and v0.20) |
-| Custom agent and custom flow | Sources merged in `duo/`; they are created in the GitLab UI by a person ([`docs/duo.md`](docs/duo.md)). Not created yet |
-| Developer Flow opens a merge request from an issue | Planned. No such merge request exists |
-| Fix CI/CD Pipeline Flow repairs a failed pipeline | Planned. No such session or commit exists |
-| Code Review Flow comments on a merge request | Planned. No such session exists |
-| Cap of 3 automatic fix attempts per merge request | Planned (task 012) |
-| Automatic merge when every gate is green | Planned (task 012). Until then a human merges every merge request |
+| Custom agent and custom flow | Sources merged in `duo/`; they are created in the GitLab UI by a person ([`docs/duo.md`](docs/duo.md)). The agent **AFAW merge agent** exists in the AI Catalog (id 1019706, version 1.1.0, seven read-and-note tools, no merge tool because Duo has none); the triage flow (`duo/triage-flow.yaml`) is not created yet |
+| Developer Flow opens a merge request from an issue | Ran four times by hand: !16, !17, !18 ([evidence](docs/submission/evidence.md)). Assigning an issue through the API also starts it (issue #6, 2026-10-25). Its merge requests are Draft |
+| Fix CI/CD Pipeline Flow repairs a failed pipeline | Ran once, started by a person: it commented and made no commit. Not started by a trigger yet |
+| Code Review Flow comments on a merge request | Planned. No such session exists; it does not run on Draft merge requests |
+| Cap of 3 automatic fix attempts per merge request | Merged (task 012, `merge_guard`); never reached on a real merge request |
+| Automatic merge when every gate is green | Merged (task 012): continuous deployment when `AFAW_AUTO_MERGE=true` with `AFAW_MERGE_TOKEN`, continuous delivery otherwise ([`docs/autohealing.md`](docs/autohealing.md)). Never run on a real merge request; every merge so far was a person's |
 | Deploy to Cloud Run and live monitor | Done (applied and run once by a person; the deploy job itself runs on every pipeline of `main`) |
-| Summary comment on the original issue | Planned. No documented event after a merge can start it ([`docs/duo.md`](docs/duo.md)) |
+| Summary comment on the original issue | Planned. No documented event after a merge can start a flow; a deterministic CI job with a project access token could post it ([`docs/duo.md`](docs/duo.md)) |
 
 ## Features
 
 - **Verification gates:** red-first check (a new test must fail on the old code), mutation gate on the diff, lint, strict typing, tests, in parallel.
 - **Security gate:** GitLab SAST and secret detection, with a script that turns their reports into a blocking decision.
 - **Governance:** human-only files (`.gitlab-ci.yml`, `AGENTS.md`, `state/equivalent_mutants.json`, `deploy/`, and the mutation and gate settings in `state/config.json`), merge requests judged by the identity of their author and of the pusher, a task file and a delta per task, decision records (ADRs).
-- **Derived state:** task board, metrics, traffic lights, `LASTCONTEXT.md` and a static dashboard, rebuilt from git and the forge API and never committed. Reading the GitLab API is Done (task 010, [`docs/facts.md`](docs/facts.md)).
+- **Derived state:** task board, metrics, traffic lights, `LASTCONTEXT.md` and a dashboard with a live GitLab panel, rebuilt from git and the forge API and never committed. Reading the GitLab API is Done (task 010, [`docs/facts.md`](docs/facts.md)).
 - **Read-only service (`src/afaw_web`):** `/`, `/live/`, `/health`, `/api/state` (derived metrics verbatim), and `/api/ask`, a deterministic file search that cites paths and copies measured numbers verbatim. No language model call, GET only.
 - **Deploy:** Terraform for Cloud Run (public, minimum 0 and maximum 2 instances), Artifact Registry, Workload Identity Federation from GitLab OIDC, no JSON keys. Done: applied by a person on Oct 24, 2026.
 
@@ -175,8 +176,8 @@ The base method was committed on Sep 29 and 30, 2026. Since Oct 5, from `git log
 | Oct 24 | Read-only service and Terraform for Cloud Run (task 013) | MR !5, release v0.15; deployed and checked in [this pipeline](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985631519) | Done |
 | Oct 24 | Duo configuration, custom agent and flow sources (task 011) | MR !6, release v0.20 | Merged; the flows must be enabled by a person |
 | Oct 24 | GitLab fact collection (task 010) | MR !7, release v0.23 | Done |
-| pending | Merge guardrails and automatic merge rule (task 012) | | Planned |
-| pending | Demo script and Devpost text (task 014) | | Planned |
+| Oct 24 | Merge guardrails and automatic merge rule (task 012) | MR !10 | Merged; never run on a real merge request |
+| Oct 24 | Demo script and Devpost text (task 014) | MR !8 | Merged; the video is not recorded |
 | pending | SCI experiment (task 015) | | Planned, conditional |
 
 ## Judging criteria
@@ -189,7 +190,17 @@ The base method was committed on Sep 29 and 30, 2026. Since Oct 5, from `git log
 | Innovation | Merge approval moved from each merge to the policy, with deterministic gates and identity checks as compensating controls ([ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md)) |
 | Presentation | Demo video <DEMO_VIDEO_URL> |
 
-## Demo dashboard
+## Dashboard
+
+Both pages carry the project name and logo in the top bar, links to the views and the repository, and the author in the footer (a link to [www.agustindiazcano.com](https://www.agustindiazcano.com/), checked on 2026-10-25: it answers 200 and its title is "Agustin Diaz-Cano | Software Engineer"). The logo is a simple mark drawn for the page, not an official asset.
+
+### Live dashboard
+
+The live service serves it at `/live/`. The board, the metrics and the history are derived at build time from `main`, so they change when a new image is deployed. The **Live from GitLab** panel is different: the browser reads the public GitLab REST API every 30 seconds (no token) and shows merge requests merged and open, Duo flow sessions, pipelines passed and failed, and the latest merge requests and pipelines. Draft merge requests show as `draft`.
+
+![Live dashboard: project name and logo, progress, status tiles and the live GitLab panel.](docs/screenshots/dashboard-live.png)
+
+### Demo dashboard
 
 A dashboard built by `scripts/build_state.py` from mock data: a fictional project whose every task and number is invented ([`examples/mock_dashboard.py`](examples/mock_dashboard.py)). It shows each traffic-light rule firing: CI failing, a blocker not done, no activity for three days, nothing measured.
 
@@ -250,7 +261,7 @@ GitLab does not copy branch protection, CI/CD variables or Duo settings when a p
 1. One terminal per agent; answer its `ROLE:`. The session-start hook injects the generated `LASTCONTEXT.md` and `PENDING.md`.
 2. The agent creates its branch, works with TDD running only its own test, and pushes; the pipeline verifies the rest.
 3. At the end it writes `summary` and `next`, fills `files_touched` with `python -m scripts.check_task_delta --base origin/main --write task_NNN`, records any decision as an ADR, and asks before opening the merge request. Use the name of your GitLab remote in place of `origin` if it differs.
-4. A person opens and merges the merge request. Until the automatic merge rule exists (task 012, Planned), every merge is a person's.
+4. A person opens and merges the merge request. The automatic merge rule exists (task 012) but is off until `AFAW_AUTO_MERGE=true`, so today every merge is a person's.
 5. Ask for status at any time, or open the dashboard.
 
 ## Project structure

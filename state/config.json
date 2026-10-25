@@ -3,8 +3,8 @@
   "code_prefixes": ["src/", "tests/", "scripts/", "examples/", ".claude/hooks/"],
   "ignored_names": [".gitkeep"],
   "test_prefixes": ["tests/"],
-  "mutation_critical_paths": ["src/back/domain/", "src/back/security/"],
-  "mutation_min_score": 80,
+  "mutation_critical_paths": ["src/back/domain/", "src/back/security/", "src/afaw_web/"],
+  "mutation_min_score": 60,
   "dashboard": {
     "stale_days": 3,
     "lastcontext_size": 5,

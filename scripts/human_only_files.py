@@ -15,6 +15,10 @@ service accounts: a user that comes back empty, or whose id is in AFAW_BOT_USER_
 (comma-separated, a group-level CI variable), is non-human. Commit author names and
 emails are forgeable: they only add a warning, never decide.
 
+A commit authored by a service account (the address GitLab gives it, see scripts.service_accounts)
+that changes a human-only file fails as well, whoever started the pipeline: a flow's commits keep
+that author when a person re-runs the pipeline.
+
 Run in CI: python -m scripts.human_only_files --base origin/main
 Exit codes: 0 ok, 1 a non-human changed a human-only file, 2 could not decide (fails closed).
 """
@@ -24,6 +28,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 import urllib.error
@@ -33,6 +38,7 @@ from typing import Any
 from urllib.parse import quote
 
 from scripts.check_task_delta import changed_files
+from scripts.service_accounts import is_service_account_email
 
 HUMAN_ONLY_PATHS = (".gitlab-ci.yml", "AGENTS.md", "state/equivalent_mutants.json")
 HUMAN_ONLY_PREFIXES = ("deploy/",)
@@ -67,6 +73,20 @@ def commit_warnings(identities: list[str]) -> list[str]:
     ]
 
 
+def service_account_commits(identities: list[str]) -> list[str]:
+    """The commit identities (``Name <email>``) whose address is a service account's.
+
+    A flow's commits carry that address even when a person starts the pipeline (a re-run, a
+    manual start), so this catches what the pusher check misses. It only adds failures.
+    """
+    hits = []
+    for who in identities:
+        match = re.search(r"<([^<>]+)>\s*$", who)
+        if match and is_service_account_email(match.group(1)):
+            hits.append(who)
+    return hits
+
+
 def fetch_json(url: str, token: str | None) -> Any:
     """GET a GitLab API URL as JSON, with the job token when there is one."""
     request = urllib.request.Request(url, headers={"JOB-TOKEN": token} if token else {})
@@ -78,7 +98,11 @@ def config_at(base: str, root: Path) -> dict[str, Any]:
     """state/config.json as it is on the merge base (empty when it did not exist)."""
     shown = subprocess.run(
         ["git", "show", f"{base}:{CONFIG_PATH}"],
-        cwd=root, capture_output=True, text=True, encoding="utf-8", timeout=TIMEOUT,
+        cwd=root,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        timeout=TIMEOUT,
     )
     data: dict[str, Any] = json.loads(shown.stdout) if shown.returncode == 0 else {}
     return data
@@ -88,7 +112,11 @@ def commit_identities(base: str, root: Path) -> list[str]:
     """Author identities of the commits on the branch since the base."""
     shown = subprocess.run(
         ["git", "log", f"{base}..HEAD", "--format=%an <%ae>"],
-        cwd=root, capture_output=True, text=True, encoding="utf-8", timeout=TIMEOUT,
+        cwd=root,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        timeout=TIMEOUT,
     )
     return sorted(set(shown.stdout.splitlines()))
 
@@ -106,9 +134,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     root = Path(args.root)
     new_config = json.loads((root / CONFIG_PATH).read_text(encoding="utf-8"))
-    hits = protected_changes(
-        changed_files(args.base, root), config_at(args.base, root), new_config
-    )
+    hits = protected_changes(changed_files(args.base, root), config_at(args.base, root), new_config)
     if not hits:
         sys.stdout.write("No human-only file changed; nothing to check.\n")
         return 0
@@ -117,8 +143,16 @@ def main(argv: list[str] | None = None) -> int:
         "enforces nothing on its own. Human-only files changed:\n"
         + "".join(f"  - {hit}\n" for hit in hits)
     )
-    for warning in commit_warnings(commit_identities(args.base, root)):
+    identities = commit_identities(args.base, root)
+    for warning in commit_warnings(identities):
         sys.stdout.write(f"WARNING: {warning}\n")
+    bot_commits = service_account_commits(identities)
+    for who in bot_commits:
+        sys.stderr.write(
+            f"PROBLEM: a commit authored by a service account changed a human-only file: {who}\n"
+        )
+    if bot_commits:
+        return 1
     api, project = os.environ.get("CI_API_V4_URL"), os.environ.get("CI_PROJECT_ID")
     token, iid = os.environ.get("CI_JOB_TOKEN"), os.environ.get("CI_MERGE_REQUEST_IID")
     if not api or not project:

@@ -1,0 +1,17 @@
+{
+  "task_id": "task_044",
+  "files_touched": [
+    "scripts/human_only_files.py",
+    "scripts/merge_guard.py",
+    "scripts/service_accounts.py",
+    "tests/tooling/test_human_only_files.py",
+    "tests/tooling/test_merge_guard.py",
+    "tests/tooling/test_service_accounts.py"
+  ],
+  "summary": "With composite identity the merge request author is the person who triggered a Duo flow and the committer is that person too, so neither can tell a flow's work from a person's. Read on 2026-10-25 from !16, !17 and !18: MR author id 43344247, commit author Duo Developer with a service_account_group_..._...@noreply.gitlab.com address, pipeline user duo-developer-gitlab-ai-hackathon (33073386); the Fix CI/CD account is 33073387. New scripts/service_accounts.py recognizes that address. human_only_files now also fails when a commit authored by a service account changes a human-only file, whoever started the pipeline (closes the case of a person re-running a flow's pipeline). merge_guard holds the merge unless the head pipeline was started by an id in AFAW_BOT_USER_IDS and every commit is authored by a service account address; with no ids it holds; the MR author is not read. Tests were written first. Run against the real merge requests with AFAW_AUTO_MERGE unset: !16 was held only for being a draft, without ids it was also held for the missing ids, and !14 (a person's) was held for pipeline user and commit author. The author address is forgeable, so it only adds conditions; the pipeline user stays the authoritative signal.",
+  "next": [
+    "Human: set AFAW_BOT_USER_IDS to 33073387,33073386",
+    "After the first Fix CI/CD merge request, check which account starts its pipeline and who authors its commits",
+    "Remaining: the Draft state of the Developer Flow merge requests, the merge mechanism and the autohealing triggers (separate tasks)"
+  ]
+}

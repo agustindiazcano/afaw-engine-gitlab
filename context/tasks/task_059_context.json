@@ -1,0 +1,14 @@
+{
+  "task_id": "task_059",
+  "files_touched": [
+    "scripts/afaw_state/brand.py",
+    "scripts/afaw_state/render.py",
+    "tests/tooling/test_dashboard_brand.py",
+    "tests/tooling/test_views.py"
+  ],
+  "summary": "The dashboard came from another project. Both pages now have a top bar with an inline GitLab-style mark and the name AFAW Engine Gitlab, links to the views and the repository, and a footer naming the author with a link to www.agustindiazcano.com (checked: HTTP 200, title Agustin Diaz-Cano). The live dashboard also has a Live from GitLab panel that reads the public GitLab REST API in the browser every 30 seconds with no token (merged and open merge requests, Duo flow sessions, pipelines passed and failed, the latest merge requests and pipelines); it is never shown on the demo of invented data. Two old tests that asserted no script at all now assert exactly one script, the live panel's. The screenshots in docs/screenshots were taken again, and a live one was added. The board, metrics and history are still derived at build time, so they change only with a new deploy.",
+  "next": [
+    "Pass the measured facts to the web_data job so the live dashboard stops saying that no facts were supplied (needs .gitlab-ci.yml, a human-only file)",
+    "Replace the simple mark by the official GitLab asset if the rules for trademarks allow it in the video"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "id": "task_046",
+  "title": "Read the results of mutmut in the mutation gate and run it on the required files",
+  "role": "architect",
+  "type": "feature",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "feat/task-046-mutmut-results-adapter",
+  "priority": 2,
+  "difficulty": 3,
+  "blocked_by": []
+}

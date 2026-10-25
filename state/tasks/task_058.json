@@ -1,0 +1,13 @@
+{
+  "id": "task_058",
+  "title": "Continuous deployment test of the hands-off loop: write docs/submission/handoff-cd-test.md",
+  "role": "architect",
+  "type": "chore",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "duo/chore/12-handoff-cd-test",
+  "priority": 3,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "EXP-01, second run. Documentation-only change from issue 12; nothing in the application depends on it."
+}

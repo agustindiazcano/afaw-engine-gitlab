@@ -36,6 +36,26 @@ A valid submission exists after tasks 009 and 010.
   - [x] Human: create the budget alert in the Google Cloud console (reported by the human; this repository cannot see it)
 - [ ] Task 014: demo script (under 3 minutes), Devpost description, Path B explanation of what was added since Oct 5
 
+## Phase 4: prove the hands-off loop (deadline 2026-10-27 10:00 GMT-3)
+- [ ] Happy path (EXP-01): issue #6 to merge request !26 ran; the Draft state, the gates, the merge by `merge_guard` and the deploy have not been shown yet
+- [ ] Autoheal (EXP-02, EXP-03): create the label, the "AFAW triage" flow and the two Pipeline Failed triggers, then push the broken branch `demo/task-028-lint-failure`
+- [ ] Chaos, load, agent quality and the environmental benchmark (EXP-04 to EXP-09, see [`docs/experiments.md`](docs/experiments.md)); record each row with its link
+- [ ] Demo ON and demo OFF scripts that run the whole flow and put the project back
+- [ ] Update `docs/submission/devpost.md` and `path-b.md` to the final state; record the video (under 3 minutes, YouTube)
+- [ ] 2026-10-26 14:00: decide Hands-off or Supervised from `docs/submission/evidence.md`
+- [ ] Rebuild `docs/paper/afaw.pdf` at the end, after the last change to `AGENTS.md`
+
+## Low priority: security hardening
+Recorded on 2026-10-25. None of these blocks the loop; do them after it works.
+- [ ] Revoke the personal token `automerge` (scope `api`, expires 2027-01-31): it was pasted in a conversation
+- [ ] Replace it by a project access token or a group service account token made by an Owner, so a leak does not reach the human's other projects
+- [ ] `AFAW_MERGE_TOKEN` is protected today and cannot be read by merge request pipelines of unprotected branches; unprotecting it exposes it to the ~50 inherited Developers of the group (the decision to unprotect is the human's)
+- [ ] Set "Allowed to push" of `main` to No one (today Developers + Maintainers)
+- [ ] Turn on "Pipelines must succeed" and "All threads must be resolved" in the merge request settings (both are off today)
+- [ ] `AFAW_BOT_USER_IDS` is masked today; unmask it so the guard log shows the ids (the guard works either way)
+- [ ] Accept ADR 0007 (`proposed` today)
+- [ ] The strong control for human-only files (pipeline execution policy or CODEOWNERS with required approval)
+
 ## FINAL: strong human-only-files control
 Do this last, only after the pipeline, the Duo flows and Cloud Run work. Until then `human_only_files` is a weak backup control.
 - [ ] Preferred: a pipeline execution policy in a separate private project (for example `afaw-policies`) linked from Secure > Policies. Our role may not allow creating policies, so first ask in #transcend-hackathon.
