@@ -1,0 +1,11 @@
+{
+  "task_id": "task_065",
+  "files_touched": [
+    "scripts/cost_summary.py",
+    "tests/tooling/test_cost_summary.py"
+  ],
+  "summary": "The Duo cost log had no way to be totalled by flow. scripts/cost_summary.py reads the table of docs/submission/cost-log.md, groups the rows by What ran and sums credits (Delta), pipelines, job minutes, job seconds and retries. A cell that is not a number (human, null, empty) adds nothing and is counted as missing, never as zero. Prints a markdown table or JSON; exit 2 on a missing file or a file without the table. Sums use Decimal so decimals add exactly. 33 tests in tests/tooling/test_cost_summary.py, written first.",
+  "next": [
+    "Paste the output into the benchmark tables of docs/experiments.md once the human fills the credit columns"
+  ]
+}
