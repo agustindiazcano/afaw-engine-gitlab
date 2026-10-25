@@ -22,7 +22,7 @@ signed out of GitLab (the project is public, so everything below is visible with
 | Segment | Condition to include it | If the condition is false |
 |---|---|---|
 | A Duo flow producing a merge request or fixing a pipeline | A real session exists: a merge request or commits authored by a flow service account, visible in the project | Do not show or mention a flow as working. Say once: "Duo flows are configured in the repository; the first session is still to run." The hackathon requires using Duo, so run at least one session before submitting |
-| The live Cloud Run URL | `terraform apply` done, the `GCP_*` variables set, and a green `deploy_cloud_run` and `monitor_live` on `main` | Use the local run above |
+| The live Cloud Run URL | Met on Oct 24, 2026: `terraform apply` done, the `GCP_*` variables set, a green `deploy_cloud_run` and `monitor_live` on `main` (pipeline 2985631519). Check `/health` again right before recording | Use the local run above |
 | The merge guard line | Task 012 merged to `main` | Cut it |
 
 ## Check before you publish

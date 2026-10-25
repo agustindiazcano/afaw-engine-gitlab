@@ -13,7 +13,7 @@ request numbers and release tags of that project, read on 2026-10-24 (GMT-3).
 | Oct 24 | Repository imported into the GitLab project | MR !2 | Merged |
 | Oct 24 | Merge policy: the human approves the policy, the engine approves each merge (ADR 0007, task 008) | MR !3 | Merged; the ADR is `proposed` until the human accepts it |
 | Oct 24 | Nine-stage `.gitlab-ci.yml`, security gate, `human_only_files` weak control (task 009) | MR !4, release v0.9 | Merged |
-| Oct 24 | Read-only FastAPI service, Dockerfile, Terraform for Cloud Run and Workload Identity Federation, deploy jobs (task 013) | MR !5, release v0.15 | Merged; not deployed until a person applies the Terraform and sets the variables |
+| Oct 24 | Read-only FastAPI service, Dockerfile, Terraform for Cloud Run and Workload Identity Federation, deploy jobs (task 013) | MR !5, release v0.15 | Done: a person applied the Terraform and set the variables, and the pipeline of `main` deployed it (pipeline 2985631519) |
 | Oct 24 | Duo configuration, custom agent and custom flow sources, `duo_config` check (task 011) | MR !6, release v0.20 | Merged; the flows must be enabled in the GitLab UI by a person |
 | Oct 24 | Facts from the GitLab REST API v4: merge requests, pipelines, jobs, retries, job minutes; GitHub kept working (task 010) | MR !7, release v0.23 | Merged |
 | Oct 24 | Fix-attempt cap and automatic merge rule, off by default (task 012) | Branch `feat/task-012-merge-guardrails` | In review: <MR number and tag when merged> |
