@@ -11,14 +11,49 @@ import logging
 from pathlib import Path
 from typing import Annotated, Any
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import HTMLResponse, JSONResponse
+from pydantic import AfterValidator
 
 from afaw_web.search import search
 from afaw_web.settings import Settings
 
 log = logging.getLogger("afaw_web")
 VIEWS = ("metrics", "pending", "history")
+MIN_QUESTION, MAX_QUESTION = 1, 200
+QUESTION_LIMIT = (
+    f"The question: between {MIN_QUESTION} and {MAX_QUESTION} characters after trimming "
+    "leading and trailing whitespace; anything else is rejected with 422."
+)
+
+
+def _check_question_length(question: str) -> str:
+    """Return the question unchanged if its trimmed length is within the limit."""
+    if not MIN_QUESTION <= len(question.strip()) <= MAX_QUESTION:
+        raise ValueError(
+            f"must have between {MIN_QUESTION} and {MAX_QUESTION} characters "
+            "after trimming whitespace"
+        )
+    return question
+
+
+Question = Annotated[
+    str, AfterValidator(_check_question_length), Query(description=QUESTION_LIMIT)
+]
+
+
+async def _invalid_request(_: Request, exc: RequestValidationError) -> JSONResponse:
+    """A 422 whose messages start with the name of the offending parameter."""
+    detail = [
+        {
+            "loc": list(e["loc"]),
+            "msg": f"{e['loc'][-1]}: {str(e['msg']).removeprefix('Value error, ')}",
+            "type": e["type"],
+        }
+        for e in exc.errors()
+    ]
+    return JSONResponse({"detail": detail}, status_code=422)
 
 
 def _missing(data_dir: Path) -> list[str]:
@@ -30,6 +65,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     """Build the application over the data directory in ``settings``."""
     data_dir = (settings or Settings()).data_dir
     app = FastAPI(title="AFAW Hands-off", docs_url=None, redoc_url=None)
+    app.add_exception_handler(RequestValidationError, _invalid_request)  # type: ignore[arg-type]
 
     def unavailable(missing: list[str]) -> JSONResponse:
         log.error("data missing: %s", missing)
@@ -60,7 +96,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return _page(data_dir / "live" / "dashboard.html", unavailable)
 
     @app.get("/api/ask")
-    def ask(q: Annotated[str, Query(min_length=1, max_length=200)]) -> dict[str, Any]:
+    def ask(q: Question) -> dict[str, Any]:
         """Search the ADRs, gotchas and LASTCONTEXT; cite paths; copy lines verbatim."""
         hits = search(data_dir, q)
         return {
