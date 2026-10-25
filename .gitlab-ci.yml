@@ -374,3 +374,13 @@ monitor_live:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   script:
     - python -m scripts.check_live --url "$GCP_SERVICE_URL"
+
+# Counts the automatic fix attempts of the merge request (cap of 3) and applies the merge rule.
+# It merges only when the CI/CD variable AFAW_AUTO_MERGE is exactly "true" and AFAW_MERGE_TOKEN
+# is set; without them it only prints its verdict. See docs/merge-guard.md.
+merge_guard:
+  stage: monitor
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  script:
+    - python -m scripts.merge_guard --mr "$CI_MERGE_REQUEST_IID"

@@ -1,0 +1,15 @@
+{
+  "task_id": "task_012",
+  "files_touched": [
+    "scripts/merge_guard.py",
+    "tests/tooling/test_gitlab_ci.py",
+    "tests/tooling/test_merge_guard.py"
+  ],
+  "summary": "Deterministic parts of ADR 0007. scripts/merge_guard.py and the merge_guard job (stage monitor, merge request pipelines only, last to run). Cap of 3 automatic fix attempts: an attempt is a distinct commit pushed by a Duo flow service account (ids in AFAW_BOT_USER_IDS, resolved from GET /pipelines/:id because the list carries no user) after the first failed pipeline of the merge request; more than 3 fail the job (exit 1). GitLab documents no cap, and the job cannot stop a flow, only turn the merge request red. Merge rule: open, not draft, targets the default branch, no conflicts, blocking discussions resolved, latest pipeline for the head commit, every other job success (failed with allow_failure, skipped and manual do not count), red_check, mutation_gate and security_gate present. Exit 2 when it cannot decide, so nothing is merged. The merge is off unless AFAW_AUTO_MERGE is exactly true and AFAW_MERGE_TOKEN is set; it then calls PUT /merge_requests/:iid/merge with sha and auto_merge true (parameters read on docs.gitlab.com on 2026-10-24: sha must match the source branch HEAD, auto_merge merges when checks pass, 405/409/422 meaning), because the guard runs inside the pipeline. This path has never run against a real merge request. Tests: 42 in tests/tooling/test_merge_guard.py on recorded jobs of this project plus constructed pipelines (no flow has ever pushed to a merge request here); red_check reported the added tests failing on the old code. Gaps read from the public API on 2026-10-24: main allows Developers and Maintainers to push and merge, code owner approval is not required, and CODEOWNERS is the template placeholder '* @owner', which is the username of an unrelated GitLab account. Pipelines must succeed, skipped pipelines, thread resolution, approvals, push rules and the variables answered 401, so a person must check them (list in docs/merge-guard.md). A protected variable does not reach pipelines of unprotected branches, so merging from inside the pipeline needs an unprotected token; the alternative without a token in the pipeline is GitLab's merge-when-pipeline-succeeds set by a person. ADR 0007 stays proposed: only the human accepts it. AGENTS.md, state/config.json, state/equivalent_mutants.json and deploy/ are untouched.",
+  "next": [
+    "Human: check the Maintainer settings in docs/merge-guard.md, replace CODEOWNERS, set AFAW_BOT_USER_IDS, then accept ADR 0007",
+    "Human: decide whether to create AFAW_AUTO_MERGE and AFAW_MERGE_TOKEN; until then the guard only prints its verdict",
+    "First merge request produced by a Duo flow: confirm the attempt count on it",
+    "Later AGENTS.md merge request: reading rule, section 17.3 and 6.1 rewording, with the rebuilt paper PDF"
+  ]
+}

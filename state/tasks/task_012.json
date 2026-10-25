@@ -1,0 +1,12 @@
+{
+  "id": "task_012",
+  "title": "Merge guardrails: fix-attempt cap and automatic merge rule",
+  "role": "architect",
+  "type": "feature",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "feat/task-012-merge-guardrails",
+  "priority": 1,
+  "difficulty": 3,
+  "blocked_by": []
+}
