@@ -24,6 +24,24 @@ the history. Nothing here is an estimate. Rows are added only after the thing ha
 | `scripts.merge_guard` decision for the open merge request !13, with `AFAW_AUTO_MERGE` unset, once with `AFAW_BOT_USER_IDS` empty and once with `33073387` | 2026-10-24 23:50 | Both runs: `merge: yes`, 0 automatic fix attempts (cap 3), nothing merged. !13 is authored by a human; this shows the rule runs against real data, not a Duo merge request |
 | `GET /users?username=duo-fix-ci-cd-pipeline-gitlab-ai-hackathon&humans=true` (the lookup used by `scripts.human_only_files`) | 2026-10-24 23:50 | Empty list, so the service account counts as non-human even without `AFAW_BOT_USER_IDS`. The same lookup for `agustindiazcano` returns id 43344247 |
 
+## Merge requests merged on 2026-10-25
+
+Read from the public GitLab API on 2026-10-25. All six were merged by a person
+(`agustindiazcano`); the pipeline of each branch had status success when the last check ran.
+
+| Merge request | Merged (UTC) | What it brought |
+|---|---|---|
+| [!20](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/20) | 16:58 | Verified tool set of the Duo agents (task_038) |
+| [!21](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/21) | 16:58 | Identity rule by commit author and pipeline user (task_044) |
+| [!23](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/23) | 16:59 | Mutmut adapter and engine (task_046) |
+| [!25](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/25) | 16:59 | `src/afaw_web` as a critical path, minimum 60 (task_048). Merged before !24, which the planned order did not allow |
+| [!24](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/24) | 17:30 | The `mutation_gate` job runs mutmut (task_047) |
+| [!22](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/22) | 17:30 | Triage flow, its tool lists and the autohealing design (task_045) |
+
+None of these ran a Duo flow: they were written and merged by a person and an agent in a local
+session. They add no link to the hands-off table below. The `mutation_gate` job has not yet been
+observed on a change to `src/afaw_web`.
+
 ## Not yet observed
 
 | Item | State |
@@ -51,7 +69,7 @@ decision between Hands-off and Supervised is made from this table.
 | Automatic review | Not run | | | The merge requests are drafts and no trigger exists |
 | A failed pipeline opens an issue | Not run | | | The triage flow and the triggers do not exist yet ([`docs/autohealing.md`](../autohealing.md)) |
 | Fix CI/CD Pipeline Flow | Ran once, by hand | Pipeline [2985662569](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985662569) | 2026-10-24 23:46 | Launched by a person; decision `add_comment`, no commits. Not started by a trigger |
-| Merge when the gates are green | Not run | | | `AFAW_AUTO_MERGE` is not set; every merge so far was a person's (!14, !15). No tool that merges is documented |
+| Merge when the gates are green | Not run | | | `AFAW_AUTO_MERGE` is not set; every merge so far was a person's. `merge_guard` (task 012) merges through the API in continuous deployment mode and has never run it on a real merge request. Duo has no merge tool, but the merge does not depend on Duo |
 | Release, deploy, monitor | Ran after a person's merge | Pipeline [2985700049](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985700049) on `main` | 2026-10-25 00:10 | 18 jobs success, including `deploy_cloud_run`, `monitor` and `monitor_live` |
-| Summary comment on the issue | Not run | | | No documented event after a merge can start it |
+| Summary comment on the issue | Not run | | | No documented event after a merge can start it. A deterministic CI job with a project access token could post it ([`docs/duo.md`](../duo.md)); not built |
 

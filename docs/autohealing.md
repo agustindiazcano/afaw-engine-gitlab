@@ -22,7 +22,19 @@ Read on docs.gitlab.com on 2026-10-25.
 | A flow opens or comments on an issue | `create_issue` and `create_issue_note` | [Tools](https://docs.gitlab.com/user/duo_agent_platform/agents/tools/) |
 | A CI job opens or comments on an issue | `CI_JOB_TOKEN` cannot create an issue or a note on an issue | [Job token](https://docs.gitlab.com/ci/jobs/ci_job_token/) |
 | Start the Developer Flow with no click | Not documented. Assign, mention, the **Implement** button or a status change; a trigger on work item created does not start it | [Developer Flow](https://docs.gitlab.com/user/project/merge_requests/developer/) |
-| A tool that merges a merge request | None, and none sets auto-merge | [Tools](https://docs.gitlab.com/user/duo_agent_platform/agents/tools/) |
+| A Duo tool that merges a merge request, for a custom agent or flow | Not documented on the agent tools page. Duo Chat reports its own tool `gitlab_accept_merge_request` (parameters `sha`, `strategy` = `merge_when_checks_pass`, `merge_train` or `add_to_merge_train_when_checks_pass`, `squash`, `should_remove_source_branch`); the GitLab MCP server page documents `accept_merge_request` since GitLab 19.4, for external clients. The agent tool list read on 2026-10-25 (merge request tools: `add_merge_request_reviewers`, `build_review_merge_request_context`, `create_merge_request`, `create_merge_request_diff_note`, `create_merge_request_note`, `get_merge_request`, `gitlab_merge_request_search`, `link_vulnerability_to_merge_request`, `list_all_merge_request_notes`, `list_merge_request_diffs`, `update_merge_request`, plus `submit_mr_review`, `list_mr_discussions`, `reply_to_discussion`, `set_discussion_resolved`, `get_pipeline_errors`, `run_glql_query`) has **no tool that accepts or arms a merge**; `update_merge_request` can retarget, retitle or close; `gitlab_api_get` is read-only. So a Duo agent or flow cannot merge, and the merge stays with `merge_guard` and its token. The merge itself is done by `merge_guard` in this repository | [Tools](https://docs.gitlab.com/user/duo_agent_platform/agents/tools/), [MCP server tools](https://docs.gitlab.com/user/gitlab_duo/model_context_protocol/mcp_server_tools/), Duo Chat (not documentation) |
+| Arm auto-merge by API | `PUT /projects/:id/merge_requests/:iid/merge` with `auto_merge=true` (the call `merge_guard` makes). `sha` may be required by a group setting. The token scope is **not stated** in what was read; `api` is unverified. A job token cannot call it; composite-identity tokens are limited to `ai_workflows` and `mcp` | [Merge requests API](https://docs.gitlab.com/api/merge_requests/) |
+| Auto-merge by push option | `merge_request.auto_merge` (`merge_request.merge_when_pipeline_succeeds` is deprecated since 17.11), a `git push -o` option. Unknown whether the commit or branch API honours push options | [Stage, commit, and push](https://docs.gitlab.com/topics/git/commit/) |
+| Protected branch and the merging account | Merging needs the account under **Allowed to merge** or **Allowed to push and merge**; by default only Maintainers. Unknown which identity a composite-identity service account is checked as | [Protected branches](https://docs.gitlab.com/user/project/repository/branches/protected/) |
+| Trigger events on a merge request | `Merge request` with actions Marked ready, Approved, Created, Merge conflict; `Pipeline events` with Passed. Every one needs a human user; a bot, a service account or another flow cannot start it. Which user counts as the actor of a pipeline event is unknown | [Triggers](https://docs.gitlab.com/user/duo_agent_platform/triggers/) |
+| Leaving Draft without a person | The Developer Flow opens a draft and has no setting to open it ready. `/ready` does not work through `create_merge_request_note` or `update_work_item`. Removing `Draft:` through `update_merge_request` is an inference, **not verified** (experiment B). A flow that marks it ready cannot start a trigger | [Developer Flow](https://docs.gitlab.com/user/project/merge_requests/developer/), [Draft MRs](https://docs.gitlab.com/user/project/merge_requests/drafts/) |
+| A comment on the issue after the merge | `create_issue_note` is available to custom agents. No event runs after a merge (documented: Mention, Assign, Assign reviewer, Pipeline events, Merge request, Work item) | [Triggers](https://docs.gitlab.com/user/duo_agent_platform/triggers/) |
+| Fix CI/CD commits instead of suggesting | No setting found. In an MR pipeline it applies inline suggestions; outside the diff it opens a new MR; sometimes it only comments | [Fix pipeline](https://docs.gitlab.com/ci/pipelines/fix_pipeline/) |
+| Fields of the trigger form | Description; Event, Run when and per-event Instructions (4096 characters at most); Service account; Configuration source; for work items, Status and Type. No branch, label or user field, so `main` cannot be excluded | [Triggers](https://docs.gitlab.com/user/duo_agent_platform/triggers/) |
+
+These rows come from Duo Chat's answer of 2026-10-25, which tagged each one as documentation or as
+its own toolset. They were not re-read page by page here, except the tools page and the auto-merge
+page, which were fetched directly and agree.
 | Automatic review | Runs when a merge request is created and is not a draft, when a draft is marked ready, on a manual request, and on a push if **Start a new review on push** is on | [Duo in merge requests](https://docs.gitlab.com/user/project/merge_requests/duo_in_merge_requests/) |
 
 Three consequences, each to be confirmed by running it:
@@ -34,6 +46,34 @@ Three consequences, each to be confirmed by running it:
    path with no person is the new merge request it opens for a pipeline with no merge request.
 3. There is no filter that keeps a trigger away from `main`. A failure on `main` starts the repair
    as well, and the fix arrives as a new merge request, never as a push.
+
+## Delivery or deployment: the merge is a setting, not a click
+
+Duo has no tool that merges (see the table above), but the repository does not need one: `merge_guard` runs in
+the merge request pipeline and merges through the API when its verdict is yes. Both modes are
+supported; the mode is the CI/CD variable `AFAW_AUTO_MERGE`.
+
+| Mode | `AFAW_AUTO_MERGE` | Who merges | Status |
+|---|---|---|---|
+| Continuous delivery | unset or not `true` | A person, after `merge_guard` prints `merge: yes` | Every merge so far (!1 to !25) |
+| Continuous deployment | `true`, with `AFAW_MERGE_TOKEN` and `AFAW_BOT_USER_IDS` set | `merge_guard`, with no person, then release, deploy and monitor run on `main` | Code and tests exist; **never run on a real merge request** |
+
+Only the token is a secret. `AFAW_AUTO_MERGE` (the literal `true`) and `AFAW_BOT_USER_IDS` (ids
+separated by commas) must not be masked: GitLab masks only values of 8 or more characters from a
+restricted alphabet, with no comma, so a masked `true` is refused and `truetrue` is read as off,
+because the guard compares with exactly `true`. Leave both variables unmasked and unprotected.
+
+The verdict is the same in both modes: green pipeline including `red_check`, `mutation_gate` and
+`security_gate`, no protected file, no draft, cap of 3 automatic fixes, and a pipeline user and
+commit authors that are all service accounts. Only the last step differs.
+
+The token is the cost of continuous deployment: `AFAW_MERGE_TOKEN` must be allowed to merge, so
+it should be a project access token with the Developer role and the `api` scope, masked. It cannot
+be protected: a protected variable is not passed to merge request pipelines of unprotected
+branches, so any pipeline of the project can read it ([`merge-guard.md`](merge-guard.md)). Two
+more conditions: ADR 0007 must be `accepted` by the human, and the merge request must be made by
+a Duo flow, because `merge_guard` never merges a person's merge request. The human decides whether
+to create the token.
 
 ## The smallest design
 
