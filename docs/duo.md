@@ -30,11 +30,31 @@ custom flow covers only step 8.
 | `.gitlab/duo/mr-review-instructions.yaml` | AFAW review rules (TDD, no estimated numbers, English, human-only files, least privilege) | Code Review Flow. Guidance for the reviewer, not enforced policy |
 | `.agents/agents/afaw-reviewer.md` | Workspace subagent that checks a change against `AGENTS.md`; tools `read_file` and `grep` only | Developer Flow; an experiment, read from the default branch only |
 | `duo/custom-flow.yaml` | Source of the custom flow, pasted in **AI > Flows > New flow** | Not read by GitLab from here |
-| `duo/custom-agent.md` | Source of the custom agent "AFAW auditor" (read-only), pasted in **AI > Agents > New agent** | Not read by GitLab from here |
-| `scripts/check_duo_config.py` | CI check (`duo_config` job) that these files use only documented keys, tools and limits | CI |
+| `duo/custom-agent.md` | Source of the custom agent "AFAW auditor" (reads only; 22 read tools, plus two optional note tools), pasted in **AI > Agents > New agent** | Not read by GitLab from here |
+| `duo/custom-planner.md` | Source of the custom agent "AFAW planner" (9 tools; it leaves a plan as a note on an issue and creates no issue), pasted in **AI > Agents > New agent** | Not read by GitLab from here |
+| `scripts/check_duo_config.py` | CI check (`duo_config` job) that these files use only documented keys, tools and limits, and that each custom agent keeps to its allow list and uses no forbidden or IDE-only tool | CI |
 
-The custom agent and the custom flow are created in the UI because the documentation describes no
+The custom agents and the custom flow are created in the UI because the documentation describes no
 repository file for them. The files in `duo/` are the reviewed source, not something GitLab loads.
+
+## Tools of the custom agents
+
+Names and availability were checked on docs.gitlab.com/user/duo_agent_platform/agents/tools on
+2026-10-25: all 44 tools below exist; six are available only in the IDE.
+
+| Agent | Tools | Optional |
+|---|---|---|
+| AFAW auditor | `get_merge_request`, `list_merge_request_diffs`, `build_review_merge_request_context`, `list_all_merge_request_notes`, `list_mr_discussions`, `get_pipeline_errors`, `get_pipeline_failing_jobs`, `get_job_logs`, `ci_linter`, `get_repository_file`, `get_repository_files`, `list_repository_tree`, `gitlab_blob_search`, `get_commit`, `get_commit_diff`, `list_commits`, `get_issue`, `list_issues`, `list_security_findings`, `get_security_finding_details`, `list_vulnerabilities`, `gitlab_api_get` | `create_merge_request_note`, `create_merge_request_diff_note`: findings go in the chat, or as a merge request note when these are selected |
+| AFAW planner | `create_plan`, `add_new_task`, `set_task_status`, `get_plan`, `get_issue`, `list_issues`, `get_repository_file`, `list_repository_tree`, `create_issue_note` | None |
+
+| Group | Tools | Rule |
+|---|---|---|
+| IDE only | `find_files`, `grep`, `read_file`, `read_files`, `list_dir`, `run_command` | Not used by the custom agents, which run from the Web UI |
+| Forbidden for both agents | `create_commit`, `create_branch`, `create_merge_request`, `update_merge_request`, `create_issue`, `update_issue`, `confirm_vulnerability`, `dismiss_vulnerability`, `revert_to_detected_vulnerability`, `update_vulnerability_severity`, `submit_mr_review`, `set_discussion_resolved`, `run_tests` | They change code, a merge request, an issue or a vulnerability, or run tests. This is the project's rule, not something the tools page states |
+
+The tools page marks the Read or Write behavior of no tool; that column is this project's reading of
+each tool's description. `scripts/check_duo_config.py` enforces both lists on `duo/custom-agent.md`
+and `duo/custom-planner.md`.
 
 ## What a person has to do (and our role may not allow)
 
@@ -43,7 +63,7 @@ repository file for them. The files in `duo/` are the reviewed source, not somet
 | 1 | 🔴 | Turn on **Allow flow execution** and **Allow foundational flows**, and the individual flows **Developer**, **Code Review** and **Fix CI/CD Pipeline**, under **Settings > GitLab Duo** of the **top-level group** | Owner of the top-level group. Here that is `gitlab-ai-hackathon`, which is not ours; the organizers may already have set it. Check in the project: **Settings > General > GitLab Duo** |
 | 2 | 🔴 | Have a runner for the flows: GitLab hosted runners enabled for the project, or one tagged `gitlab--duo` with a Docker-capable executor | Maintainer. Hosted runners already run our pipelines |
 | 3 | 🔴 | Push rules that allow the flows' service account | Maintainer. Push rules need Premium or Ultimate |
-| 4 | 🟡 | Create the custom agent (**AI > Agents**) and the custom flow (**AI > Flows**), enable the flow in the project and add its trigger | Maintainer or Owner |
+| 4 | 🟡 | Create the custom agents, the AFAW auditor and the AFAW planner (**AI > Agents**), and the custom flow (**AI > Flows**), enable the flow in the project and add its trigger | Maintainer or Owner |
 | 5 | 🟡 | Create the trigger for Fix CI/CD Pipeline (**AI > Triggers**, event **Pipeline events**, action **Failed**) | Maintainer or Owner; triggers need Premium or Ultimate |
 | 6 | 🟡 | Read the ids of the flows' service accounts and put them in the group-level CI/CD variable `AFAW_BOT_USER_IDS` (comma-separated), so `human_only_files` treats them as non-human | Maintainer |
 | 7 | 🟢 | Credits: the account has 500 GitLab Credits a month and each session spends them | Owner |
@@ -78,3 +98,5 @@ Not verified until a human enables the flows and a real session runs:
 | Whether the flows' service accounts are excluded by the `humans=true` user filter | Until confirmed, `AFAW_BOT_USER_IDS` lists them explicitly |
 | The tier of the namespace | Push rules, triggers and `AGENTS.md` customization need Premium or Ultimate |
 | `ui_log_events` and the optional component keys | Not used: only keys named in the documentation appear in the flow |
+| `read_file` and `grep` in `.agents/agents/afaw-reviewer.md` | The tools page lists both as IDE-only. The subagent follows the documented example, but whether the Developer Flow's sandbox provides them is not verified; a session that does not start would show it |
+| The merge request author of a flow | With composite identity the merge request is attributed to the person who triggered the flow and the commits to the service account ([Composite identity](https://docs.gitlab.com/user/duo_agent_platform/composite_identity/)). How `human_only_files` sees this is confirmed only with the first merge request of a flow |

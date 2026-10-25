@@ -1,0 +1,13 @@
+{
+  "task_id": "task_038",
+  "files_touched": [
+    "scripts/check_duo_config.py",
+    "tests/tooling/test_check_duo_config.py"
+  ],
+  "summary": "Rewrites the AFAW auditor spec (duo/custom-agent.md) with the 22 read tools of the Web UI and two optional note tools, states that find_files, grep, read_file, read_files, list_dir and run_command are IDE-only and not used, lists the tools forbidden for the agent, and fixes the system prompt: findings go in the chat, or as a merge request note when the comment tools are selected. Adds the AFAW planner spec (duo/custom-planner.md, 9 tools, its own system prompt). scripts/check_duo_config.py now enforces the allow list of each agent, the forbidden list and the IDE-only list, and requires both spec files; its tests were written first and failed on the old code. Verified on docs.gitlab.com/user/duo_agent_platform/agents/tools on 2026-10-25: all 44 names exist, six are IDE-only; the page marks no tool as read or write, so that classification and the forbidden list are the project's. docs/duo.md records the tool tables and two open points: whether the Developer Flow sandbox provides read_file and grep for the workspace subagent, and how human_only_files sees a merge request attributed to the person who triggered a flow.",
+  "next": [
+    "Human: create the two agents in AI > Agents from the spec files and report any tool the editor refuses",
+    "After the first merge request of a flow, confirm the author and pusher that human_only_files sees",
+    "README rows for the planner and auditor stay Planned until a session exists"
+  ]
+}
