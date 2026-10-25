@@ -77,7 +77,8 @@ AUDITOR_TOOLS = frozenset(
     get_pipeline_failing_jobs get_job_logs ci_linter get_repository_file get_repository_files
     list_repository_tree gitlab_blob_search get_commit get_commit_diff list_commits get_issue
     list_issues list_security_findings get_security_finding_details list_vulnerabilities
-    gitlab_api_get""".split()
+    gitlab_api_get get_commit_comments get_failing_bridge_jobs get_issue_note
+    gitlab_issue_search""".split()
 )
 AUDITOR_OPTIONAL_TOOLS = frozenset({"create_merge_request_note", "create_merge_request_diff_note"})
 PLANNER_TOOLS = frozenset(

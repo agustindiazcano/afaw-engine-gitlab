@@ -243,3 +243,30 @@ def test_a_missing_planner_spec_fails_loudly(tmp_path, capsys: pytest.CaptureFix
     (tmp_path / "duo" / "custom-planner.md").unlink(missing_ok=True)
     assert duo.main(["--root", str(tmp_path)]) == 1
     assert "duo/custom-planner.md does not exist" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize(
+    "tool",
+    ["get_commit_comments", "get_failing_bridge_jobs", "get_issue_note", "gitlab_issue_search"],
+)
+def test_the_auditor_may_use_the_documented_read_tools_added_after_review(tool: str) -> None:
+    problems = duo.check_agent_spec(
+        "auditor", spec(["get_issue", tool]), duo.AUDITOR_TOOLS, duo.AUDITOR_OPTIONAL_TOOLS
+    )
+    assert problems == []
+
+
+@pytest.mark.parametrize("tool", ["get_job", "get_pipeline", "get_merge_request_conflicts"])
+def test_a_tool_the_documentation_does_not_list_is_rejected_until_it_is_verified(
+    tool: str,
+) -> None:
+    problems = duo.check_agent_spec(
+        "auditor", spec(["get_issue", tool]), duo.AUDITOR_TOOLS, duo.AUDITOR_OPTIONAL_TOOLS
+    )
+    assert any(tool in p and "unknown tool" in p for p in problems)
+
+
+def test_the_auditor_prompt_does_not_claim_to_run_tests() -> None:
+    text = (REPO_ROOT / "duo" / "custom-agent.md").read_text(encoding="utf-8")
+    assert "You cannot run tests yourself" in text
+    assert "not verified" in text
