@@ -1,0 +1,13 @@
+{
+  "id": "task_054",
+  "title": "Raise the coverage of scripts/red_check.py from 50 percent (EXP-08)",
+  "role": "architect",
+  "type": "chore",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "chore/task-054-red-check-coverage",
+  "priority": 3,
+  "difficulty": 2,
+  "blocked_by": [],
+  "notes": "Tests only: adds tests/tooling/test_red_check_unit.py; no file under src/ or scripts/ changes."
+}

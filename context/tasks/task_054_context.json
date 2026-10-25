@@ -1,0 +1,9 @@
+{
+  "task_id": "task_054",
+  "files_touched": [],
+  "summary": "Adds tests/tooling/test_red_check_unit.py: 45 unit tests of scripts/red_check.py with git and pytest subprocesses mocked. They assert exact values, messages and exit codes (0, 1, 2) for _git (timeout and error mapping), test_ids, _junit_key, not_red, characterization detection, _is_test_file, skip_declaration, run_old (command line, copied support files, cleanup, missing report) and main. Measured locally with pytest-cov (line and branch): scripts/red_check.py 50 percent -> 99 percent (168 statements, 1 missed: the __main__ guard; the existing end-to-end tests run it in a subprocess, which coverage does not trace). No defect found in the code under test, so there is no xfail test. The pipeline measurement on the merge request is the number that counts.",
+  "next": [
+    "Read the coverage of scripts/red_check.py from the pipeline on the merge request and compare it with the 50 percent baseline",
+    "Human: the red_check job will report these tests as passing on the old code (they cover existing behavior); decide whether to declare the task tests-only or accept the characterization declaration"
+  ]
+}
