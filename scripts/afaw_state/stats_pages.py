@@ -33,6 +33,7 @@ svg.bars text{fill:var(--ink);font:12px system-ui,-apple-system,"Segoe UI",sans-
 svg.bars .lab{fill:var(--muted)}
 svg.bars .bar.s1{fill:var(--series-1)}
 svg.bars .bar.s2{fill:var(--series-2)}
+table.chaos td{white-space:normal;vertical-align:top;min-width:140px}
 details.table{margin-top:8px}
 details.table summary{cursor:pointer;color:var(--muted)}
 .note{color:var(--muted)}
@@ -129,6 +130,18 @@ def chart(
     )
 
 
+def chaos_table(rows: Sequence[Mapping[str, Any]]) -> str:
+    """Faults injected on purpose: what was expected, what was seen, and whether it held."""
+    head = "".join(f"<th>{h}</th>" for h in ("Id", "Fault", "Expected", "Observed", "Result"))
+    body = "".join(
+        "<tr>"
+        + "".join(f"<td>{escape(str(r[k]))}</td>" for k in ("id", "fault", "expected", "observed"))
+        + f"<td>{'Held' if r['held'] else 'Did not hold'}</td></tr>"
+        for r in rows
+    )
+    return f'<div class="scroll"><table class="chaos"><tr>{head}</tr>{body}</table></div>'
+
+
 def _tile(value: str, label: str) -> str:
     return f'<div class="tile"><b>{escape(value)}</b><span>{escape(label)}</span></div>'
 
@@ -207,6 +220,7 @@ def experiments_page(data: Mapping[str, Any]) -> str:
     body = (
         f'<div class="tiles">{tiles}</div><h2>Charts</h2>{charts}'
         f"<h2>Merges and builds</h2>{merges}{hard}"
+        f"<h2>Chaos and security</h2>{chaos_table(data['chaos'])}"
         f'<p class="note">{escape(data["note"])}</p>'
     )
     return _page("Experiments and benchmarks", f"Measured on {data['as_of']}.", body)

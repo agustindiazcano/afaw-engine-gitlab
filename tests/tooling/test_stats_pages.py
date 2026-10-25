@@ -108,7 +108,7 @@ def test_the_experiments_page_has_the_project_name_nav_and_author_footer(experim
 def test_the_experiments_page_shows_the_headline_numbers(experiments: str) -> None:
     assert "39 of 39" in experiments  # hidden acceptance tests passed
     assert "3 of 3" in experiments  # planted defects repaired
-    assert "156 of 500" in experiments  # credits, read by the human
+    assert "174.33 of 500" in experiments  # credits, read by the human
 
 
 def test_the_experiments_page_has_the_three_charts_and_the_merge_table(experiments: str) -> None:
@@ -126,6 +126,30 @@ def test_the_experiments_page_names_every_source(experiments: str, data: dict[st
 def test_the_experiments_page_has_no_script_and_no_remote_resource(experiments: str) -> None:
     assert "<script" not in experiments
     assert "http://" not in experiments and "src=" not in experiments
+
+
+def test_every_chaos_row_says_what_was_expected_and_what_was_seen(data: dict[str, Any]) -> None:
+    assert data["chaos"]
+    for row in data["chaos"]:
+        assert all(row[k] for k in ("id", "fault", "expected", "observed"))
+        assert isinstance(row["held"], bool)
+
+
+def test_the_experiments_page_lists_the_chaos_and_security_results(experiments: str) -> None:
+    assert "Chaos and security" in experiments
+    for ident in ("C1", "C3", "S1"):
+        assert f"<td>{ident}</td>" in experiments
+    assert "Held" in experiments
+
+
+def test_the_chaos_table_shows_failures_as_failures() -> None:
+    rows = [
+        {"id": "X1", "fault": "f", "expected": "e", "observed": "o", "held": False},
+        {"id": "X2", "fault": "f", "expected": "e", "observed": "o", "held": True},
+    ]
+    html = stats_pages.chaos_table(rows)
+    assert "Did not hold" in html and "Held" in html
+    assert html.index("X1") < html.index("Did not hold") < html.index("X2")
 
 
 # ---- the environment page
