@@ -1,0 +1,8 @@
+{
+  "task_id": "task_055",
+  "files_touched": [],
+  "summary": "Adds in-process tests for the entry points of scripts/check_docs.py and scripts/build_state.py (experiment EXP-08, issue 10): exit codes, exact stderr and stdout messages, the as-of time zone check, the facts file, the foreign build directory refusal and the __main__ guard. No file under src/ or scripts/ changed and no defect was found.",
+  "next": [
+    "Read the new coverage of scripts/check_docs.py and scripts/build_state.py from the pipeline on the merge request"
+  ]
+}
