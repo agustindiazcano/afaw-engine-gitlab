@@ -11,7 +11,7 @@ High-level roadmap and pending tasks of AFAW Hands-off, a derived variant of AFA
 ## Phase 1: Valid submission
 - [x] Task 008: document the merge policy (ADR 0007, `AGENTS.md`, README, this roadmap)
 - [x] Task 009: `.gitlab-ci.yml` with the nine stages (plan, create, verify, secure, govern, package, configure, release, monitor), GitLab SAST and secret detection in `secure`
-- [ ] Task 010: `collect_facts.py` with the GitLab REST API v4, GitHub kept working
+- [x] Task 010: `collect_facts.py` with the GitLab REST API v4, GitHub kept working (see [`docs/facts.md`](docs/facts.md))
 
 A valid submission exists after tasks 009 and 010.
 
@@ -21,6 +21,7 @@ A valid submission exists after tasks 009 and 010.
   - [ ] Human: enable the foundational flows for the top-level group, create the custom agent and flow in the UI, add the triggers, set `AFAW_BOT_USER_IDS` (steps and required roles in `docs/duo.md`)
   - [ ] First real sessions: Developer on an issue, a failed pipeline fixed by the Fix CI/CD Pipeline Flow, a review by the Code Review Flow; keep the failed pipelines in the history for the video
 - [ ] Task 012: guardrails and merge policy (human-only files, 3-attempt cap, auto-merge rule); report gaps in the GitLab tier
+  - [ ] Add to the first line of `AGENTS.md` that this repository is `afaw-engine-gitlab` and lives on GitLab (`CLAUDE.md` already says it).
   - [ ] Add to `AGENTS.md` that an agent always reads `LASTCONTEXT.md` and `PENDING.md` before anything else (section 1.2 says it only for the session-start hook).
   - [ ] Fix the overclaim in `AGENTS.md` section 17.3 ("guarded by CI (the govern job)"): `human_only_files` is a weak backup control. Regenerate `docs/paper/afaw.pdf` in the same merge request; `paper_pdf` keeps requiring it.
   - [ ] Add a TeX Live job to rebuild the paper PDF (there is no `paper_build` job until then).

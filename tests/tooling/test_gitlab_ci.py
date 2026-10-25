@@ -215,6 +215,13 @@ def test_monitor_collects_facts_and_rebuilds_the_dashboard(ci: dict[str, Any]) -
     assert "build/" in str(ci["monitor"]["artifacts"]["paths"])
 
 
+def test_monitor_always_collects_facts_on_gitlab(ci: dict[str, Any]) -> None:
+    script = _script(ci["monitor"])
+    assert "NOTICE" not in script and "GITHUB_REPOSITORY" not in script
+    assert "python -m scripts.collect_facts" in script
+    assert "--facts build/facts.json" in script
+
+
 def test_human_only_files_job_is_a_labelled_weak_control(ci: dict[str, Any]) -> None:
     job = ci["human_only_files"]
     assert job["stage"] == "govern" and "scripts.human_only_files" in _script(job)

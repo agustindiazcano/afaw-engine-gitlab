@@ -41,7 +41,7 @@ Expected, not measured: no figure below has been measured yet.
 |---|---|---|---|
 | Merge | A human approves every pull request | The human approves the **policy**; the deterministic engine approves **each merge** ([ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md)) | Policy documented; the automatic merge rule is Planned (task 012). Until then a human merges |
 | Measuring | The AI decides, the engine measures | Unchanged | Done |
-| Forge | GitHub | GitLab (REST API v4); the GitHub path is kept | In progress (task 010: GitLab facts) |
+| Forge | GitHub | GitLab (REST API v4); the GitHub path is kept | Done for facts: they are read from the GitLab API ([`docs/facts.md`](docs/facts.md), task 010) |
 | Agents | Coding agents that open pull requests | GitLab Duo flows, configured to run under a group service account instead of a personal token ([`docs/duo.md`](docs/duo.md)) | Configuration merged; no flow has run yet |
 | Guardrails | Human reviews each diff | Human-only files (a weak control, see [limits](#guardrails-and-known-limits)) and a red-first check that a new test fails on the old code | Done |
 | | | Cap of 3 automatic fix attempts per merge request, merge only when the full pipeline is green | Planned (task 012) |
@@ -92,7 +92,7 @@ flowchart LR
 | package | `package_docker` (service `Dockerfile`); `package_buildah` as the fallback, selected with `PACKAGE_BUILDER=buildah` | GitLab Container Registry | Done for `package_docker`; the Buildah path has not run | 009, 013 |
 | configure | `check_configuration` (`check_ci_config`: config schema and CI variables, by name only), `terraform_validate` | Protected CI/CD variables | Merged, not deployed: `check_configuration` fails on `main` until a human sets the `GCP_*` variables | 009, 013 |
 | release | `release` (`glab`), `publish_image` and `deploy_cloud_run` (`gcp_access_token.sh`, `gcloud run deploy`) | `release:` keyword (a GitLab Release per pipeline on `main`); `id_tokens` with Workload Identity Federation | `release` Done; `publish_image` and `deploy_cloud_run` Merged, not deployed | 009, 013 |
-| monitor | `monitor` (`collect_facts`, `build_state`), `monitor_live` (`check_live`: fails if live `/health` or `/api/state` does not answer) | Job artifacts | In progress: `monitor` builds the dashboard without measured facts until task 010 is merged; `monitor_live` needs the deploy | 009, 010, 013 |
+| monitor | `monitor` (`collect_facts`, `build_state`), `monitor_live` (`check_live`: fails if live `/health` or `/api/state` does not answer) | Job artifacts | `monitor` Done (it runs `collect_facts` on the GitLab API; it ran in a branch pipeline and is skipped on `main` while `main` is red); `monitor_live` Merged, not deployed | 009, 010, 013 |
 
 Verified in docs.gitlab.com (Oct 24, 2026): the SAST and secret-detection templates run in the `test` stage and only in branch pipelines by default, so `.gitlab-ci.yml` moves them to `secure` and also runs them in merge request pipelines. Basic Semgrep SAST and the secret-detection JSON report are in every tier; findings in the merge request and Advanced SAST need Ultimate. Kaniko is marked as no longer maintained, so Buildah is the fallback.
 
@@ -117,7 +117,7 @@ Verified in docs.gitlab.com (Oct 24, 2026): the SAST and secret-detection templa
 - **Verification gates:** red-first check (a new test must fail on the old code), mutation gate on the diff, lint, strict typing, tests, in parallel.
 - **Security gate:** GitLab SAST and secret detection, with a script that turns their reports into a blocking decision.
 - **Governance:** human-only files (`.gitlab-ci.yml`, `AGENTS.md`, `state/equivalent_mutants.json`, `deploy/`, and the mutation and gate settings in `state/config.json`), merge requests judged by the identity of their author and of the pusher, a task file and a delta per task, decision records (ADRs).
-- **Derived state:** task board, metrics, traffic lights, `LASTCONTEXT.md` and a static dashboard, rebuilt from git and the forge API and never committed. Reading the GitLab API is task 010 (In progress).
+- **Derived state:** task board, metrics, traffic lights, `LASTCONTEXT.md` and a static dashboard, rebuilt from git and the forge API and never committed. Reading the GitLab API is Done (task 010, [`docs/facts.md`](docs/facts.md)).
 - **Read-only service (`src/afaw_web`):** `/`, `/live/`, `/health`, `/api/state` (derived metrics verbatim), and `/api/ask`, a deterministic file search that cites paths and copies measured numbers verbatim. No language model call, GET only.
 - **Deploy:** Terraform for Cloud Run (public, minimum 0 and maximum 2 instances), Artifact Registry, Workload Identity Federation from GitLab OIDC, no JSON keys. Merged, not deployed.
 
@@ -147,7 +147,7 @@ flowchart TB
 - `main` is red on purpose until a human runs `terraform apply` and sets the protected `GCP_*` CI/CD variables: `check_configuration` and `publish_image` fail without them, and `deploy_cloud_run`, `monitor` and `monitor_live` are then skipped. Steps: [`docs/google-cloud.md`](docs/google-cloud.md).
 - Security scanners do not block on lower severities; those are counted and printed.
 - The account has 500 GitLab Credits per month, which bounds how many flow runs fit ([ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md)).
-- `collect_facts` reads the GitLab REST API v4 only from task 010; until it is merged, `monitor` builds the dashboard without measured facts, prints a notice and the traffic lights show no data.
+- `collect_facts` reads the GitLab REST API v4. Tasks 001 to 006 and 999 have no facts (their branches were never merge requests in this project), tasks 007 and 008 have no CI facts (no pipeline existed before the pipeline of task 009), and `started_at` of task 007 comes from the imported history, so its lead time is not a real working time. `monitor` is skipped on `main` while `main` is red.
 - Branch protection, approvals and group settings of the GitLab project are set by its maintainers; this repository does not verify them.
 - `/api/ask` is a deterministic search; it does not generate answers.
 - The paper PDF is not rebuilt in this repository's CI: changes to `AGENTS.md` are batched in one later merge request that also rebuilds `docs/paper/afaw.pdf`.
@@ -157,7 +157,7 @@ flowchart TB
 
 Design choice: the agent runs only the test it is writing, and the full check suite runs once in CI, instead of an agent running the whole suite locally and retrying with its whole context. The Cloud Run service is configured with a minimum of 0 instances and a maximum of 2.
 
-Intended metric: Software Carbon Intensity, `SCI = (O + M) per R` with `O = E x I`, as the Green Software Foundation specification defines it (E energy in kWh, I carbon intensity in gCO2eq per kWh, M embodied emissions, R the functional unit). Here R is one merged merge request. Inputs task 010 captures per merge request: CI job seconds and minutes, pipelines and retries (In progress). Inputs we must assume and declare: runner power draw, grid carbon intensity, embodied emissions. The ISO number of the specification is not stated here because it was not confirmed.
+Intended metric: Software Carbon Intensity, `SCI = (O + M) per R` with `O = E x I`, as the Green Software Foundation specification defines it (E energy in kWh, I carbon intensity in gCO2eq per kWh, M embodied emissions, R the functional unit). Here R is one merged merge request. Inputs task 010 captures per merge request: CI job seconds and minutes, pipelines and retries (Done). Inputs we must assume and declare: runner power draw, grid carbon intensity, embodied emissions. The ISO number of the specification is not stated here because it was not confirmed.
 
 Status: **not yet measured.** Gains described anywhere in this README are expected, not measured. The Most Environmentally Impactful prize is opt-in and will only be requested if the experiment in the ADR (task 015, Planned) is completed with its assumptions listed.
 
@@ -174,7 +174,7 @@ The base method was committed on Sep 29 and 30, 2026. Since Oct 5, from `git log
 | Oct 24 | Nine-stage pipeline and security gate (task 009) | MR !4, release v0.9 | Done |
 | Oct 24 | Read-only service and Terraform for Cloud Run (task 013) | MR !5, release v0.15 | Merged, not deployed |
 | Oct 24 | Duo configuration, custom agent and flow sources (task 011) | MR !6, release v0.20 | Merged; the flows must be enabled by a person |
-| Oct 24 | GitLab fact collection (task 010) | Branch `feat/task-010-gitlab-facts` pushed, not merged | In progress |
+| Oct 24 | GitLab fact collection (task 010) | MR !7, release v0.23 | Done |
 | pending | Merge guardrails and automatic merge rule (task 012) | | Planned |
 | pending | Demo script and Devpost text (task 014) | | Planned |
 | pending | SCI experiment (task 015) | | Planned, conditional |
