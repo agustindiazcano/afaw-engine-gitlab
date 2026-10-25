@@ -1,0 +1,10 @@
+{
+  "task_id": "task_048",
+  "files_touched": [],
+  "summary": "Adds src/afaw_web/ to mutation_critical_paths and sets mutation_min_score to 60 in state/config.json, a human-only file. The minimum comes from the first measurement of mutmut 3.8.0 on the CI runner (docs/submission/mutation-tools-measurement.md): app.py 62.2 percent (28 of 45 mutants), search.py 78.0 percent (46 of 59); 60 is the weakest score rounded down with a margin of 2.2 points. The minimum is one value for every required file, so it also lowers the bar for src/back/domain/ and src/back/security/ from 80 to 60; those folders do not exist in this repository today. The human reviews this change. It must be merged after task_046 and task_047: with the path set and no job running mutmut, every change to src/afaw_web would fail for lack of results. The gate has not yet run on a real merge request. After !16 and !17 (which change app.py) merge, re-measure and consider raising the minimum.",
+  "next": [
+    "Human: review the 60 and the lowered bar for the old paths, then merge after task_047",
+    "Re-measure app.py after !16 and !17 merge",
+    "Write tests that kill the surviving mutants, then raise the minimum"
+  ]
+}
