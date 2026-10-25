@@ -1,0 +1,6 @@
+{
+  "task_id": "task_100",
+  "files_touched": [],
+  "summary": "scripts/check_ci_config.py prints one line, `variables: N of M set`, after the per-variable lines. M counts the variables checked on the current ref (required, the GCP ones only on protected refs, and the optional one); variables reported as not checked are left out. Names only, and the exit code is unchanged. Tests use a synthetic environment.",
+  "next": []
+}
