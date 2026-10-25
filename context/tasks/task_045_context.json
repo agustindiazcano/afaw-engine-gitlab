@@ -1,0 +1,14 @@
+{
+  "task_id": "task_045",
+  "files_touched": [
+    "scripts/check_duo_config.py",
+    "tests/tooling/test_check_duo_config.py"
+  ],
+  "summary": "Autohealing, design and the parts that live in the repository. duo/triage-flow.yaml is a custom flow for a trigger on Pipeline events > Failed: it finds the latest failed pipeline with a read-only API call, reads the failing jobs and their logs, and opens one issue per job and short sha titled 'autoheal: <job> @ <sha8>' (or adds a note to the open one), at most 5 per run. scripts/check_duo_config.py gains per-flow allow and forbidden lists (check_flow takes the file name, an allow list and a forbidden list): the triage flow may use gitlab_api_get, get_pipeline_failing_jobs, get_job_logs, list_issues, create_issue and create_issue_note and nothing that changes code, a merge request, an existing issue or a vulnerability; the older flow still may not create an issue. Tests were written first. docs/autohealing.md records what docs.gitlab.com allows (read 2026-10-25), the two-trigger design, loop protection, the UI steps with how to know each worked, and three experiments (a merging agent, clearing Draft, an issue template with /assign). The issue template .gitlab/issue_templates/duo-feature.md ends with /assign to the Duo Developer account. docs/submission/evidence.md gains a link-by-link table of what ran, with nothing marked Hands-off. Not verified and not run: the triggers, the triage flow, that create_issue applies a label, that a quick action in a tool-created issue runs, that a pipeline pushed by a person is the event a trigger sees, and any tool that merges (the tools page lists none). This task is stacked on task_038 (same check_duo_config.py): merge that one first.",
+  "next": [
+    "Human: create the label afaw-autoheal, the AFAW triage flow and the two Pipeline failed triggers in the UI, then report the form fields",
+    "Human: run experiments A, B and C of docs/autohealing.md and report the results",
+    "Provoke one failure on a branch with no merge request and record every link in docs/submission/evidence.md",
+    "Update the README Hands-off status only with that evidence"
+  ]
+}

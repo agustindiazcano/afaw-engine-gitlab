@@ -32,3 +32,26 @@ the history. Nothing here is an estimate. Rows are added only after the thing ha
 | Developer Flow session, Code Review Flow session | None seen yet |
 | Automatic merge by `merge_guard` | Off (`AFAW_AUTO_MERGE` is not set); no merge request has been merged by it |
 | GitLab Credits used | To be filled by the human from the GitLab UI |
+
+## Hands-off loop, link by link
+
+Nothing is marked Hands-off. Each link says whether it ran, with the link, the date (GMT-3) and the
+result, read from the public GitLab API on 2026-10-25. A link that did not run says so. The
+decision between Hands-off and Supervised is made from this table.
+
+| Link | Ran | Evidence | Date | Result |
+|---|---|---|---|---|
+| A person creates the issue | Ran | Issues #2, #3, #4, #5 | 2026-10-25 | By design a person's step |
+| The Developer Flow starts | Ran, started by a person | Pipelines [2985781520](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985781520), [2985787398](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985787398), [2985790337](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985790337), [2985792243](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985792243) | 2026-10-25 00:37 to 00:39 | Four sessions as `duo-developer-gitlab-ai-hackathon` (id 33073386), success, 106 to 151 s. How each was started (assign or mention) is not recorded. Issue #4 has no merge request |
+| It opens a merge request | Ran | [!16](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/16), [!17](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/17), [!18](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/18) | 2026-10-25 00:39 to 00:41 | Draft. Author of each is a person (composite identity); commits are authored by the service account. !19, a duplicate of !16, was closed by a person |
+| The Draft state is cleared | Not run | | | No merge request of the flow has left Draft |
+| The pipeline gates judge the merge request | Ran | Pipelines [2985793535](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985793535) (!16), [2985796808](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985796808) (!17), [2985796985](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985796985) (!18) | 2026-10-25 | 20 jobs each, all success. On !16, `red_check`: 5 added tests failed on the old code; `human_only_files`: no human-only file changed |
+| The gates stop broken code | Ran | Branches `demo/task-028-lint-failure` ([2985688766](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985688766)) and `demo/task-029-red-check-rejection` ([2985689849](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985689849)) | 2026-10-25 | The first failed only `lint`; the second failed only `red_check` |
+| `merge_guard` gives a verdict | Ran, read only | Job `merge_guard` of 2985793535 | 2026-10-25 | `merge: no`, one reason: the merge request is a draft; 0 of 3 fix attempts |
+| Automatic review | Not run | | | The merge requests are drafts and no trigger exists |
+| A failed pipeline opens an issue | Not run | | | The triage flow and the triggers do not exist yet ([`docs/autohealing.md`](../autohealing.md)) |
+| Fix CI/CD Pipeline Flow | Ran once, by hand | Pipeline [2985662569](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985662569) | 2026-10-24 23:46 | Launched by a person; decision `add_comment`, no commits. Not started by a trigger |
+| Merge when the gates are green | Not run | | | `AFAW_AUTO_MERGE` is not set; every merge so far was a person's (!14, !15). No tool that merges is documented |
+| Release, deploy, monitor | Ran after a person's merge | Pipeline [2985700049](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985700049) on `main` | 2026-10-25 00:10 | 18 jobs success, including `deploy_cloud_run`, `monitor` and `monitor_live` |
+| Summary comment on the issue | Not run | | | No documented event after a merge can start it |
+
