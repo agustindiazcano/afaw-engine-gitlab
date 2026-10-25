@@ -1,0 +1,13 @@
+{
+  "id": "task_076",
+  "title": "Benchmark tables from the merge request and pipeline lists",
+  "role": "architect",
+  "type": "feature",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "duo/feature/24-benchmark-report",
+  "priority": 3,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Issue 24. Replaces the benchmark tables of docs/experiments.md that were written by hand."
+}
