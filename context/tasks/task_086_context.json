@@ -1,0 +1,13 @@
+{
+  "task_id": "task_086",
+  "files_touched": [
+    "scripts/check_live.py",
+    "tests/tooling/test_check_live.py",
+    "tests/tooling/test_gitlab_ci.py"
+  ],
+  "summary": "/api/version answered unknown on the live service because the deploy never passed the commit or the release, and a deploy could ship without the new pages and nobody would notice. deploy_cloud_run now sets AFAW_COMMIT_SHA and AFAW_RELEASE_TAG (v0 and the pipeline number); check_live takes --expect-sha, which requires /api/version to report exactly the deployed commit, and --page, repeatable, which requires each page to answer 200; monitor_live asks for the commit and for /, /experiments/ and /environment/. While writing the tests, three existing tests of check_live turned out to pass for the wrong reason: next() on the generator of the fake server shut the server down at once, so a failure was expected and got a connection refused (gotcha 0005); they now keep the server up and assert the reason. A stray line from a discarded experiment was found in the working tree and reverted before the merge request.",
+  "next": [
+    "After the deploy, read /api/version and see the commit of main",
+    "Apply the context-manager fix to any other test that uses next() on a server generator"
+  ]
+}

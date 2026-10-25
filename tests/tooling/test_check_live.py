@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import threading
 from collections.abc import Iterator
+from contextlib import contextmanager
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Any
 
@@ -37,6 +38,12 @@ def _serve(routes: dict[str, tuple[int, Any]]) -> Iterator[str]:
         server.shutdown()
 
 
+@contextmanager
+def _server(routes: dict[str, tuple[int, Any]]) -> Iterator[str]:
+    """A fake service that stays up for the whole ``with`` block."""
+    yield from _serve(routes)
+
+
 @pytest.fixture
 def healthy() -> Iterator[str]:
     yield from _serve({"/health": (200, {"status": "ok"}), "/api/state": (200, STATE)})
@@ -53,14 +60,16 @@ def test_a_healthy_service_passes(healthy: str, capsys: pytest.CaptureFixture[st
 
 def test_an_unhealthy_service_fails_loudly(capsys: pytest.CaptureFixture[str]) -> None:
     routes = {"/health": (503, {"status": "unavailable"}), "/api/state": (200, STATE)}
-    url = next(_serve(routes))
-    assert _run(url) == 1
-    assert "PROBLEM" in capsys.readouterr().err
+    with _server(routes) as url:
+        assert _run(url) == 1
+    err = capsys.readouterr().err
+    assert "/health answered 503" in err and "did not answer" not in err
 
 
 def test_a_state_without_the_derived_views_fails() -> None:
-    url = next(_serve({"/health": (200, {"status": "ok"}), "/api/state": (200, {"metrics": {}})}))
-    assert _run(url) == 1
+    routes = {"/health": (200, {"status": "ok"}), "/api/state": (200, {"metrics": {}})}
+    with _server(routes) as url:
+        assert _run(url) == 1
 
 
 def test_no_answer_fails_after_the_attempts(capsys: pytest.CaptureFixture[str]) -> None:
@@ -70,3 +79,65 @@ def test_no_answer_fails_after_the_attempts(capsys: pytest.CaptureFixture[str]) 
 
 def test_a_url_that_is_not_https_or_local_http_is_refused() -> None:
     assert check_live.main(["--url", "ftp://example.com", "--attempts", "1", "--wait", "0"]) == 2
+
+
+# ---- the deployed commit and the pages
+
+
+def _healthy_routes(**extra: tuple[int, Any]) -> dict[str, tuple[int, Any]]:
+    return {"/health": (200, {"status": "ok"}), "/api/state": (200, STATE), **extra}
+
+
+def _run_with(url: str, *args: str) -> int:
+    return check_live.main(["--url", url, "--attempts", "1", "--wait", "0", *args])
+
+
+def test_the_expected_commit_passes_when_the_service_reports_it() -> None:
+    version = {"release_tag": "v0.9", "commit_sha": "abc123"}
+    with _server(_healthy_routes(**{"/api/version": (200, version)})) as url:
+        assert _run_with(url, "--expect-sha", "abc123") == 0
+
+
+def test_a_service_running_another_commit_fails_and_says_which(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    version = {"release_tag": "v0.9", "commit_sha": "old000"}
+    with _server(_healthy_routes(**{"/api/version": (200, version)})) as url:
+        assert _run_with(url, "--expect-sha", "abc123") == 1
+    err = capsys.readouterr().err
+    assert "commit_sha" in err and "old000" in err and "abc123" in err
+
+
+def test_a_service_that_reports_unknown_fails_the_expected_commit(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    version = {"release_tag": "unknown", "commit_sha": "unknown"}
+    with _server(_healthy_routes(**{"/api/version": (200, version)})) as url:
+        assert _run_with(url, "--expect-sha", "abc123") == 1
+    assert "unknown" in capsys.readouterr().err
+
+
+def test_a_service_without_the_version_endpoint_fails_the_expected_commit() -> None:
+    with _server(_healthy_routes()) as url:
+        assert _run_with(url, "--expect-sha", "abc123") == 1
+
+
+@pytest.mark.characterization(
+    reason="the version was never read before; this pins that it still is not without the flag"
+)
+def test_without_an_expected_commit_the_version_is_not_looked_at() -> None:
+    with _server(_healthy_routes()) as url:
+        assert _run_with(url) == 0
+
+
+def test_pages_that_answer_200_pass() -> None:
+    routes = _healthy_routes(**{"/": (200, {}), "/experiments/": (200, {})})
+    with _server(routes) as url:
+        assert _run_with(url, "--page", "/", "--page", "/experiments/") == 0
+
+
+def test_a_missing_page_fails_and_names_it(capsys: pytest.CaptureFixture[str]) -> None:
+    routes = _healthy_routes(**{"/": (200, {})})
+    with _server(routes) as url:
+        assert _run_with(url, "--page", "/", "--page", "/environment/") == 1
+    assert "/environment/ answered 404" in capsys.readouterr().err

@@ -260,6 +260,20 @@ def test_web_data_builds_the_live_views_from_measured_facts(ci: dict[str, Any]) 
     assert "--out build/facts.json" in script[collect:build]
 
 
+def test_the_deploy_tells_the_service_which_commit_and_release_it_runs(ci: dict[str, Any]) -> None:
+    script = _script(ci["deploy_cloud_run"])
+    assert "--update-env-vars" in script
+    assert "AFAW_COMMIT_SHA=$CI_COMMIT_SHA" in script
+    assert "AFAW_RELEASE_TAG=v0.$CI_PIPELINE_IID" in script
+
+
+def test_the_live_monitor_checks_the_deployed_commit_and_the_pages(ci: dict[str, Any]) -> None:
+    script = _script(ci["monitor_live"])
+    assert '--expect-sha "$CI_COMMIT_SHA"' in script
+    for page in ("/", "/experiments/", "/environment/"):
+        assert f"--page {page}" in script
+
+
 def test_monitor_always_collects_facts_on_gitlab(ci: dict[str, Any]) -> None:
     script = _script(ci["monitor"])
     assert "NOTICE" not in script and "GITHUB_REPOSITORY" not in script
