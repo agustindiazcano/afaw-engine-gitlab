@@ -15,7 +15,7 @@ the history. Nothing here is an estimate. Rows are added only after the thing ha
 
 | What ran | Link | Date (GMT-3) | Result |
 |---|---|---|---|
-| Fix CI/CD Pipeline Flow session started from the GitLab UI by a person | [pipeline 2985662569](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985662569) | 2026-10-24 23:46 | Pipeline source `duo_workflow`, one job `workload`, status success, 79 s. Run by the service account `duo-fix-ci-cd-pipeline-gitlab-ai-hackathon` (user id 33073387). At the time of the check it had produced no merge request, branch or commit |
+| Fix CI/CD Pipeline Flow session, launched manually by the human from the GitLab UI | [pipeline 2985662569](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985662569) | 2026-10-24 23:46 | Ran as the service account `duo-fix-ci-cd-pipeline-gitlab-ai-hackathon` (user id 33073387). Pipeline source `duo_workflow`, one job `workload`, status success, 79 s (API). The flow's decision was `add_comment`, as read by the human in the session; it made no commits. The API showed no merge request, branch or commit from it |
 
 ## Deterministic checks run locally against the public API (read-only)
 
