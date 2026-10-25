@@ -1,0 +1,11 @@
+{
+  "task_id": "task_114",
+  "files_touched": [
+    "scripts/request_fix.py",
+    "tests/tooling/test_request_fix.py"
+  ],
+  "summary": "request_fix opens an issue for the flow only when the failed ref is the default branch, a demo/ branch or a duo/ branch. A failure on a branch named by a person (feat/, fix/, docs/, chore/) is reported in the job log and nobody is asked. Merge request pipelines are unchanged.",
+  "next": [
+    "Observe the next failure on a person's branch: no autoheal issue should open"
+  ]
+}
