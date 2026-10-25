@@ -1,0 +1,17 @@
+{
+  "task_id": "task_091",
+  "files_touched": [
+    "src/notes_app/Dockerfile",
+    "src/notes_app/__init__.py",
+    "src/notes_app/app.py",
+    "src/notes_app/main.py",
+    "src/notes_app/requirements.txt",
+    "tests/notes/__init__.py",
+    "tests/notes/test_app.py"
+  ],
+  "summary": "Added src/notes_app, a tiny FastAPI notes app (health, version, list and add notes, one HTML page) with its own image (src/notes_app/Dockerfile) and 14 tests. It is the target app that the Duo flows will change through issues, so the loop has something visible to act on. Notes are in memory per instance.",
+  "next": [
+    "task_092: Terraform service afaw-demo-app, package, publish and deploy jobs, live check (human-only files, MR with the human's token)",
+    "Demo issues that ask Duo for features and fixes on the app"
+  ]
+}
