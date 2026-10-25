@@ -1,0 +1,11 @@
+{
+  "task_id": "task_064",
+  "files_touched": [
+    "scripts/sci_estimate.py",
+    "tests/tooling/test_sci_estimate.py"
+  ],
+  "summary": "Added scripts/sci_estimate.py: estimate() computes the Software Carbon Intensity terms of a CI run (avg_watts, energy_kwh, operational_g, embodied_g, sci_g_per_unit) from nine inputs that are echoed under inputs, unrounded, and raises ValueError naming the invalid argument (NaN and infinity are also rejected). The command line prints the result as JSON, or the error on stderr with exit 2. No coefficient is a constant in the code (ADR 0009). 33 tests in tests/tooling/test_sci_estimate.py, written first.",
+  "next": [
+    "Feed the measured job seconds of scripts.cost_log into estimate() when the experiment of ADR 0009 runs"
+  ]
+}
