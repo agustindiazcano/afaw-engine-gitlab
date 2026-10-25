@@ -1,10 +1,11 @@
 {
   "task_id": "task_109",
-  "files_touched": [],
-  "summary": "The README table Stages and Duo links the seven stage experiments (issues 37 to 43, merge requests 75 to 81) and states 9 of 9 stages with a Duo-authored merge request. evidence.md has a new section with the burst, the UI redesign, the repairs 85 and 87, e2e_live and the autonomy stats, each read from the API on 2026-10-25. rules-and-coverage.md matches.",
+  "files_touched": [
+    "scripts/check_task_files.py",
+    "tests/tooling/test_check_task_files.py"
+  ],
+  "summary": "Issue 49: task_files failed on feat/task-108-autonomy-stats because that branch merged main with a one-parent merge commit, so task_104 to task_107 (already on main, with other branches) looked added against the merge base. check_task_files now skips a task file that is byte-identical on the target branch, since merging it changes nothing. A new id or a changed file is still checked in full. Run on the real failing branch, the check went from failing to OK (13 task files checked). The failed branch's own task_108 is valid and untouched.",
   "next": [
-    "Bug benchmarks on the demo app",
-    "Orchestrator and handoff ADRs",
-    "Credits reading before and after each Duo batch"
+    "Re-run the pipeline of feat/task-108-autonomy-stats after this merges"
   ]
 }

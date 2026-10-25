@@ -1,13 +1,13 @@
 {
   "id": "task_109",
-  "title": "Evidence for the stage experiments: README Stages and Duo table, evidence and coverage files",
+  "title": "check_task_files: skip task files that are identical on the target branch",
   "role": "architect",
-  "type": "chore",
+  "type": "fix",
   "status": "done",
   "owner": "agent",
-  "branch": "docs/task-109-stage-evidence",
-  "priority": 1,
-  "difficulty": 1,
+  "branch": "duo/fix/49-task-files-identical-copies",
+  "priority": 2,
+  "difficulty": 2,
   "blocked_by": [],
-  "notes": "Documents only."
+  "notes": "Autoheal issue 49: task_files failed on feat/task-108-autonomy-stats."
 }
