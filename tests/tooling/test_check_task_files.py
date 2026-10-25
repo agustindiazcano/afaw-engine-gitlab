@@ -423,7 +423,7 @@ def test_main_passes_its_arguments_to_check_and_reports_ok(monkeypatch, capsys):
     )
     out = capsys.readouterr()
     assert code == 0
-    assert out.out == "OK: task file check passed.\n"
+    assert out.out == "OK: task file check passed (0 task files checked).\n"
     assert out.err == ""
     assert captured["base"] == "abc"
     assert captured["head_branch"] == "feat/x"
@@ -482,3 +482,18 @@ def test_main_reads_head_files_from_the_working_tree(monkeypatch, tmp_path):
     monkeypatch.setattr(check_task_files, "check", fake_check)
     check_task_files.main(["--base", "abc"])
     assert read["text"] == '{"ünï": 1}'
+
+
+def test_main_reports_how_many_task_files_the_check_read(monkeypatch, capsys):
+    def fake_check(base, head_branch, run, read_head, target):
+        read_head("state/tasks/task_001.json")
+        read_head("state/tasks/task_002.json")
+        read_head("state/tasks/task_003.json")
+        return []
+
+    monkeypatch.setattr(check_task_files, "check", fake_check)
+    monkeypatch.setattr(check_task_files.Path, "read_text", lambda self, encoding: "{}")
+    code = check_task_files.main(["--base", "abc"])
+    out = capsys.readouterr()
+    assert code == 0
+    assert out.out == "OK: task file check passed (3 task files checked).\n"
