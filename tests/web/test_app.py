@@ -94,6 +94,19 @@ def test_requests_never_change_the_data_directory(client: TestClient, data_dir: 
     assert before == sorted((p, p.stat().st_mtime_ns) for p in data_dir.rglob("*") if p.is_file())
 
 
+@pytest.mark.characterization(
+    reason="the 503 for a missing page already existed; the test pins it so a change is noticed"
+)
+@pytest.mark.parametrize(
+    ("path", "missing"), [("/", "demo/index.html"), ("/live/", "live/dashboard.html")]
+)
+def test_a_missing_page_is_503_and_names_the_file(data_dir: Path, path: str, missing: str) -> None:
+    (data_dir / missing).unlink()
+    response = TestClient(create_app(Settings(data_dir=data_dir))).get(path)
+    assert response.status_code == 503
+    assert response.json() == {"status": "unavailable", "missing": [missing]}
+
+
 def _client(data_dir: Path) -> TestClient:
     return TestClient(create_app(Settings(data_dir=data_dir)))
 
