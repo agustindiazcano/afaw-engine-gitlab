@@ -1,0 +1,15 @@
+{
+  "task_id": "task_046",
+  "files_touched": [
+    "scripts/mutation_engine.py",
+    "scripts/mutmut_results.py",
+    "tests/tooling/test_mutation_engine.py",
+    "tests/tooling/test_mutmut_results.py"
+  ],
+  "summary": "Measured mutmut 3.8.0 and cosmic-ray 8.7.0 on the shared runner saas-linux-small-amd64 (Python 3.12.15, 2 vCPUs) over src/afaw_web with tests/web: mutmut 104 mutants, 74 killed, 71.2 percent, run 11 s, job 56 s; cosmic-ray 240 mutants, 185 killed, 77.1 percent, exec 261 s, job 309 s. mutmut was chosen for speed and a per-file result. Read from the runner log: mutmut writes mutants/<path>.meta with exit_code_by_key (1 killed, 0 survived, confirmed against mutmut results --all). scripts/mutmut_results.py converts those files to the gate's results and refuses any other exit code; scripts/mutation_engine.py finds the required files, writes the mutmut config, runs mutmut with a timeout and calls the adapter (one directory and one test selection, as run). Tests were written first; the engine tests simulate mutmut. docs/submission/mutation-tools-measurement.md keeps both tools' numbers (also sustainability data), the per-file scores (app.py 62.2, search.py 78.0) and the proposed minimum of 60 (weakest file rounded down with a 2.2 point margin). Not verified: exit codes other than 0 and 1, several test selections in one run, and the time on a larger change. The job in .gitlab-ci.yml and the change to state/config.json are human-only and are separate merge requests; the config change must come after the job, or every change to src/afaw_web would fail for lack of results.",
+  "next": [
+    "Human: merge the .gitlab-ci.yml job (task_047), then the state/config.json change (task_048)",
+    "Re-measure after !16 and !17 merge, because they change app.py",
+    "Write tests that kill the 17 surviving mutants of app.py, then raise the minimum"
+  ]
+}

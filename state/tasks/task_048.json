@@ -1,0 +1,13 @@
+{
+  "id": "task_048",
+  "title": "Make src/afaw_web a critical path of the mutation gate with a minimum of 60",
+  "role": "architect",
+  "type": "chore",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "chore/task-048-mutation-critical-path",
+  "priority": 2,
+  "difficulty": 1,
+  "blocked_by": ["task_046", "task_047"],
+  "notes": "Edits the mutation settings of state/config.json, a human-only file: the human reviews, opens and merges it, after task_047."
+}

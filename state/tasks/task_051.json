@@ -1,0 +1,12 @@
+{
+  "id": "task_051",
+  "title": "Write docs/submission/handoff-happy-path.md as a happy-path test of the hands-off loop",
+  "role": "architect",
+  "type": "chore",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "duo/chore/6-handoff-happy-path",
+  "priority": 3,
+  "difficulty": 1,
+  "blocked_by": []
+}

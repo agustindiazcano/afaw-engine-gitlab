@@ -1,0 +1,12 @@
+{
+  "id": "task_044",
+  "title": "Decide who made a change by the pipeline user and the commit author, not by the merge request author",
+  "role": "architect",
+  "type": "fix",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "fix/task-044-identity-by-commit-and-pipeline-user",
+  "priority": 1,
+  "difficulty": 2,
+  "blocked_by": []
+}

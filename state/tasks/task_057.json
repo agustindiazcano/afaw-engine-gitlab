@@ -1,0 +1,13 @@
+{
+  "id": "task_057",
+  "title": "merge_guard takes a merge request of a service account out of Draft when only the draft holds it back",
+  "role": "architect",
+  "type": "feature",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "feat/task-057-auto-ready",
+  "priority": 1,
+  "difficulty": 2,
+  "blocked_by": [],
+  "notes": "Closes the Draft gap of the hands-off loop: the Developer Flow opens a draft and no Duo tool can clear it. Only with AFAW_AUTO_MERGE=true."
+}

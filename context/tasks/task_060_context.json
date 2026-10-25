@@ -1,0 +1,14 @@
+{
+  "task_id": "task_060",
+  "files_touched": [
+    "scripts/request_fix.py",
+    "tests/tooling/test_gitlab_ci.py",
+    "tests/tooling/test_request_fix.py"
+  ],
+  "summary": "The repair of a failed pipeline had no way to start without a person: Duo triggers need a human, have no branch filter, and Fix CI/CD only suggests. Two facts were observed instead: a note that mentions the Developer Flow account starts a session, and assigning an issue to it through the API starts it. scripts/request_fix.py and the request_fix job (monitor stage, on failure, only with AFAW_AUTO_MERGE=true) use them: in a merge request pipeline one note that mentions the flow with the failed jobs and the end of their logs, in a branch pipeline with no merge request one issue assigned to the flow with the label afaw-autoheal. One request per commit, 3 per merge request or branch, 6 open autoheal issues for the project. Written with AFAW_MERGE_TOKEN; fails closed. 20 tests failed on the old code. Not yet run on a real failure.",
+  "next": [
+    "After the merge, push a broken change to demo/task-028-lint-failure and record what ran in docs/submission/evidence.md",
+    "Decide whether to count the flow's own sessions against the credit budget",
+    "Replace the mention by a trigger if the AI > Triggers form gains a branch filter"
+  ]
+}
