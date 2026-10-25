@@ -146,3 +146,56 @@ def test_whitespace_only_name_fails(
     captured = capsys.readouterr()
     assert "empty" in captured.err and "'  '" in captured.err and "'\\t'" in captured.err
     assert "secret-value" not in captured.out + captured.err
+
+
+def _summary(out: str) -> list[str]:
+    return [line for line in out.splitlines() if line.startswith("variables:")]
+
+
+def test_summary_counts_set_variables_on_unprotected_refs(
+    project: Project, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Unprotected ref: two required plus the optional one; the GCP names are not counted."""
+    project.write("state/config.json", {})
+    assert _run(project, {**REQUIRED, "AFAW_BOT_USER_IDS": "1,2"}) == 0
+    out = capsys.readouterr().out
+    assert _summary(out) == ["variables: 3 of 3 set"]
+    assert out.splitlines()[-1] == "variables: 3 of 3 set"
+    assert "1,2" not in out
+
+
+def test_summary_counts_unset_optional_variable(
+    project: Project, capsys: pytest.CaptureFixture[str]
+) -> None:
+    project.write("state/config.json", {})
+    assert _run(project, REQUIRED) == 0
+    assert _summary(capsys.readouterr().out) == ["variables: 2 of 3 set"]
+
+
+def test_summary_counts_missing_required_variable_and_keeps_exit_code(
+    project: Project, capsys: pytest.CaptureFixture[str]
+) -> None:
+    project.write("state/config.json", {})
+    assert _run(project, {"CI_DEFAULT_BRANCH": "main"}) == 1
+    assert _summary(capsys.readouterr().out) == ["variables: 1 of 3 set"]
+
+
+def test_summary_includes_gcp_variables_on_protected_refs_without_values(
+    project: Project, capsys: pytest.CaptureFixture[str]
+) -> None:
+    project.write("state/config.json", {})
+    env = {**REQUIRED, **GCP, "CI_COMMIT_REF_PROTECTED": "true"}
+    del env["GCP_REGION"]
+    assert _run(project, env) == 1
+    out = capsys.readouterr().out
+    assert _summary(out) == ["variables: 8 of 10 set"]
+    assert "live.example" not in out
+
+
+@pytest.mark.characterization(reason="an invalid config exits before any variable is checked")
+def test_summary_is_not_printed_when_the_config_is_invalid(
+    project: Project, capsys: pytest.CaptureFixture[str]
+) -> None:
+    project.write("state/config.json", {"mutation_min_score": -5})
+    assert _run(project, REQUIRED) == 2
+    assert _summary(capsys.readouterr().out) == []
