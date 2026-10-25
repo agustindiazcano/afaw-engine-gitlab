@@ -1,0 +1,13 @@
+{
+  "id": "task_096",
+  "title": "check_task_files: say how many task files were checked",
+  "role": "architect",
+  "type": "feature",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "duo/feature/37-task-files-checked-count",
+  "priority": 3,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "The success line now ends with the number of task files the check read."
+}
