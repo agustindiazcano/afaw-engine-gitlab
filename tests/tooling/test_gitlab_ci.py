@@ -10,7 +10,15 @@ import yaml
 from tests.tooling.conftest import REPO_ROOT
 
 STAGES = [
-    "plan", "create", "verify", "secure", "govern", "package", "configure", "release", "monitor",
+    "plan",
+    "create",
+    "verify",
+    "secure",
+    "govern",
+    "package",
+    "configure",
+    "release",
+    "monitor",
 ]
 # Jobs whose script comes from an included GitLab template, not from this file.
 NATIVE = {"semgrep-sast", "secret_detection"}
@@ -21,9 +29,7 @@ class _GitLabLoader(yaml.SafeLoader):
     """SafeLoader that accepts GitLab's !reference tag (kept as a plain list)."""
 
 
-_GitLabLoader.add_constructor(
-    "!reference", lambda loader, node: loader.construct_sequence(node)
-)
+_GitLabLoader.add_constructor("!reference", lambda loader, node: loader.construct_sequence(node))
 
 
 @pytest.fixture(scope="module")
@@ -105,8 +111,13 @@ def test_release_tags_do_not_start_pipelines(ci: dict[str, Any]) -> None:
 
 def test_verify_jobs_run_the_afaw_gates(ci: dict[str, Any]) -> None:
     scripts = "\n".join(_script(j) for j in _jobs(ci).values() if j["stage"] == "verify")
-    for expected in ("scripts.red_check", "scripts.mutation_ci", "pytest tests/tooling",
-                     "ruff check", "mypy --strict scripts"):
+    for expected in (
+        "scripts.red_check",
+        "scripts.mutation_ci",
+        "pytest tests/tooling",
+        "ruff check",
+        "mypy --strict scripts",
+    ):
         assert expected in scripts
 
 
@@ -173,7 +184,7 @@ def test_terraform_is_formatted_and_validated_in_configure(ci: dict[str, Any]) -
     assert "fmt -check" in script and "validate" in script and "-backend=false" in script
 
 
-MAIN_ONLY = '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+MAIN_ONLY = "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
 
 
 @pytest.mark.parametrize("name", ["publish_image", "deploy_cloud_run", "monitor_live"])
@@ -239,6 +250,16 @@ def test_merge_guard_runs_last_in_merge_request_pipelines_only(ci: dict[str, Any
     assert [r["if"] for r in job["rules"]] == ['$CI_PIPELINE_SOURCE == "merge_request_event"']
     assert not job.get("allow_failure")
     assert "AFAW_MERGE_TOKEN" not in str(job)  # the token comes from a CI/CD variable, not the file
+
+
+def test_request_fix_runs_only_after_a_failure_and_only_with_the_switch_on(
+    ci: dict[str, Any],
+) -> None:
+    job = ci["request_fix"]
+    assert job["stage"] == "monitor"  # after every job it may have to read
+    assert _script(job).strip() == "python -m scripts.request_fix"
+    assert job["rules"] == [{"if": '$AFAW_AUTO_MERGE == "true"', "when": "on_failure"}]
+    assert "AFAW_MERGE_TOKEN" not in str(job)  # the token comes from a CI/CD variable
 
 
 def test_monitor_always_collects_facts_on_gitlab(ci: dict[str, Any]) -> None:
