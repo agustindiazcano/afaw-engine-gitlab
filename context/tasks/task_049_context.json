@@ -1,4 +1,11 @@
 {
   "task_id": "task_049",
-  "files_touched": []
+  "files_touched": [],
+  "summary": "Records the six merge requests merged on 2026-10-25 (!20 to !25, with the merge times read from the API, and that !25 merged before !24) in docs/submission/evidence.md, and adds docs/submission/coverage-measurement.md: 86 percent line and branch coverage over src/ and scripts/, 95 percent on src/afaw_web, measured locally and not on the runner. No link of the hands-off table changed: none of these merges ran a Duo flow. A coverage gate is proposed, not built, because it edits human-only files. Also documents in docs/autohealing.md that the merge is a setting: AFAW_AUTO_MERGE unset is continuous delivery, true with AFAW_MERGE_TOKEN is continuous deployment by merge_guard (code and tests exist, never run on a real merge request).",
+  "next": [
+    "Human: choose delivery or deployment; deployment needs AFAW_AUTO_MERGE, AFAW_MERGE_TOKEN (project access token, Developer, api, masked, protected) and AFAW_BOT_USER_IDS",
+    "Human: decide whether to add a coverage gate (.gitlab-ci.yml and state/config.json are human-only)",
+    "Observe mutation_gate on a real change to src/afaw_web",
+    "Re-measure mutation on app.py after !16 and !17 merge"
+  ]
 }

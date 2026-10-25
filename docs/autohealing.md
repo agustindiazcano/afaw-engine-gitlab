@@ -35,6 +35,25 @@ Three consequences, each to be confirmed by running it:
 3. There is no filter that keeps a trigger away from `main`. A failure on `main` starts the repair
    as well, and the fix arrives as a new merge request, never as a push.
 
+## Delivery or deployment: the merge is a setting, not a click
+
+Duo has no tool that merges (see the table above), but the repository does not need one: `merge_guard` runs in
+the merge request pipeline and merges through the API when its verdict is yes. Both modes are
+supported; the mode is the CI/CD variable `AFAW_AUTO_MERGE`.
+
+| Mode | `AFAW_AUTO_MERGE` | Who merges | Status |
+|---|---|---|---|
+| Continuous delivery | unset or not `true` | A person, after `merge_guard` prints `merge: yes` | Every merge so far (!1 to !25) |
+| Continuous deployment | `true`, with `AFAW_MERGE_TOKEN` and `AFAW_BOT_USER_IDS` set | `merge_guard`, with no person, then release, deploy and monitor run on `main` | Code and tests exist; **never run on a real merge request** |
+
+The verdict is the same in both modes: green pipeline including `red_check`, `mutation_gate` and
+`security_gate`, no protected file, no draft, cap of 3 automatic fixes, and a pipeline user and
+commit authors that are all service accounts. Only the last step differs.
+
+The token is the cost of continuous deployment: `AFAW_MERGE_TOKEN` must be allowed to merge, so
+it should be a project access token with the Developer role and the `api` scope, masked and
+protected so that only pipelines on protected refs read it. The human decides whether to create it.
+
 ## The smallest design
 
 Two triggers on the same event, because one flow cannot start another:
