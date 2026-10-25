@@ -43,10 +43,12 @@ def mutmut_config(required: list[str], tests: str) -> str:
             f"required files in {len(directories)} directories: only one directory is "
             "supported, more is not verified with mutmut"
         )
+    # mutmut 3.8.0 reads a list from one item per line; a comma-separated line is one pattern.
+    only_mutate = "\n  ".join(required)
     return (
         "[mutmut]\n"
         f"source_paths={directories.pop()}/\n"
-        f"only_mutate={','.join(required)}\n"
+        f"only_mutate={only_mutate}\n"
         f"pytest_add_cli_args_test_selection={tests}\n"
     )
 

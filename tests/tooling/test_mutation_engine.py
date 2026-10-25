@@ -61,6 +61,11 @@ def test_the_config_names_the_directory_the_files_and_the_tests() -> None:
     )
 
 
+def test_several_files_are_one_pattern_per_line_because_mutmut_does_not_split_on_commas() -> None:
+    text = mutation_engine.mutmut_config(["src/afaw_web/app.py", "src/afaw_web/search.py"], "t")
+    assert "only_mutate=src/afaw_web/app.py\n  src/afaw_web/search.py\n" in text
+
+
 def test_files_in_two_directories_are_not_supported() -> None:
     with pytest.raises(mutation_engine.EngineError, match="not verified"):
         mutation_engine.mutmut_config(["src/a/x.py", "src/b/y.py"], "tests/web")
