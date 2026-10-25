@@ -2,7 +2,7 @@
   "id": "task_049",
   "title": "Record the merged merge requests and the first coverage measurement",
   "role": "architect",
-  "type": "docs",
+  "type": "chore",
   "status": "in_progress",
   "owner": "agent",
   "branch": "chore/task-049-evidence-coverage",
