@@ -1,0 +1,13 @@
+{
+  "id": "task_065",
+  "title": "cost_summary: summarise the Duo cost log by flow",
+  "role": "architect",
+  "type": "feature",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "duo/feature/14-cost-summary",
+  "priority": 3,
+  "difficulty": 2,
+  "blocked_by": [],
+  "notes": "Feeds the benchmark tables of docs/experiments.md. Standard library only."
+}
