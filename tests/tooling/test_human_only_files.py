@@ -60,10 +60,11 @@ def _run(
     changed: list[str],
     users: dict[str, dict[str, Any]],
     env: dict[str, str] | None = None,
+    identities: list[str] | None = None,
 ) -> int:
     monkeypatch.setattr(hof, "changed_files", lambda base, root: changed)
     monkeypatch.setattr(hof, "config_at", lambda base, root: OLD_CONFIG)
-    monkeypatch.setattr(hof, "commit_identities", lambda base, root: [])
+    monkeypatch.setattr(hof, "commit_identities", lambda base, root: identities or [])
     project.write("state/config.json", OLD_CONFIG)
 
     def fake_fetch(url: str, token: str | None) -> Any:
@@ -155,3 +156,24 @@ def test_a_flow_service_account_may_change_unprotected_files(
 ) -> None:
     users = {**HUMAN, AUTHOR: [], PUSHER: []}  # both are non-human (the flows' service account)
     assert _run(project, monkeypatch, ["src/a.py", "tests/test_a.py"], users) == 0
+
+
+SA_COMMIT = "Duo Developer <service_account_group_1_ab12@noreply.gitlab.com>"
+
+
+def test_service_account_commits_are_picked_out_by_the_address() -> None:
+    identities = ["Dev <dev@example.com>", SA_COMMIT, "Fake <x@noreply.gitlab.com>"]
+    assert hof.service_account_commits(identities) == [SA_COMMIT]
+
+
+def test_a_commit_authored_by_a_service_account_fails_even_with_a_human_pusher_and_author(
+    project: Project, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    assert _run(project, monkeypatch, ["AGENTS.md"], HUMAN, identities=[SA_COMMIT]) == 1
+    assert "service account" in capsys.readouterr().err
+
+
+def test_a_service_account_commit_on_unprotected_files_is_fine(
+    project: Project, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    assert _run(project, monkeypatch, ["src/a.py"], {}, identities=[SA_COMMIT]) == 0

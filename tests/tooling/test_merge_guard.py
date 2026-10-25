@@ -17,6 +17,7 @@ from scripts.merge_guard import (
 
 FIXTURES = Path(__file__).parent / "fixtures" / "gitlab"
 BOT = 900
+SA_EMAIL = "service_account_group_1_ab12@noreply.gitlab.com"
 
 
 def recorded_jobs() -> list[dict[str, Any]]:
@@ -163,7 +164,8 @@ def test_every_reason_is_reported():
 
 
 class FakeApi:
-    def __init__(self, merge_request, pipelines, jobs, fail_on=None):
+    def __init__(self, merge_request, pipelines, jobs, fail_on=None, commits=None):
+        self.commits = [{"author_email": SA_EMAIL}] if commits is None else commits
         self.merge_request = merge_request
         self.pipelines = pipelines
         self.jobs = jobs
@@ -178,6 +180,9 @@ class FakeApi:
     def mr_pipelines(self, iid):
         return self.pipelines
 
+    def mr_commits(self, iid):
+        return self.commits
+
     def pipeline(self, pipeline_id):
         return next(p for p in self.pipelines if p["id"] == pipeline_id)
 
@@ -188,7 +193,7 @@ class FakeApi:
         self.merged.append((iid, sha))
 
 
-GREEN = [pipe(10, "abc", "running", "2026-10-24T12:00:00Z", user=1, source="merge_request_event")]
+GREEN = [pipe(10, "abc", "running", "2026-10-24T12:00:00Z", user=BOT, source="merge_request_event")]
 ENV = {"CI_DEFAULT_BRANCH": "main", "AFAW_BOT_USER_IDS": str(BOT)}
 
 
@@ -291,3 +296,67 @@ def test_main_fails_closed_outside_gitlab_ci(monkeypatch, capsys):
         monkeypatch.delenv(name, raising=False)
     assert merge_guard.main(["--mr", "7"]) == 2
     assert "CI_API_V4_URL" in capsys.readouterr().err
+
+
+# ------------------------------------------------------------------ who made the change
+
+
+def test_a_merge_pushed_by_a_service_account_with_its_own_commits_may_merge():
+    pipeline = {"sha": "abc", "user": {"id": BOT, "username": "duo-developer"}}
+    v = verdict(pipeline=pipeline, bot_ids=frozenset({BOT}), commit_emails=[SA_EMAIL])
+    assert v.merge and v.reasons == []
+
+
+def test_a_head_pipeline_started_by_a_person_holds_the_merge():
+    pipeline = {"sha": "abc", "user": {"id": 1, "username": "agus"}}
+    v = verdict(pipeline=pipeline, bot_ids=frozenset({BOT}), commit_emails=[SA_EMAIL])
+    assert not v.merge and any("agus" in r and "service account" in r for r in v.reasons)
+
+
+def test_one_commit_by_a_person_holds_the_merge():
+    pipeline = {"sha": "abc", "user": {"id": BOT, "username": "duo-developer"}}
+    emails = [SA_EMAIL, "agus@example.com"]
+    v = verdict(pipeline=pipeline, bot_ids=frozenset({BOT}), commit_emails=emails)
+    assert not v.merge and any("agus@example.com" in r for r in v.reasons)
+
+
+def test_a_merge_request_without_commits_is_held():
+    pipeline = {"sha": "abc", "user": {"id": BOT, "username": "duo-developer"}}
+    v = verdict(pipeline=pipeline, bot_ids=frozenset({BOT}), commit_emails=[])
+    assert not v.merge and any("no commit" in r for r in v.reasons)
+
+
+def test_without_any_service_account_id_nothing_is_auto_merged():
+    pipeline = {"sha": "abc", "user": {"id": BOT, "username": "duo-developer"}}
+    v = verdict(pipeline=pipeline, bot_ids=frozenset(), commit_emails=[SA_EMAIL])
+    assert not v.merge and any("AFAW_BOT_USER_IDS" in r for r in v.reasons)
+
+
+def test_the_mr_author_does_not_matter_only_the_pusher_and_the_commits(capsys):
+    api = FakeApi(mr(author={"id": 1, "username": "agus"}), GREEN, recorded_jobs())
+    assert run(api, {"AFAW_AUTO_MERGE": "true"}) == 0
+    assert api.merged == [(7, "abc")]
+
+
+def test_a_person_pushing_the_head_is_not_auto_merged(capsys):
+    pipelines = [pipe(10, "abc", "running", "2026-10-24T12:00:00Z", user=1)]
+    api = FakeApi(mr(), pipelines, recorded_jobs())
+    assert run(api, {"AFAW_AUTO_MERGE": "true"}) == 0
+    assert api.merged == [] and "merge: no" in capsys.readouterr().out
+
+
+def test_a_commit_by_a_person_is_not_auto_merged(capsys):
+    api = FakeApi(mr(), GREEN, recorded_jobs(), commits=[{"author_email": "agus@example.com"}])
+    assert run(api, {"AFAW_AUTO_MERGE": "true"}) == 0
+    assert api.merged == []
+
+
+def test_the_api_reads_the_commits_of_the_merge_request():
+    seen = []
+
+    def get_json(url):
+        seen.append(url)
+        return []
+
+    merge_guard.Api("https://gitlab.com/api/v4", "88", None, get_json=get_json).mr_commits(7)
+    assert "merge_requests/7/commits" in seen[0]

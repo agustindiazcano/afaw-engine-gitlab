@@ -7,6 +7,10 @@ and decides, with no model involved:
 * fix attempts: a commit pushed by a Duo flow service account (ids in AFAW_BOT_USER_IDS) after
   the first failed pipeline of the merge request. GitLab documents no cap, so it is counted here.
   More than CAP attempts fail this job (exit 1), which blocks the merge.
+* who made the change: the merge request author is the person who triggered a flow (composite
+  identity), so it decides nothing. The head pipeline must have been started by a service account
+  in AFAW_BOT_USER_IDS and every commit must be authored by a service account address. With no id
+  configured nothing is merged automatically.
 * merge: yes only when the merge request is open, not a draft, targets the default branch, has
   no conflicts and no unresolved blocking discussion; its latest pipeline is for the head
   commit; every other job of that pipeline has the status success; and red_check, mutation_gate
@@ -29,12 +33,13 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
 from scripts.afaw_state.derive import require_ts
 from scripts.afaw_state.facts import MAX_PAGES, PAGE_SIZE, FactsError, http_get_json
+from scripts.service_accounts import is_service_account_email
 
 CAP = 3
 REQUIRED_JOBS = ("red_check", "mutation_gate", "security_gate")
@@ -66,14 +71,39 @@ def fix_attempts(pipelines: list[Mapping[str, Any]], bot_ids: set[int]) -> int:
     )
 
 
+def identity_reasons(
+    pipeline: Mapping[str, Any], bot_ids: frozenset[int], commit_emails: Sequence[str]
+) -> list[str]:
+    """Why the change is not the work of a service account (empty when it is)."""
+    if not bot_ids:
+        return ["AFAW_BOT_USER_IDS is empty: a service account cannot be told from a person"]
+    reasons: list[str] = []
+    pusher = pipeline.get("user") or {}
+    if pusher.get("id") not in bot_ids:
+        who = pusher.get("username") or "an unknown user"
+        reasons.append(f"the head pipeline was started by {who}, not by a service account")
+    if not commit_emails:
+        reasons.append("no commit found for the merge request")
+    reasons += [
+        f"a commit is authored by {email}, not by a service account"
+        for email in sorted({e for e in commit_emails if not is_service_account_email(e)})
+    ]
+    return reasons
+
+
 def merge_verdict(
     mr: Mapping[str, Any],
     pipeline: Mapping[str, Any] | None,
     jobs: list[Mapping[str, Any]],
     attempts: int,
     default_branch: str,
+    bot_ids: frozenset[int] | None = None,
+    commit_emails: Sequence[str] = (),
 ) -> Verdict:
-    """The merge rule; ``jobs`` are the jobs of ``pipeline`` (this guard job is ignored)."""
+    """The merge rule; ``jobs`` are the jobs of ``pipeline`` (this guard job is ignored).
+
+    With ``bot_ids`` the change must also be the work of a service account.
+    """
     reasons: list[str] = []
     if mr["state"] != "opened":
         reasons.append("merge request is not open")
@@ -96,6 +126,8 @@ def merge_verdict(
         reasons += [
             f"required job {name} is missing" for name in REQUIRED_JOBS if name not in present
         ]
+        if bot_ids is not None:
+            reasons += identity_reasons(pipeline, bot_ids, commit_emails)
     if attempts > CAP:
         reasons.append(f"{attempts} automatic fix attempts exceed the cap of {CAP}")
     return Verdict(not reasons, reasons)
@@ -133,6 +165,9 @@ class Api:
 
     def mr_pipelines(self, iid: int) -> list[Mapping[str, Any]]:
         return self._pages(f"merge_requests/{iid}/pipelines")
+
+    def mr_commits(self, iid: int) -> list[Mapping[str, Any]]:
+        return self._pages(f"merge_requests/{iid}/commits")
 
     def pipeline(self, pipeline_id: int) -> Mapping[str, Any]:
         """One pipeline in full: the list does not carry the user who pushed."""
@@ -185,7 +220,10 @@ def run(api: Api, iid: int, env: Mapping[str, str]) -> int:
         head = max(pipelines, key=lambda p: require_ts(p["created_at"]), default=None)
         jobs = api.pipeline_jobs(head["id"]) if head else []
         attempts = fix_attempts(pipelines, bot_ids)
-        verdict = merge_verdict(mr, head, jobs, attempts, default_branch)
+        emails = [c.get("author_email", "") for c in api.mr_commits(iid)]
+        verdict = merge_verdict(
+            mr, head, jobs, attempts, default_branch, frozenset(bot_ids), emails
+        )
         print(f"merge: {'yes' if verdict.merge else 'no'}")
         for reason in verdict.reasons:
             print(f"  - {reason}")
