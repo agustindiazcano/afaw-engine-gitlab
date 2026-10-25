@@ -1,0 +1,13 @@
+{
+  "id": "task_087",
+  "title": "Autoheal issue 33: record the repair of the task_files failure on the planted is_human defect",
+  "role": "architect",
+  "type": "fix",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "duo/fix/33-task-files-branch-mismatch-human-only",
+  "priority": 2,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Repairs issue 33. The failed branch carried task_082 whose branch is the demo branch, not the pull request's. main already has the correct is_human, so this changes no code."
+}
