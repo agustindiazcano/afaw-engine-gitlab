@@ -67,7 +67,10 @@ def test_the_deployer_gets_exactly_the_required_roles() -> None:
 def test_all_users_may_only_invoke_the_service() -> None:
     blocks = re.findall(r'resource "[^"]+" "[^"]+" \{.*?\n\}', _all(), re.S)
     with_all_users = [b for b in blocks if "allUsers" in b]
-    assert len(with_all_users) == 1 and 'role     = "roles/run.invoker"' in with_all_users[0]
+    # Two public services: the dashboard and the demo notes app. Nothing else is public.
+    assert len(with_all_users) == 2
+    assert all('role     = "roles/run.invoker"' in b for b in with_all_users)
+    assert all("google_cloud_run_v2_service." in b for b in with_all_users)
 
 
 def test_the_provider_trusts_only_this_gitlab_project() -> None:

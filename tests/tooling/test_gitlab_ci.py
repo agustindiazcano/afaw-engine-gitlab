@@ -290,3 +290,30 @@ def test_human_only_files_job_is_a_labelled_weak_control(ci: dict[str, Any]) -> 
 def test_no_secret_is_written_in_the_file() -> None:
     text = CI_FILE.read_text(encoding="utf-8")
     assert "glpat-" not in text and "password:" not in text.lower()
+
+
+def test_the_demo_app_is_packaged_published_and_deployed(ci: dict[str, Any]) -> None:
+    package, publish = ci["package_demo_app"], ci["publish_demo_image"]
+    deploy = ci["deploy_demo_app"]
+    assert package["stage"] == "package" and publish["stage"] == deploy["stage"] == "release"
+    assert "src/notes_app/Dockerfile" in _script(package)
+    assert "afaw-demo-app:$CI_COMMIT_SHA" in _script(package) + _script(publish)
+    assert "publish_demo_image" in deploy["needs"]
+    assert "gcloud run deploy" in _script(deploy)
+    assert "AFAW_COMMIT_SHA=$CI_COMMIT_SHA" in _script(deploy)
+    assert "latest" not in _script(package) + _script(publish) + _script(deploy)
+    for name in ("publish_demo_image", "deploy_demo_app"):
+        assert ci[name]["id_tokens"]["GITLAB_OIDC_TOKEN"]["aud"] == "https://gitlab.com"
+        assert "deploy/gcp_access_token.sh" in _script(ci[name])
+
+
+def test_the_demo_deploy_proves_the_commit_and_hands_the_url_on(ci: dict[str, Any]) -> None:
+    deploy = ci["deploy_demo_app"]
+    text = _script(deploy)
+    assert "/api/version" in text and "$CI_COMMIT_SHA" in text
+    assert "DEMO_APP_URL" in text
+    assert "dotenv" in str(deploy["artifacts"]["reports"])
+
+
+def test_the_demo_app_is_type_checked_and_tested(ci: dict[str, Any]) -> None:
+    assert "tests/notes" in _script(ci["tests"])
