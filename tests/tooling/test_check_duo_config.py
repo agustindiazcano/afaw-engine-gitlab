@@ -154,3 +154,119 @@ def test_a_missing_configuration_fails_loudly(
 ) -> None:
     assert duo.main(["--root", str(tmp_path)]) == 1
     assert "PROBLEM" in capsys.readouterr().err
+
+
+def spec(tools: list[str], optional: list[str] | None = None) -> str:
+    """A custom agent spec the way duo/custom-agent.md writes it."""
+    rows = "| Tools | " + ", ".join(f"`{t}`" for t in tools) + " |\n"
+    if optional is not None:
+        rows += "| Optional tools | " + ", ".join(f"`{t}`" for t in optional) + " |\n"
+    return "# Custom agent\n\n| Field | Value |\n|---|---|\n" + rows + "\n## System prompt\n"
+
+
+def test_the_agent_allow_lists_are_documented_and_never_forbidden() -> None:
+    allowed = duo.AUDITOR_TOOLS | duo.AUDITOR_OPTIONAL_TOOLS | duo.PLANNER_TOOLS
+    assert allowed <= duo.DOCUMENTED_TOOLS
+    assert not allowed & duo.AGENT_FORBIDDEN_TOOLS
+    assert not allowed & duo.IDE_ONLY_TOOLS
+
+
+def test_the_auditor_may_use_its_read_tools_and_the_optional_note_tools() -> None:
+    text = spec(sorted(duo.AUDITOR_TOOLS), sorted(duo.AUDITOR_OPTIONAL_TOOLS))
+    assert (
+        duo.check_agent_spec("auditor", text, duo.AUDITOR_TOOLS, duo.AUDITOR_OPTIONAL_TOOLS) == []
+    )
+
+
+def test_a_documented_tool_outside_the_allow_list_is_rejected() -> None:
+    text = spec(["get_issue", "get_wiki_page"])
+    problems = duo.check_agent_spec("auditor", text, duo.AUDITOR_TOOLS, duo.AUDITOR_OPTIONAL_TOOLS)
+    assert any("get_wiki_page" in p and "allow list" in p for p in problems)
+
+
+@pytest.mark.parametrize("tool", sorted(duo.AGENT_FORBIDDEN_TOOLS))
+def test_a_forbidden_tool_is_rejected_by_name(tool: str) -> None:
+    problems = duo.check_agent_spec(
+        "auditor", spec(["get_issue", tool]), duo.AUDITOR_TOOLS, duo.AUDITOR_OPTIONAL_TOOLS
+    )
+    assert any(tool in p and "forbidden" in p for p in problems)
+
+
+@pytest.mark.parametrize("tool", sorted(duo.IDE_ONLY_TOOLS))
+def test_an_ide_only_tool_is_rejected_by_name(tool: str) -> None:
+    problems = duo.check_agent_spec(
+        "auditor", spec(["get_issue", tool]), duo.AUDITOR_TOOLS, duo.AUDITOR_OPTIONAL_TOOLS
+    )
+    assert any(tool in p and "IDE-only" in p for p in problems)
+
+
+def test_a_note_tool_must_sit_in_the_optional_row() -> None:
+    text = spec(["get_issue", "create_merge_request_note"])
+    problems = duo.check_agent_spec("auditor", text, duo.AUDITOR_TOOLS, duo.AUDITOR_OPTIONAL_TOOLS)
+    assert any("create_merge_request_note" in p for p in problems)
+
+
+def test_an_agent_spec_without_a_tools_row_is_rejected() -> None:
+    problems = duo.check_agent_spec("auditor", "# no table\n", duo.AUDITOR_TOOLS, frozenset())
+    assert any("Tools row" in p for p in problems)
+
+
+def test_the_planner_may_use_only_its_own_tools() -> None:
+    assert (
+        duo.check_agent_spec(
+            "planner", spec(sorted(duo.PLANNER_TOOLS)), duo.PLANNER_TOOLS, frozenset()
+        )
+        == []
+    )
+    problems = duo.check_agent_spec(
+        "planner", spec(["create_plan", "get_job_logs"]), duo.PLANNER_TOOLS, frozenset()
+    )
+    assert any("get_job_logs" in p for p in problems)
+
+
+def test_the_repository_agent_specs_follow_the_lists() -> None:
+    root = REPO_ROOT
+    auditor = (root / "duo" / "custom-agent.md").read_text(encoding="utf-8")
+    planner = (root / "duo" / "custom-planner.md").read_text(encoding="utf-8")
+    assert (
+        duo.check_agent_spec("auditor", auditor, duo.AUDITOR_TOOLS, duo.AUDITOR_OPTIONAL_TOOLS)
+        == []
+    )
+    assert duo.check_agent_spec("planner", planner, duo.PLANNER_TOOLS, frozenset()) == []
+
+
+def test_a_missing_planner_spec_fails_loudly(tmp_path, capsys: pytest.CaptureFixture[str]) -> None:
+    import shutil
+
+    for rel in (".gitlab", ".agents", "duo"):
+        shutil.copytree(REPO_ROOT / rel, tmp_path / rel)
+    (tmp_path / "duo" / "custom-planner.md").unlink(missing_ok=True)
+    assert duo.main(["--root", str(tmp_path)]) == 1
+    assert "duo/custom-planner.md does not exist" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize(
+    "tool",
+    ["get_commit_comments", "get_failing_bridge_jobs", "get_issue_note", "gitlab_issue_search"],
+)
+def test_the_auditor_may_use_the_documented_read_tools_added_after_review(tool: str) -> None:
+    problems = duo.check_agent_spec(
+        "auditor", spec(["get_issue", tool]), duo.AUDITOR_TOOLS, duo.AUDITOR_OPTIONAL_TOOLS
+    )
+    assert problems == []
+
+
+@pytest.mark.parametrize("tool", ["get_job", "get_pipeline", "get_merge_request_conflicts"])
+def test_a_tool_the_documentation_does_not_list_is_rejected_until_it_is_verified(
+    tool: str,
+) -> None:
+    problems = duo.check_agent_spec(
+        "auditor", spec(["get_issue", tool]), duo.AUDITOR_TOOLS, duo.AUDITOR_OPTIONAL_TOOLS
+    )
+    assert any(tool in p and "unknown tool" in p for p in problems)
+
+
+def test_the_auditor_prompt_does_not_claim_to_run_tests() -> None:
+    text = (REPO_ROOT / "duo" / "custom-agent.md").read_text(encoding="utf-8")
+    assert "You cannot run tests yourself" in text
+    assert "not verified" in text
