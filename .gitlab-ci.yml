@@ -197,6 +197,30 @@ paper_pdf:
       fi
       echo "OK: paper PDF in step with its sources."
 
+# Compiles the paper, so nobody needs LaTeX on their machine: download the artifact
+# docs/paper/afaw.pdf from this job and commit it in the same merge request. The image tag
+# (a fixed TeX Live release) was checked on Docker Hub. It runs when a source of the paper
+# changes, or on a manual run from the pipelines page ("Run pipeline").
+paper_build:
+  stage: govern
+  image: texlive/texlive:TL2025-historic
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes: [AGENTS.md, docs/paper/afaw.tex, "docs/img/**/*"]
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      changes: [AGENTS.md, docs/paper/afaw.tex, "docs/img/**/*"]
+    - if: $CI_PIPELINE_SOURCE == "web"
+  script:
+    - apt-get update -qq
+    - apt-get install -y -qq --no-install-recommends fonts-liberation python3
+    - python3 -m scripts.rules_to_tex AGENTS.md docs/paper/appendix_rules.tex
+    - cd docs/paper
+    - xelatex -interaction=nonstopmode -halt-on-error afaw.tex
+    - xelatex -interaction=nonstopmode -halt-on-error afaw.tex
+  artifacts:
+    paths: [docs/paper/afaw.pdf]
+    expire_in: 1 week
+
 # WEAK backup control: this job is part of .gitlab-ci.yml, so the same merge request can edit
 # it away. It enforces nothing on its own. The strong control is deferred (PENDING.md, FINAL).
 # AFAW_BOT_USER_IDS is a group-level CI variable that task 011 fills with the service account.
