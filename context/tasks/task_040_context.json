@@ -1,0 +1,11 @@
+{
+  "task_id": "task_040",
+  "files_touched": [
+    "src/afaw_web/app.py",
+    "tests/web/test_version.py"
+  ],
+  "summary": "Adds read-only GET /api/version to src/afaw_web/app.py. It returns release_tag and commit_sha from AFAW_RELEASE_TAG and AFAW_COMMIT_SHA, and an unset or empty variable gives the string unknown. It makes no network call and reads no file. POST returns 405 and the OpenAPI entry has a one-line summary. Five tests were written first in tests/web/test_version.py and red_check confirmed all five fail on the old code.",
+  "next": [
+    "Human: set AFAW_RELEASE_TAG and AFAW_COMMIT_SHA at deploy time (needs .gitlab-ci.yml and deploy/, which are human-only files)"
+  ]
+}
