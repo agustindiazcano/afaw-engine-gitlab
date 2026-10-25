@@ -149,9 +149,20 @@ red_check:
 mutation_gate:
   stage: verify
   extends: [.on_change, .base_ref]
+  before_script:
+    - !reference [.python_dev, before_script]
+    - !reference [.base_ref, before_script]
+    # The version measured on this runner (docs/submission/mutation-tools-measurement.md).
+    - pip install mutmut==3.8.0
   script:
-    # The engine is specific to each project; with mandatory files and no results this fails.
+    # mutmut needs fork support: it runs on this Linux runner, not on Windows. With no mandatory
+    # file the engine runs nothing; with mandatory files and no results the gate fails.
+    - python -m scripts.mutation_engine --base "$BASE" --out build/mutation.json
     - python -m scripts.mutation_ci --base "$BASE" --results build/mutation.json
+  artifacts:
+    when: always
+    expire_in: 1 week
+    paths: [build/mutation.json]
 
 # ---- secure: GitLab-native SAST and secret detection ---------------------------------------
 # The templates run in the test stage and, by default, only in branch pipelines. Their jobs are
