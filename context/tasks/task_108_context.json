@@ -1,0 +1,12 @@
+{
+  "task_id": "task_108",
+  "files_touched": [
+    "scripts/autonomy_stats.py",
+    "tests/tooling/test_autonomy_stats.py"
+  ],
+  "summary": "Added scripts/autonomy_stats.py: counts merge requests made only by service accounts and merged by the guard, from the GitLab API (system notes need a token). The note alone is not proof (a person can enable automatic merge on their own merge request), so it counts only with agent-only authorship. Result on 2026-10-25: 83 merge requests, 29 agent only, 22 of them merged, 16 with the recorded automatic merge. The plan now lists what is checked by code and what is not (auditing agent claims).",
+  "next": [
+    "Run autonomy_stats again before submitting",
+    "Build repair_check and the telemetry report"
+  ]
+}

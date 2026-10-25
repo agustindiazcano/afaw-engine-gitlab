@@ -1,0 +1,9 @@
+{
+  "task_id": "task_102",
+  "files_touched": [
+    "scripts/human_only_files.py",
+    "tests/tooling/test_human_only_files.py"
+  ],
+  "summary": "scripts/human_only_files.py gains a --list flag that prints the human-only path and prefix patterns it protects, sorted, one per line, and exits 0 without --base or the network. Without --list, --base is still required and the run exits 2. Tests check the list against the script constants, the sort order, and the failure without --base.",
+  "next": []
+}

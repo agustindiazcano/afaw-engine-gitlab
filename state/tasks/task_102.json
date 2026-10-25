@@ -1,0 +1,13 @@
+{
+  "id": "task_102",
+  "title": "human_only_files: add a --list flag that prints the protected patterns",
+  "role": "architect",
+  "type": "feature",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "duo/feature/43-human-only-files-list",
+  "priority": 3,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Govern stage experiment from issue 43. --base is required only when --list is absent."
+}

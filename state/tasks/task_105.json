@@ -1,13 +1,13 @@
 {
   "id": "task_105",
-  "title": "autonomy_stats: count the merge requests made and merged by agents from the GitLab API",
+  "title": "check_live: accept a newer deployed commit when pipelines of main overlap",
   "role": "architect",
-  "type": "feature",
+  "type": "fix",
   "status": "in_progress",
   "owner": "agent",
-  "branch": "feat/task-105-autonomy-stats",
-  "priority": 1,
+  "branch": "duo/fix/46-monitor-live-newer-deploy",
+  "priority": 2,
   "difficulty": 2,
   "blocked_by": [],
-  "notes": "First piece of the telemetry report planned in docs/plan-telemetry-and-budget.md."
+  "notes": "Autoheal issue 46: monitor_live failed because a later pipeline had already deployed."
 }

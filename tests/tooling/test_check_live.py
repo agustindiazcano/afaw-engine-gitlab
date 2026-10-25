@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import threading
 from collections.abc import Iterator
 from contextlib import contextmanager
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -141,3 +143,119 @@ def test_a_missing_page_fails_and_names_it(capsys: pytest.CaptureFixture[str]) -
     with _server(routes) as url:
         assert _run_with(url, "--page", "/", "--page", "/environment/") == 1
     assert "/environment/ answered 404" in capsys.readouterr().err
+
+
+# ---- the optional JSON result file
+
+
+def test_the_json_file_records_the_statuses_of_a_healthy_service(tmp_path: Path) -> None:
+    out = tmp_path / "result.json"
+    routes = _healthy_routes(**{"/": (200, {}), "/api/version": (200, {"commit_sha": "abc123"})})
+    with _server(routes) as url:
+        assert _run_with(url, "--page", "/", "--expect-sha", "abc123", "--json", str(out)) == 0
+    data = json.loads(out.read_text(encoding="utf-8"))
+    assert data == {
+        "base_url": url,
+        "expected_sha": "abc123",
+        "statuses": {"/health": 200, "/api/state": 200, "/": 200},
+        "ok": True,
+    }
+
+
+def test_the_json_file_is_written_when_the_check_fails_and_the_exit_code_stays(
+    tmp_path: Path,
+) -> None:
+    out = tmp_path / "result.json"
+    routes = {"/health": (503, {"status": "unavailable"}), "/api/state": (200, STATE)}
+    with _server(routes) as url:
+        assert _run_with(url, "--page", "/missing/", "--json", str(out)) == 1
+    data = json.loads(out.read_text(encoding="utf-8"))
+    assert data["ok"] is False
+    assert data["expected_sha"] is None
+    assert data["statuses"] == {"/health": 503, "/api/state": 200, "/missing/": 404}
+
+
+def test_the_json_file_is_written_when_the_service_does_not_answer(tmp_path: Path) -> None:
+    out = tmp_path / "result.json"
+    assert _run_with("http://127.0.0.1:9", "--json", str(out)) == 1
+    data = json.loads(out.read_text(encoding="utf-8"))
+    assert data["ok"] is False
+    assert data["statuses"].get("/health") is None
+
+
+@pytest.mark.characterization(reason="without the flag no file was ever written; pins that")
+def test_no_json_file_is_written_without_the_flag(tmp_path: Path, healthy: str) -> None:
+    assert _run_with(healthy) == 0
+    assert list(tmp_path.iterdir()) == []
+
+
+# ---- a newer deploy that overtook this pipeline (concurrent pipelines of main)
+
+
+def _git(repo: Path, *args: str) -> str:
+    done = subprocess.run(  # noqa: S603
+        ["git", "-C", str(repo), *args], check=True, capture_output=True, text=True, timeout=30
+    )
+    return done.stdout.strip()
+
+
+@pytest.fixture
+def history(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> dict[str, str]:
+    """A repo with commits ``old`` <- ``new`` on main and an unrelated ``side`` branch."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git(repo, "init", "-q", "-b", "main")
+    _git(repo, "config", "user.email", "t@example.com")
+    _git(repo, "config", "user.name", "t")
+    _git(repo, "config", "commit.gpgsign", "false")
+    _git(repo, "commit", "-q", "--allow-empty", "-m", "old")
+    old = _git(repo, "rev-parse", "HEAD")
+    _git(repo, "commit", "-q", "--allow-empty", "-m", "new")
+    new = _git(repo, "rev-parse", "HEAD")
+    _git(repo, "checkout", "-q", "-b", "side", old)
+    _git(repo, "commit", "-q", "--allow-empty", "-m", "side")
+    side = _git(repo, "rev-parse", "HEAD")
+    monkeypatch.chdir(repo)
+    return {"old": old, "new": new, "side": side}
+
+
+def _version(sha: str) -> dict[str, tuple[int, Any]]:
+    return _healthy_routes(**{"/api/version": (200, {"commit_sha": sha})})
+
+
+def test_a_service_running_a_newer_commit_passes(
+    history: dict[str, str], capsys: pytest.CaptureFixture[str]
+) -> None:
+    with _server(_version(history["new"])) as url:
+        assert _run_with(url, "--expect-sha", history["old"]) == 0
+    assert "newer" in capsys.readouterr().out
+
+
+@pytest.mark.characterization(reason="a mismatch always failed; pins that it still does")
+def test_a_service_running_an_older_commit_still_fails(history: dict[str, str]) -> None:
+    with _server(_version(history["old"])) as url:
+        assert _run_with(url, "--expect-sha", history["new"]) == 1
+
+
+@pytest.mark.characterization(reason="a mismatch always failed; pins that it still does")
+def test_a_service_running_an_unrelated_commit_still_fails(history: dict[str, str]) -> None:
+    with _server(_version(history["side"])) as url:
+        assert _run_with(url, "--expect-sha", history["new"]) == 1
+
+
+@pytest.mark.characterization(reason="a mismatch always failed; pins that it still does")
+def test_an_unknown_reported_commit_fails_even_with_history(history: dict[str, str]) -> None:
+    with _server(_version("unknown")) as url:
+        assert _run_with(url, "--expect-sha", history["old"]) == 1
+
+
+@pytest.mark.characterization(reason="a mismatch always failed; pins that it still does")
+def test_a_newer_commit_fails_closed_without_a_git_repository(
+    history: dict[str, str], tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    empty = tmp_path / "no-repo"
+    empty.mkdir()
+    monkeypatch.chdir(empty)
+    monkeypatch.setenv("GIT_CEILING_DIRECTORIES", str(tmp_path))
+    with _server(_version(history["new"])) as url:
+        assert _run_with(url, "--expect-sha", history["old"]) == 1

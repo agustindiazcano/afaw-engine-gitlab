@@ -134,18 +134,19 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--head-branch", help="the pull request's head branch")
     parser.add_argument("--target", help="the branch the PR merges into, e.g. origin/main")
     args = parser.parse_args(argv)
-    errors = check(
-        args.base,
-        args.head_branch,
-        git_runner,
-        lambda p: Path(p).read_text(encoding="utf-8"),
-        args.target,
-    )
+    read_count = 0
+
+    def read_head(path: str) -> str:
+        nonlocal read_count
+        read_count += 1
+        return Path(path).read_text(encoding="utf-8")
+
+    errors = check(args.base, args.head_branch, git_runner, read_head, args.target)
     for error in errors:
         sys.stderr.write(f"PROBLEM: {error}\n")
     if errors:
         return 1
-    sys.stdout.write("OK: task file check passed.\n")
+    sys.stdout.write(f"OK: task file check passed ({read_count} task files checked).\n")
     return 0
 
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 
-from playwright.sync_api import Page, expect
+from playwright.sync_api import Page, Route, expect
 
 from e2e.conftest import RESULTS
 
@@ -20,14 +20,12 @@ def test_a_note_added_in_the_page_appears_in_the_list(page: Page, notes_url: str
     expect(page.locator("#n li", has_text=text)).to_be_visible()
 
 
-def test_a_blank_note_is_not_added(page: Page, notes_url: str) -> None:
+def test_a_blank_note_cannot_be_added(page: Page, notes_url: str) -> None:
     page.goto(notes_url)
     expect(page.locator("#v")).not_to_be_empty()
-    before = page.locator("#n li").count()
+    expect(page.locator("button")).to_be_disabled()
     page.fill("#t", "   ")
-    page.click("button")
-    page.wait_for_timeout(500)
-    assert page.locator("#n li").count() == before
+    expect(page.locator("button")).to_be_disabled()
 
 
 def test_the_page_shows_the_release_and_the_commit(page: Page, notes_url: str) -> None:
@@ -41,3 +39,68 @@ def test_the_add_button_has_the_brand_colours(page: Page, notes_url: str) -> Non
     expect(button).to_have_css("background-color", BRAND)
     expect(button).to_have_css("color", WHITE)
     page.screenshot(path=str(RESULTS / "notes-app.png"))
+
+
+def test_there_is_no_horizontal_scroll_on_a_phone(page: Page, notes_url: str) -> None:
+    page.set_viewport_size({"width": 375, "height": 700})
+    page.goto(notes_url)
+    expect(page.locator("#v")).not_to_be_empty()
+    assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+
+
+def test_the_dark_theme_changes_the_background(page: Page, notes_url: str) -> None:
+    page.emulate_media(color_scheme="light")
+    page.goto(notes_url)
+    light = page.evaluate("getComputedStyle(document.body).backgroundColor")
+    page.screenshot(path=str(RESULTS / "notes-app-light.png"))
+    page.emulate_media(color_scheme="dark")
+    dark = page.evaluate("getComputedStyle(document.body).backgroundColor")
+    page.screenshot(path=str(RESULTS / "notes-app-dark.png"))
+    assert light != dark
+
+
+def test_the_counter_follows_the_typed_text(page: Page, notes_url: str) -> None:
+    page.goto(notes_url)
+    expect(page.locator("#count")).to_have_text("0/200")
+    page.fill("#t", "hello")
+    expect(page.locator("#count")).to_have_text("5/200")
+
+
+def test_the_button_is_enabled_only_with_text(page: Page, notes_url: str) -> None:
+    page.goto(notes_url)
+    expect(page.locator("button")).to_be_disabled()
+    page.fill("#t", "something")
+    expect(page.locator("button")).to_be_enabled()
+    page.fill("#t", "")
+    expect(page.locator("button")).to_be_disabled()
+
+
+def test_the_empty_message_is_hidden_once_a_note_exists(page: Page, notes_url: str) -> None:
+    page.goto(notes_url)
+    expect(page.locator("#v")).not_to_be_empty()
+    page.fill("#t", f"e2e {uuid.uuid4().hex[:8]}")
+    page.click("button")
+    expect(page.locator("#n li")).not_to_have_count(0)
+    expect(page.locator("#empty")).to_be_hidden()
+
+
+def test_the_empty_message_is_shown_when_there_are_no_notes(page: Page, notes_url: str) -> None:
+    page.route("**/api/notes", lambda route: route.fulfill(json=[]))
+    page.goto(notes_url)
+    expect(page.locator("#empty")).to_be_visible()
+    expect(page.locator("#empty")).to_have_text("No notes yet. Add the first one.")
+
+
+def test_a_failed_save_shows_an_alert_and_keeps_the_text(page: Page, notes_url: str) -> None:
+    def handle(route: Route) -> None:
+        if route.request.method == "POST":
+            route.fulfill(status=500, body="boom")
+        else:
+            route.continue_()
+
+    page.route("**/api/notes", handle)
+    page.goto(notes_url)
+    page.fill("#t", "keep me")
+    page.click("button")
+    expect(page.get_by_role("alert")).to_be_visible()
+    expect(page.locator("#t")).to_have_value("keep me")

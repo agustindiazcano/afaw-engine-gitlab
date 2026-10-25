@@ -20,6 +20,7 @@ that changes a human-only file fails as well, whoever started the pipeline: a fl
 that author when a person re-runs the pipeline.
 
 Run in CI: python -m scripts.human_only_files --base origin/main
+List the protected patterns (no --base, no network): python -m scripts.human_only_files --list
 Exit codes: 0 ok, 1 a non-human changed a human-only file, 2 could not decide (fails closed).
 """
 
@@ -45,6 +46,11 @@ HUMAN_ONLY_PREFIXES = ("deploy/",)
 CONFIG_PATH = "state/config.json"
 CONFIG_KEYS = ("mutation_critical_paths", "mutation_min_score")
 TIMEOUT = 30
+
+
+def protected_patterns() -> list[str]:
+    """The human-only path and prefix patterns this script protects, sorted."""
+    return sorted((*HUMAN_ONLY_PATHS, *HUMAN_ONLY_PREFIXES))
 
 
 def protected_changes(
@@ -130,8 +136,16 @@ def main(argv: list[str] | None = None) -> int:
     """Check who changed the human-only files of the branch."""
     parser = argparse.ArgumentParser(description="Weak backup control for human-only files.")
     parser.add_argument("--root", default=".", help="project root (default: current directory)")
-    parser.add_argument("--base", required=True, help="git ref to compare with, e.g. origin/main")
+    parser.add_argument("--base", help="git ref to compare with, e.g. origin/main")
+    parser.add_argument(
+        "--list", action="store_true", help="print the protected patterns, one per line, and exit"
+    )
     args = parser.parse_args(argv)
+    if args.list:
+        sys.stdout.write("".join(f"{pattern}\n" for pattern in protected_patterns()))
+        return 0
+    if not args.base:
+        parser.error("--base is required unless --list is given")
     root = Path(args.root)
     new_config = json.loads((root / CONFIG_PATH).read_text(encoding="utf-8"))
     hits = protected_changes(changed_files(args.base, root), config_at(args.base, root), new_config)

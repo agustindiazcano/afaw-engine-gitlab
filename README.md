@@ -30,6 +30,7 @@ AFAW Engine is the entry of the AFAW (Anti-Fragile Agentic Workflow) method to t
 | [Hackathon requirements](#hackathon-requirements-and-status) | Devpost requirements and their state |
 | [The nine stages](#the-nine-stages) and [Stages and Duo](#stages-and-duo) | The jobs of each stage and where a Duo flow ran |
 | [Demo app](#demo-app) and [End to end tests](docs/e2e.md) | The deployed app the agents change, and the browser tests that watch it |
+| [Hands-off method](docs/method-handsoff.md) | Diagrams of the loop, self-repair, merge decision, control layers and observability |
 | [Stack](#stack) | Technologies; Google Cloud, Terraform and CI/CD in [`docs/stack.md`](docs/stack.md) |
 | [Dashboard](#dashboard) | Live, experiments and environment pages |
 | [Guardrails](#guardrails-and-known-limits) and [Sustainability](#sustainability) | Limits and the carbon estimate |
@@ -63,21 +64,24 @@ Expected, not measured: no figure below has been measured yet.
 | Guardrails | Human reviews each diff | Human-only files (a weak control, see [limits](#guardrails-and-known-limits)) and a red-first check that a new test fails on the old code | Done |
 | | | Cap of 3 automatic fix attempts per merge request, merge only when the full pipeline is green | Code and tests merged (task 012); never run on a real merge request |
 
-The loop is the target design; the status of each link is in [Hands-off status](#hands-off-status):
+Diagrams of the loop, the self-repair, the merge decision, the control layers and the observability: [`docs/method-handsoff.md`](docs/method-handsoff.md). The loop is the target design; the status of each link is in [Hands-off status](#hands-off-status):
 
 ```mermaid
 flowchart LR
-    I[Issue] --> D[Developer Flow opens MR]
-    D --> P[Nine-stage pipeline]
-    P -- failure --> F[Fix CI/CD Pipeline Flow<br/>max 3 attempts]
-    F --> P
-    P -- green --> R[Code Review Flow]
-    R --> G{Every gate green?}
-    G -- yes --> M[Automatic merge]
-    M --> L[Release and deploy to Cloud Run]
-    L --> O[Monitor: /health, /api/state]
-    O --> C[Summary comment on the issue]
+    I[Issue<br/>or failed pipeline] --> D[Duo Developer Flow<br/>service account]
+    D --> MR[Merge request<br/>Draft]
+    MR --> G{{Gates<br/>tests, red-first, mutation,<br/>SAST, secrets, human-only files}}
+    G -- red --> RF[request_fix<br/>note or issue for Duo]
+    RF --> D
+    G -- green --> MG[merge_guard<br/>identity + rules]
+    MG -- merge: yes --> M[Merge to main]
+    M --> R[Release, image,<br/>Cloud Run deploy]
+    R --> E[e2e_live<br/>Playwright on the live apps]
+    E -- red --> RF
+    E -- green --> O[Observe<br/>dashboard, experiments,<br/>environment]
 ```
+
+Not in the diagram because it has not run: a review by the Code Review Flow and a summary comment on the issue.
 
 ## Hackathon requirements and status
 
@@ -372,6 +376,8 @@ Generated from `git ls-files` on Oct 24, 2026.
 The sections below are the original method, unchanged in substance. In this variant, "a human approves every PR" is replaced by the policy described above.
 
 ## Method and this implementation
+
+> The tables and diagrams from here to the end describe **upstream AFAW**, where a human approves every pull request. The hands-off method of AFAW Engine, with its own diagrams, is in [`docs/method-handsoff.md`](docs/method-handsoff.md).
 
 The method does not require these exact tools. Some parts are what make it work: remove them and the problem they solve comes back.
 

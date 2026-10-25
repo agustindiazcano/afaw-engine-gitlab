@@ -10,6 +10,9 @@ The list of required names is itself validated: a name that is duplicated, empty
 whitespace is a defect in this script, so it fails before any variable is checked. The message
 lists the offending names, never any variable value.
 
+After the per-variable lines one summary line, ``variables: N of M set``, counts the variables
+checked on this ref (required and optional; "not checked" ones are left out), names only.
+
 Run in CI: python -m scripts.check_ci_config
 Exit codes: 0 ok, 1 a required variable is missing, 2 the config is invalid, 3 the declared list
 of required names has a duplicated, empty or whitespace-only name.
@@ -79,6 +82,9 @@ def main(argv: list[str] | None = None, environ: Mapping[str, str] | None = None
     for name, note in OPTIONAL.items():
         state = "set" if env.get(name) else f"not set (optional, {note})"
         sys.stdout.write(f"{name}: {state}\n")
+    checked = [*names, *OPTIONAL]
+    set_count = sum(1 for name in checked if env.get(name))
+    sys.stdout.write(f"variables: {set_count} of {len(checked)} set\n")
     return 1 if missing else 0
 
 

@@ -1,0 +1,11 @@
+{
+  "task_id": "task_107",
+  "files_touched": [
+    "scripts/check_live.py",
+    "tests/tooling/test_check_live.py"
+  ],
+  "summary": "scripts/check_live.py: with --expect-sha, a /api/version commit that is a strict descendant of the expected commit (git merge-base --is-ancestor, fetching it from origin if needed) now passes with a NOTE, because overlapping pipelines of main deploy in order and a newer deploy proves the expected one was superseded. Older, unrelated, unknown, non-sha values and a missing repository still fail closed. This re-lands the fix of issue 46, whose task file reused id task_103 (already on main). Not fixed: deploy_demo_app greps the same sha in its script in .gitlab-ci.yml, which is human-only.",
+  "next": [
+    "A human may add a resource_group to the deploy jobs or the same descendant check to deploy_demo_app in .gitlab-ci.yml"
+  ]
+}

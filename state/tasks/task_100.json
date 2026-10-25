@@ -1,0 +1,13 @@
+{
+  "id": "task_100",
+  "title": "check_ci_config: summary line with the number of variables set",
+  "role": "architect",
+  "type": "feature",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "feat/task-100-ci-config-variables-summary",
+  "priority": 3,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Stage experiment (configure), issue #41. Names only, exit code unchanged."
+}

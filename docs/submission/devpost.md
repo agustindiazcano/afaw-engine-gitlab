@@ -96,7 +96,7 @@ Every figure is in [`docs/experiments.md`](../experiments.md) with its source.
 | Planted defects repaired with no test touched | 6 of 6, plus 1 real defect Duo found |
 | Chaos: C1, C3 and a security case | Held |
 | Load test of the live service | 992 requests, no errors |
-| GitLab Credits used | 204.26 of 500, read by hand; GitLab exposes no token counts |
+| GitLab Credits used | 219.38 of 500, read by hand on 2026-10-25; GitLab exposes no token counts |
 
 Nothing here is a claim of savings in speed or money. The carbon figure is an estimate with its
 assumptions listed on the `/environment/` page.

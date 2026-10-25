@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>AFAW demo notes</title>
+<style>
+:root{
+--space-4:4px;--space-8:8px;--space-12:12px;--space-16:16px;--space-24:24px;--space-32:32px;
+--bg:#f3f5fa;--surface:#fff;--text:#161a23;--muted:#4b5568;--border:#d5dbe8;
+--primary:#0b5fff;--on-primary:#fff;--focus:#0b5fff;--note-bg:#f8f9fd;
+--error:#a1001a;--error-bg:#fdecef;--shadow:0 1px 3px rgba(16,24,40,.08);
+}
+@media (prefers-color-scheme: dark){:root{
+--bg:#0d1017;--surface:#171b26;--text:#eef1f8;--muted:#a9b3c9;--border:#2e3547;
+--focus:#7aa5ff;--note-bg:#1d2230;--error:#ffb3bd;--error-bg:#3b151b;--shadow:none;
+}}
+*{box-sizing:border-box}
+body{margin:0;padding:var(--space-24) var(--space-16);background:var(--bg);color:var(--text);
+font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+main{max-width:40rem;margin:0 auto;padding:var(--space-24);background:var(--surface);
+border:1px solid var(--border);border-radius:var(--space-12);box-shadow:var(--shadow)}
+header{display:flex;align-items:center;gap:var(--space-12);margin-bottom:var(--space-24)}
+header svg{flex:none;width:40px;height:40px}
+.mark-bg{fill:var(--primary)}.mark-fg{fill:none;stroke:#fff;stroke-width:3;
+stroke-linecap:round;stroke-linejoin:round}
+h1{margin:0;font-size:1.5rem;line-height:1.2}
+.sub{margin:var(--space-4) 0 0;color:var(--muted);font-size:.875rem}
+label{display:block;margin-bottom:var(--space-4);color:var(--muted);font-size:.875rem}
+.row{display:flex;gap:var(--space-8)}
+input{flex:1;min-width:0;padding:var(--space-8) var(--space-12);font:inherit;color:var(--text);
+background:var(--surface);border:1px solid var(--border);border-radius:var(--space-8)}
+button{flex:none;padding:var(--space-8) var(--space-16);font:inherit;font-weight:600;
+background:var(--primary);color:var(--on-primary);border:0;border-radius:var(--space-8);
+cursor:pointer}
+button:disabled{opacity:.55;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.meta{display:flex;justify-content:flex-end;margin:var(--space-4) 0 0;color:var(--muted);
+font-size:.75rem}
+.error{margin:var(--space-12) 0 0;padding:var(--space-8) var(--space-12);color:var(--error);
+background:var(--error-bg);border-radius:var(--space-8);font-size:.875rem}
+ul{list-style:none;margin:var(--space-24) 0 0;padding:0;display:grid;gap:var(--space-8)}
+li{padding:var(--space-12) var(--space-16);background:var(--note-bg);
+border:1px solid var(--border);border-radius:var(--space-8);overflow-wrap:anywhere;
+animation:fade .25s ease-out}
+@keyframes fade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){li{animation:none}}
+#empty{margin:var(--space-24) 0 0;padding:var(--space-16);text-align:center;color:var(--muted);
+border:1px dashed var(--border);border-radius:var(--space-8)}
+footer{margin-top:var(--space-24);color:var(--muted);font-size:.75rem;overflow-wrap:anywhere}
+[hidden]{display:none!important}
+</style></head>
+<body><main>
+<header>
+<svg viewBox="0 0 40 40" aria-hidden="true" focusable="false"><rect class="mark-bg" width="40"
+height="40" rx="10"/><path class="mark-fg" d="M11 20.5l6 6L29 14"/></svg>
+<div><h1>AFAW demo notes</h1>
+<p class="sub">A tiny app that is changed by AFAW agents, one issue at a time.</p></div>
+</header>
+<form id="f" autocomplete="off">
+<label for="t">New note</label>
+<div class="row"><input id="t" maxlength="200" placeholder="Write a note">
+<button type="submit" disabled>Add</button></div>
+<p class="meta"><span id="count" aria-live="polite">0/200</span></p>
+<p id="err" class="error" role="alert" hidden></p>
+</form>
+<ul id="n"></ul>
+<p id="empty" hidden>No notes yet. Add the first one.</p>
+<footer>Notes live in memory and are lost when the instance stops.
+<span id="v"></span></footer>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const input=$('t'),btn=document.querySelector('button'),err=$('err');
+function sync(){const n=input.value.length;$('count').textContent=n+'/200';
+btn.disabled=input.value.trim()===''}
+function fail(m){err.textContent=m;err.hidden=false}
+async function load(){const r=await fetch('/api/notes');const d=await r.json();
+const ul=$('n');ul.replaceChildren();
+for(const x of d){const li=document.createElement('li');li.textContent=x.text;ul.append(li)}
+$('empty').hidden=d.length>0}
+input.addEventListener('input',()=>{err.hidden=true;sync()});
+$('f').addEventListener('submit',async e=>{e.preventDefault();
+if(input.value.trim()==='')return;
+btn.disabled=true;err.hidden=true;
+try{const r=await fetch('/api/notes',{method:'POST',
+headers:{'content-type':'application/json'},body:JSON.stringify({text:input.value})});
+if(!r.ok){fail(r.status===409?'The store is full.':'Could not save the note. Try again.');
+sync();return}
+input.value='';sync();await load()}
+catch(_){fail('Could not save the note. Check your connection and try again.');sync()}});
+fetch('/api/version').then(r=>r.json()).then(v=>{
+$('v').textContent='Release '+v.release_tag+', commit '+v.commit_sha}).catch(()=>{});
+load().catch(()=>fail('Could not load the notes.'));
+</script></body></html>

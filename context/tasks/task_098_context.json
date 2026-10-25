@@ -1,0 +1,9 @@
+{
+  "task_id": "task_098",
+  "files_touched": [
+    "src/notes_app/Dockerfile",
+    "tests/notes/test_dockerfile.py"
+  ],
+  "summary": "The notes app image now has a HEALTHCHECK (interval 30s, timeout 3s) that calls GET /health on the port in $PORT (default 8080) with python urllib from the standard library, so no package is added to the slim image. tests/notes/test_dockerfile.py reads the Dockerfile text and asserts the instruction, the timings, the /health path and that no new package is installed.",
+  "next": []
+}

@@ -1,0 +1,13 @@
+{
+  "id": "task_104",
+  "title": "Hands-off method diagrams: replace the upstream human-in-the-loop view in the README",
+  "role": "architect",
+  "type": "chore",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "docs/task-104-handsoff-method",
+  "priority": 2,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Documents only."
+}

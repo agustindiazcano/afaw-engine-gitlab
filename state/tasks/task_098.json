@@ -1,0 +1,13 @@
+{
+  "id": "task_098",
+  "title": "Docker HEALTHCHECK for the demo notes app image",
+  "role": "architect",
+  "type": "feature",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "duo/feature/39-dockerfile-healthcheck",
+  "priority": 3,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Package stage experiment from issue 39. Standard library only, no new package."
+}

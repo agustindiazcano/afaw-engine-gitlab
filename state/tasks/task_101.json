@@ -1,0 +1,13 @@
+{
+  "id": "task_101",
+  "title": "check_live: optional JSON result file",
+  "role": "architect",
+  "type": "feature",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "duo/feature/42-check-live-json-result",
+  "priority": 3,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Monitor stage experiment: scripts/check_live.py gains an optional --json PATH."
+}
