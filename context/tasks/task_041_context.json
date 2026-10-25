@@ -1,0 +1,9 @@
+{
+  "task_id": "task_041",
+  "files_touched": [
+    "src/afaw_web/app.py",
+    "tests/web/test_ask_validation.py"
+  ],
+  "summary": "Validates q on /api/ask: after trimming whitespace it must have 1 to 200 characters, otherwise a JSON 422 whose messages start with 'q:'. The limit is in the parameter's OpenAPI description. The search logic and valid responses are unchanged. Tests were written first and seen failing (9 of 15 new test cases) before the change.",
+  "next": []
+}

@@ -1,0 +1,12 @@
+{
+  "id": "task_041",
+  "title": "Validate the q parameter of /api/ask",
+  "role": "backend",
+  "type": "fix",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "fix/task-041-validate-ask-q",
+  "priority": 3,
+  "difficulty": 1,
+  "blocked_by": []
+}
