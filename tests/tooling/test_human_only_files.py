@@ -173,6 +173,9 @@ def test_a_commit_authored_by_a_service_account_fails_even_with_a_human_pusher_a
     assert "service account" in capsys.readouterr().err
 
 
+@pytest.mark.characterization(
+    reason="a flow's commits on unprotected files were always allowed; this pins that they stay so"
+)
 def test_a_service_account_commit_on_unprotected_files_is_fine(
     project: Project, monkeypatch: pytest.MonkeyPatch
 ) -> None:
