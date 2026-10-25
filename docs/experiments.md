@@ -27,11 +27,11 @@ estimate (`AGENTS.md` section 2.2). Rows are added only after the experiment ran
 | EXP-04 | Long chain | Four issues, one after the other: how many merge with no person, and how long does each take? | Not run |
 | EXP-05 | Burst | Four issues assigned at once: do the merge requests collide, and how fast do credits burn? | Not run |
 | EXP-06 | Chaos | Do the gates and the guard hold when things break on purpose? | Not run |
-| EXP-07 | Service load | How does the live service behave under load, and what does it cost? | Not run |
+| EXP-07 | Service load | How does the live service behave under load, and what does it cost? | Run once (992 requests, 0 errors); the cost is not read |
 | EXP-08 | Agent quality | How good are the Duo flows on standard small tasks? | Not run |
-| EXP-10 | Real repair | Does Duo fix defects that real tests catch, with no test weakened? | Running: three planted defects |
-| EXP-11 | Hard build, hidden tests | Can Duo build a non-trivial tool from a specification and pass tests it cannot see? | Running: issues #13 and #14 |
-| EXP-12 | Test writing with a measured effect | Do the tests Duo writes raise coverage and the mutation score? | Coverage measured; mutation running |
+| EXP-10 | Real repair | Does Duo fix defects that real tests catch, with no test weakened? | Run: three planted defects repaired, plus one real defect found and fixed |
+| EXP-11 | Hard build, hidden tests | Can Duo build a non-trivial tool from a specification and pass tests it cannot see? | Run: two tools, 27 of 27 hidden tests passed |
+| EXP-12 | Test writing with a measured effect | Do the tests Duo writes raise coverage and the mutation score? | Run: coverage 86 to 94 percent; mutation app.py 62.2 to 95.6 percent |
 | EXP-09 | Environmental benchmark | What is the SCI of one merged merge request, and what do the optimizations save? | Partly: one measured optimization, no SCI yet |
 
 ### EXP-01 Happy path
@@ -69,11 +69,16 @@ Target: `https://afaw-handsoff-ljm5hefnsq-uc.a.run.app`, endpoints `/health`, `/
 `/api/ask`. The service has no rate limiting and at most two instances. Keep the run short and
 small, because the traffic is billed.
 
-| Run | Rate | Duration | p50 | p95 | Error rate | Instances | Cost |
-|---|---|---|---|---|---|---|---|
-| warm, `/health` | not run | | | | | | |
-| cold start | not run | | | | | | |
-| `/api/ask` | not run | | | | | | |
+Measured on 2026-10-25 from one machine in Argentina against the Cloud Run service in `us-central1`, with 5 parallel clients for 20 seconds per endpoint. The latency includes the network between the two. The first request after an idle period took 378 ms.
+
+| Endpoint | Requests | Rate | p50 | p95 | Max | Errors |
+|---|---|---|---|---|---|---|
+| `/health` | 288 | 14.2 per second | 328 ms | 453 ms | 1050 ms | 0 |
+| `/api/state` | 213 | 10.4 per second | 416 ms | 757 ms | 1031 ms | 0 |
+| `/api/ask?q=merge+policy` | 266 | 13.1 per second | 340 ms | 542 ms | 1064 ms | 0 |
+| `/live/` | 225 | 11.0 per second | 419 ms | 638 ms | 1099 ms | 0 |
+
+992 requests, no error. The service is configured with at most 2 instances and a concurrency of 80. The cost of the run was not read (Google Cloud billing is read by hand).
 
 ### EXP-08 Agent quality
 
@@ -143,6 +148,69 @@ All five merge requests failed `red_check` at first, which is expected for tests
 already exists, and a Duo session started by a note repaired each one by declaring the tests as
 characterization: five repairs out of five. The conflict of the sixth was passed to Duo too.
 
+
+### EXP-10 results: repair
+
+Three defects planted on purpose in real modules, each caught by an existing test. The branch is
+pushed with no merge request; `request_fix` opens the issue; the Developer Flow repairs it.
+
+| Defect | Where | Repair | Change | Test touched | Push to green |
+|---|---|---|---|---|---|
+| `attempts >= CAP` instead of `>` | `scripts/merge_guard.py` | The line was restored (first session, from an issue that named the wrong failure) | 1 line | No | not comparable: two issues overlapped |
+| `search` instead of `fullmatch` on the address | `scripts/service_accounts.py` | Restored `fullmatch` | 1 line | No | 12.1 min: 2.6 to the issue, 1.9 to the merge request, 7.5 to green |
+| gated score divided by `generated` instead of `denominator` | `scripts/mutation_gate.py` | Restored the denominator | 1 line | No | 13.2 min: 2.8, 2.9 and 7.5 |
+
+Each repair is the exact inverse of the planted line. The repair merge requests were closed
+without merging, because their branches start from the planted defect and their net change
+against `main` is only task files.
+
+What went wrong, and was found by the experiment:
+
+| Finding | Where | Fix |
+|---|---|---|
+| The planted commits carried no task file, so the first failure was `task_delta` and the first issues (#16 to #18) asked for the wrong thing | The seeding, mine | The branches were corrected and the issues closed; the repair of the right failure followed |
+| `merge_guard` counted `request_fix`, skipped on every green pipeline, as a job that did not succeed, and held every merge request of the flow | `scripts/merge_guard.py`, mine | Merged as task_070 (!51), 5 tests failed on the old code |
+
+A real defect found by Duo, not planted: on the measurement branch the `mutation_gate` job failed
+(issue #19, opened by `request_fix`) and Duo found that `scripts/mutation_engine.py` joined the
+required files with a comma, which mutmut reads as one pattern that matches no file, so the gate
+never mutated more than one required file. The fix (!47) was merged by `merge_guard`.
+
+### EXP-11 results: hard build with hidden tests
+
+The acceptance tests were written before the run, from values computed apart from any model, and
+were never in the repository or in the issue.
+
+| Tool | Merge request | Hidden tests | Tests Duo wrote | Coverage by its own tests | `ruff` | `mypy --strict` | Pipelines | Issue to merge |
+|---|---|---|---|---|---|---|---|---|
+| `scripts/sci_estimate.py` | !40 | 17 of 17 | 33 | 96 % | clean | clean | 3 | 29.4 min |
+| `scripts/cost_summary.py` | !43 | 10 of 10 | 33 | 97 % | clean | clean | 3 | 28.1 min |
+
+Both merge requests were merged by `merge_guard` after the Developer Flow brought `main` into the
+branch. The mutation score of the two files is not measured: `mutation_gate` runs only on the
+critical paths of `state/config.json`.
+
+### EXP-12 results: mutation score, measured in CI
+
+On the CI runner with mutmut 3.8.0, the whole suite including the tests Duo wrote (pipeline
+2987035333, job `mutation_gate`, 63 s):
+
+| File | Before | After |
+|---|---|---|
+| `src/afaw_web/app.py` | 62.2 % (28 of 45) | **95.6 % (43 of 45)** |
+| `src/afaw_web/search.py` | 78.0 % (46 of 59) | **84.7 % (50 of 59)** |
+
+### Credits
+
+Read by the human from the GitLab Credits dashboard. GitLab shows no per-session figure here.
+
+| When (GMT-3, 2026-10-25) | Credits used | Duo flow sessions (pipelines of source `duo_workflow`) |
+|---|---|---|
+| about 16:20 | 59.67 | not read |
+| about 16:48 | not read | 41 |
+| about 17:00 | 156 | not read |
+
+LLM tokens are not exposed by GitLab Duo.
 
 ## How to add a row
 
