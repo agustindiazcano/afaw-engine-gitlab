@@ -1,6 +1,11 @@
 {
   "task_id": "task_053",
-  "files_touched": [],
+  "files_touched": [
+    "tests/web/test_app.py",
+    "tests/web/test_main.py",
+    "tests/web/test_search.py",
+    "tests/web/test_settings.py"
+  ],
   "summary": "Adds tests under tests/web/ for src/afaw_web: test_main.py (the uvicorn entry point builds the app from AFAW_WEB_DATA_DIR and registers exactly the five GET routes), test_settings.py (default, prefixed variable, unprefixed variable ignored, explicit argument wins), test_search.py (record order, titles and fallback, UTF-8 reading, scoring, excerpts, ordering) and one extra test in test_app.py (a missing page is a 503 naming the file). Measured locally with coverage and mutmut 3.8.0 (not the CI runner): line and branch coverage of src/afaw_web 100 percent (main.py was 0 percent, app.py 94 percent), and search.py mutants killed 59 of 59 (the CI baseline was 46 of 59). No defect was found in the code under test, so no xfail test was added.",
   "next": [
     "Read the new numbers from the pipeline (mutation_gate) on the merge request, not from the local run",
