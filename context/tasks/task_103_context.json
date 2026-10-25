@@ -1,0 +1,13 @@
+{
+  "task_id": "task_103",
+  "files_touched": [
+    "src/notes_app/app.py",
+    "src/notes_app/static/index.html",
+    "tests/notes/test_page.py"
+  ],
+  "summary": "The demo notes page is now a static file read once at app creation. It has one centered card of at most 40rem, a spacing scale and every colour as CSS variables, light and dark themes, an inline SVG logo, a labelled input with a live n/200 counter, an Add button disabled while the text is blank, note cards with a fade-in that respects reduced motion, an empty state and an alert on a failed save that keeps the typed text. The page is about 5 KB with no external resource. Unit tests check its structure and the end to end tests check the behaviour in a browser.",
+  "next": [
+    "Check the e2e_local job result in the pipeline",
+    "Review the look of the live page after the release"
+  ]
+}

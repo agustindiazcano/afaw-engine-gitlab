@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import os
 import threading
+from pathlib import Path
 from typing import Annotated
 
 from fastapi import FastAPI, HTTPException
@@ -18,32 +19,7 @@ from pydantic import BaseModel, ConfigDict, StringConstraints
 MAX_TEXT = 200
 MAX_NOTES = 100
 
-PAGE = """<!doctype html>
-<html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AFAW demo notes</title>
-<style>body{font:16px system-ui;max-width:36rem;margin:2rem auto;padding:0 1rem}
-li{margin:.4rem 0}small{color:#555}
-button{background:#0b5fff;color:#fff;border:0;border-radius:4px;padding:.4rem .9rem}</style></head>
-<body><h1>AFAW demo notes</h1>
-<p><small>The target app of the AFAW hands-off loop: agents change it through issues.
-Notes live in memory and are lost when the instance stops.</small></p>
-<form id="f"><input id="t" maxlength="200" required placeholder="A note">
-<button>Add</button></form><ul id="n"></ul>
-<p><small id="v"></small></p>
-<script>
-async function load(){const r=await fetch('/api/notes');const d=await r.json();
-const ul=document.getElementById('n');ul.replaceChildren();
-for(const x of d){const li=document.createElement('li');li.textContent=x.text;ul.append(li)}}
-document.getElementById('f').addEventListener('submit',async e=>{e.preventDefault();
-const t=document.getElementById('t');
-await fetch('/api/notes',{method:'POST',headers:{'content-type':'application/json'},
-body:JSON.stringify({text:t.value})});t.value='';load()});
-fetch('/api/version').then(r=>r.json()).then(v=>{
-document.getElementById('v').textContent='Release '+v.release_tag+', commit '+v.commit_sha});
-load();
-</script></body></html>
-"""
+STATIC_PAGE = Path(__file__).parent / "static" / "index.html"
 
 
 class NoteIn(BaseModel):
@@ -65,10 +41,11 @@ def create_app() -> FastAPI:
     app = FastAPI(title="AFAW demo notes")
     notes: list[dict[str, int | str]] = []
     lock = threading.Lock()
+    page_html = STATIC_PAGE.read_text(encoding="utf-8")
 
     @app.get("/", response_class=HTMLResponse)
     def page() -> str:
-        return PAGE
+        return page_html
 
     @app.get("/health")
     def health() -> dict[str, str]:
