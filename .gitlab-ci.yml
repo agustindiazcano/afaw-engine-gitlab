@@ -137,7 +137,7 @@ tests:
   script:
     - git config --global user.email "ci@example.com"
     - git config --global user.name "CI"
-    - pytest tests/tooling tests/web -q
+    - pytest tests/tooling tests/web tests/notes -q
 
 red_check:
   stage: verify
@@ -301,6 +301,28 @@ package_buildah:
     - buildah build -t "$CI_REGISTRY_IMAGE/afaw-web:$CI_COMMIT_SHA" .
     - buildah push "$CI_REGISTRY_IMAGE/afaw-web:$CI_COMMIT_SHA"
 
+# The demo notes app (src/notes_app): the target the Duo flows change through issues. Built when its
+# files change and on main; it is deployed to its own Cloud Run service, afaw-demo-app.
+package_demo_app:
+  stage: package
+  image: docker:24.0.5-cli
+  services:
+    - docker:24.0.5-dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - changes:
+        paths: ["src/notes_app/**/*"]
+        compare_to: refs/heads/main
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+  script:
+    - docker build -f src/notes_app/Dockerfile -t "$CI_REGISTRY_IMAGE/afaw-demo-app:$CI_COMMIT_SHA" .
+    - docker push "$CI_REGISTRY_IMAGE/afaw-demo-app:$CI_COMMIT_SHA"
+
 # ---- configure: the settings and CI variables the pipeline depends on ----------------------
 # Validates state/config.json against its schema and checks the CI variables by name only,
 # never printing a value. The Google Cloud variables are protected, so they are required only on
@@ -391,6 +413,52 @@ deploy_cloud_run:
     - GCP_TOKEN="$(sh deploy/gcp_access_token.sh)"
     - export CLOUDSDK_AUTH_ACCESS_TOKEN="$GCP_TOKEN"
     - gcloud run deploy "$GCP_SERVICE_NAME" --image "$GCP_ARTIFACT_REPOSITORY/afaw-web:$CI_COMMIT_SHA" --update-env-vars "AFAW_COMMIT_SHA=$CI_COMMIT_SHA,AFAW_RELEASE_TAG=v0.$CI_PIPELINE_IID" --region "$GCP_REGION" --project "$GCP_PROJECT_ID" --quiet
+
+publish_demo_image:
+  stage: release
+  image: docker:24.0.5-cli
+  services:
+    - docker:24.0.5-dind
+  needs: [package_demo_app]
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  id_tokens:
+    GITLAB_OIDC_TOKEN:
+      aud: https://gitlab.com
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - apk add --no-cache curl
+    - GCP_TOKEN="$(sh deploy/gcp_access_token.sh)"
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+    - echo "$GCP_TOKEN" | docker login -u oauth2accesstoken --password-stdin "${GCP_ARTIFACT_REPOSITORY%%/*}"
+    - docker pull "$CI_REGISTRY_IMAGE/afaw-demo-app:$CI_COMMIT_SHA"
+    - docker tag "$CI_REGISTRY_IMAGE/afaw-demo-app:$CI_COMMIT_SHA" "$GCP_ARTIFACT_REPOSITORY/afaw-demo-app:$CI_COMMIT_SHA"
+    - docker push "$GCP_ARTIFACT_REPOSITORY/afaw-demo-app:$CI_COMMIT_SHA"
+
+# Deploys the demo app, then fails unless the live service reports this very commit. The URL goes
+# to the next jobs (the end to end tests) in a dotenv report.
+deploy_demo_app:
+  stage: release
+  image: google/cloud-sdk:590.0.1 # pinned; tag verified on Docker Hub
+  needs: [publish_demo_image]
+  variables:
+    DEMO_SERVICE_NAME: afaw-demo-app
+  id_tokens:
+    GITLAB_OIDC_TOKEN:
+      aud: https://gitlab.com
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - GCP_TOKEN="$(sh deploy/gcp_access_token.sh)"
+    - export CLOUDSDK_AUTH_ACCESS_TOKEN="$GCP_TOKEN"
+    - gcloud run deploy "$DEMO_SERVICE_NAME" --image "$GCP_ARTIFACT_REPOSITORY/afaw-demo-app:$CI_COMMIT_SHA" --update-env-vars "AFAW_COMMIT_SHA=$CI_COMMIT_SHA,AFAW_RELEASE_TAG=v0.$CI_PIPELINE_IID" --region "$GCP_REGION" --project "$GCP_PROJECT_ID" --quiet
+    - DEMO_APP_URL="$(gcloud run services describe "$DEMO_SERVICE_NAME" --region "$GCP_REGION" --project "$GCP_PROJECT_ID" --format 'value(status.url)')"
+    - echo "DEMO_APP_URL=$DEMO_APP_URL" > demo.env
+    - curl -fsS --retry 6 --retry-delay 5 --retry-all-errors "$DEMO_APP_URL/api/version" | grep -q "$CI_COMMIT_SHA"
+  artifacts:
+    reports:
+      dotenv: demo.env
 
 # ---- monitor: measured facts and the dashboard ---------------------------------------------
 monitor:
