@@ -1,0 +1,9 @@
+{
+  "task_id": "task_090",
+  "files_touched": [],
+  "summary": "Rewrote devpost.md and path-b.md and the README status tables to the measured state: 29 jobs plus the template jobs, the Developer Flow and the request_fix path as ran, nine merges by the guard with a person's token, and a list of what is not claimed (Code Review Flow, summary comment, multi-attempt repair, Hands-off for the whole loop).",
+  "next": [
+    "Playwright end to end jobs",
+    "A small deployed target app that the agents change, so the loop is visible"
+  ]
+}

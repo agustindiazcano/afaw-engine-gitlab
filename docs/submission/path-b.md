@@ -16,13 +16,16 @@ request numbers and release tags of that project, read on 2026-10-24 (GMT-3).
 | Oct 24 | Read-only FastAPI service, Dockerfile, Terraform for Cloud Run and Workload Identity Federation, deploy jobs (task 013) | MR !5, release v0.15 | Done: a person applied the Terraform and set the variables, and the pipeline of `main` deployed it (pipeline 2985631519) |
 | Oct 24 | Duo configuration, custom agent and custom flow sources, `duo_config` check (task 011) | MR !6, release v0.20 | Merged; the flows must be enabled in the GitLab UI by a person |
 | Oct 24 | Facts from the GitLab REST API v4: merge requests, pipelines, jobs, retries, job minutes; GitHub kept working (task 010) | MR !7, release v0.23 | Merged |
-| Oct 24 | Fix-attempt cap and automatic merge rule, off by default (task 012) | Branch `feat/task-012-merge-guardrails` | In review: <MR number and tag when merged> |
-| Oct 24 | README validated against the repository (task 016) | Branch `docs/readme-validated` | In review: <MR number when merged> |
-| Oct 24 | Demo script, Devpost text, this page (task 014) | Branch `docs/task-014-submission` | In review |
+| Oct 24 | Fix-attempt cap and automatic merge rule, off by default (task 012) | MR !10 | Merged; merges nothing unless a person sets `AFAW_AUTO_MERGE=true` |
+| Oct 24 | README validated against the repository (task 016); demo script, Devpost text, this page (task 014) | MR !8 and later | Merged |
+| Oct 25 | Developer Flow started by assigning an issue through the API: !16, !17, !18 | [evidence](evidence.md) | Ran; its merge requests are Draft |
+| Oct 25 | `merge_guard` clears Draft and asks for the merge; `request_fix` turns a failed pipeline into a note or an issue | From !35 | Nine merges by the guard with a person's token; `request_fix` opened issues #15 and #19 to #23 |
+| Oct 25 | Experiments: coverage, mutation score, hidden acceptance tests, planted defects, chaos, load | [`experiments.md`](../experiments.md) | Measured; some faults and experiments not run |
+| Oct 25 | Dashboard with live GitLab panel, `/experiments/`, `/environment/`; mutmut as mutation engine | Listed in `evidence.md` | Merged and deployed |
 
 ## What is deliberately not claimed
 
-- No Duo flow session is claimed until one exists in the project history.
-- No savings in time, cost or carbon is claimed; the SCI experiment (task 015) is not done.
-- The Cloud Run service is not described as live until `deploy_cloud_run` and `monitor_live` are
-  green on `main`.
+- No automatic review by the Code Review Flow and no summary comment on the issue: neither ran.
+- No repair that needed more than one attempt.
+- No Hands-off for the whole loop: the token that clears Draft and enables the merge is a person's.
+- No saving in time or money. The carbon figure is an estimate with its assumptions listed.
