@@ -23,10 +23,10 @@ A valid submission exists after tasks 009 and 010.
 - [ ] Task 012: guardrails and merge policy (human-only files, 3-attempt cap, auto-merge rule); report gaps in the GitLab tier
   - [x] Deterministic parts: `scripts/merge_guard.py` and the `merge_guard` job (cap of 3 fix attempts, merge rule, merge off by default); see [`docs/merge-guard.md`](docs/merge-guard.md)
   - [ ] Human: check the Maintainer settings listed as gaps in `docs/merge-guard.md` (who may push to `main`, a real `CODEOWNERS`, Pipelines must succeed, `AFAW_BOT_USER_IDS`), then accept ADR 0007
-  - [ ] Add to the first line of `AGENTS.md` that this repository is `afaw-engine-gitlab` and lives on GitLab (`CLAUDE.md` already says it).
-  - [ ] Add to `AGENTS.md` that an agent always reads `LASTCONTEXT.md` and `PENDING.md` before anything else (section 1.2 says it only for the session-start hook).
-  - [ ] Fix the overclaim in `AGENTS.md` section 17.3 ("guarded by CI (the govern job)"): `human_only_files` is a weak backup control. Regenerate `docs/paper/afaw.pdf` in the same merge request; `paper_pdf` keeps requiring it.
-  - [ ] Add a TeX Live job to rebuild the paper PDF (there is no `paper_build` job until then).
+  - [x] Add to the first line of `AGENTS.md` that this repository is `afaw-engine-gitlab` and lives on GitLab (`CLAUDE.md` already says it).
+  - [x] Add to `AGENTS.md` that an agent always reads `LASTCONTEXT.md` and `PENDING.md` before anything else (section 1.2 says it only for the session-start hook).
+  - [x] Fix the overclaim in `AGENTS.md` section 17.3 and reword 6.1 for Duo flows (task 018) ("guarded by CI (the govern job)"): `human_only_files` is a weak backup control. Regenerate `docs/paper/afaw.pdf` in the same merge request; `paper_pdf` keeps requiring it.
+  - [x] A TeX Live job, `paper_build`, compiles the paper PDF in CI; download its artifact and commit it (see `docs/paper/README.md`).
 
 ## Phase 3: Live service and submission
 - [ ] Task 013: read-only FastAPI service (dashboard, `/health`, `/api/state`, `/api/ask`), Dockerfile, `deploy/`, release and deploy job on Cloud Run
