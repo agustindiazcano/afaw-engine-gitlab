@@ -1,0 +1,13 @@
+{
+  "id": "task_107",
+  "title": "check_live: accept a newer deployed commit when pipelines of main overlap",
+  "role": "architect",
+  "type": "fix",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "duo/fix/48-task-id-collision",
+  "priority": 2,
+  "difficulty": 2,
+  "blocked_by": [],
+  "notes": "Autoheal issue 48: task_103 was already taken on main; the fix of issue 46 is re-landed under the next free id."
+}
