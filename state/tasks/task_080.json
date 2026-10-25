@@ -1,0 +1,13 @@
+{
+  "id": "task_080",
+  "title": "Dashboard: experiments and environment pages with charts and the measured data",
+  "role": "architect",
+  "type": "feature",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "feat/task-080-stats-and-environment-pages",
+  "priority": 1,
+  "difficulty": 3,
+  "blocked_by": [],
+  "notes": "The data is docs/data/experiments.json; every section names its source. The environment page computes the SCI with scripts/sci_estimate.py, written by the Duo Developer Flow."
+}

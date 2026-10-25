@@ -17,7 +17,8 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from scripts.afaw_state.source import read_source
+from scripts.afaw_state import stats_pages
+from scripts.afaw_state.source import git_runner, read_experiments, read_source
 from scripts.afaw_state.views import StateError, build
 
 MARKER = ".afaw-build"
@@ -64,6 +65,7 @@ def main(argv: list[str] | None = None) -> int:
         print(exc, file=sys.stderr)
         return 1
 
+    outputs.update(stats_pages.extra_outputs(read_experiments(git_runner, args.ref)))
     prepare_out(args.out)
     for rel, content in outputs.items():
         path = args.out / rel

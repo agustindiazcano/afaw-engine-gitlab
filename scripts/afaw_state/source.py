@@ -30,6 +30,15 @@ def list_files(run: Runner, ref: str, folder: str, suffix: str = ".json") -> lis
     return sorted(p for p in out.splitlines() if p.endswith(suffix))
 
 
+def read_experiments(run: Runner, ref: str) -> dict[str, Any] | None:
+    """``docs/data/experiments.json`` at ``ref``, or None when the repository has no such file."""
+    path = "docs/data/experiments.json"
+    if not list_files(run, ref, path):
+        return None
+    data: dict[str, Any] = _load(run, ref, path)
+    return data
+
+
 def read_source(ref: str, run: Runner = git_runner) -> dict[str, Any]:
     """Task files, context deltas, ADRs and gotchas, config and the commit time of ``ref``."""
     tasks = [_load(run, ref, p) for p in list_files(run, ref, "state/tasks")]

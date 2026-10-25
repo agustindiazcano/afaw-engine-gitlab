@@ -118,6 +118,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         """This repository's own dashboard; ``/live/`` is the old address of the same page."""
         return _page(data_dir / "live" / "dashboard.html", unavailable)
 
+    @app.get("/experiments/", response_class=HTMLResponse, response_model=None)
+    def experiments() -> HTMLResponse | JSONResponse:
+        """Coverage, mutation score and timings of the experiments, with their sources."""
+        return _page(data_dir / "live" / "experiments.html", unavailable)
+
+    @app.get("/environment/", response_class=HTMLResponse, response_model=None)
+    def environment() -> HTMLResponse | JSONResponse:
+        """The estimated Software Carbon Intensity of the mutation runs, with its assumptions."""
+        return _page(data_dir / "live" / "environment.html", unavailable)
+
     @app.get("/demo/", response_class=HTMLResponse, response_model=None)
     def demo() -> HTMLResponse | JSONResponse:
         """The demo dashboard, built from invented mock data."""

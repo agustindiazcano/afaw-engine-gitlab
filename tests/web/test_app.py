@@ -48,6 +48,30 @@ def test_the_demo_with_invented_data_moved_to_its_own_path(client: TestClient) -
     assert response.status_code == 200 and "demo dashboard" in response.text
 
 
+def test_the_experiments_and_environment_pages_are_served_from_the_live_views(
+    client: TestClient,
+) -> None:
+    assert client.get("/experiments/").text == "<html>experiments page</html>"
+    assert client.get("/environment/").text == "<html>environment page</html>"
+    assert client.get("/experiments/").headers["content-type"].startswith("text/html")
+
+
+@pytest.mark.parametrize(
+    ("path", "name"),
+    [("/experiments/", "experiments.html"), ("/environment/", "environment.html")],
+)
+def test_a_missing_statistics_page_is_503_and_never_breaks_the_health_check(
+    data_dir: Path, path: str, name: str
+) -> None:
+    (data_dir / "live" / name).unlink()
+    client = TestClient(create_app(Settings(data_dir=data_dir)))
+    response = client.get(path)
+    assert response.status_code == 503
+    assert response.json() == {"status": "unavailable", "missing": [f"live/{name}"]}
+    assert client.get("/health").status_code == 200
+    assert client.get("/").status_code == 200
+
+
 def test_the_old_live_path_still_serves_the_same_real_dashboard(client: TestClient) -> None:
     assert client.get("/live/").text == client.get("/").text
 
@@ -87,7 +111,19 @@ def test_ask_rejects_a_missing_or_oversized_question(
 
 
 @pytest.mark.parametrize("method", ["post", "put", "patch", "delete"])
-@pytest.mark.parametrize("path", ["/", "/demo/", "/live/", "/health", "/api/state", "/api/ask"])
+@pytest.mark.parametrize(
+    "path",
+    [
+        "/",
+        "/demo/",
+        "/live/",
+        "/experiments/",
+        "/environment/",
+        "/health",
+        "/api/state",
+        "/api/ask",
+    ],
+)
 def test_the_service_is_read_only(client: TestClient, method: str, path: str) -> None:
     assert getattr(client, method)(path).status_code == 405
 
@@ -422,6 +458,8 @@ def test_the_openapi_schema_names_the_app_and_lists_only_get_routes(client: Test
         "/",
         "/demo/",
         "/live/",
+        "/experiments/",
+        "/environment/",
         "/api/ask",
     }
     assert all(set(methods) == {"get"} for methods in schema["paths"].values())

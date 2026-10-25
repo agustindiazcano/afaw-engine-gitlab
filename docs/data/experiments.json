@@ -1,0 +1,196 @@
+{
+  "as_of": "2026-10-25",
+  "note": "Every figure was read from the GitLab API, a CI job or a command on the date above; see docs/experiments.md for how.",
+  "coverage": {
+    "unit": "percent of lines and branches",
+    "source": "python -m pytest --cov=src --cov=scripts --cov-branch, on main before and after the five test merge requests",
+    "rows": [
+      {
+        "label": "scripts/red_check.py",
+        "before": 50,
+        "after": 99
+      },
+      {
+        "label": "scripts/afaw_state/source.py",
+        "before": 34,
+        "after": 100
+      },
+      {
+        "label": "scripts/check_task_files.py",
+        "before": 72,
+        "after": 97
+      },
+      {
+        "label": "scripts/check_docs.py",
+        "before": 0,
+        "after": 100
+      },
+      {
+        "label": "scripts/build_state.py",
+        "before": 0,
+        "after": 100
+      },
+      {
+        "label": "src/afaw_web/app.py",
+        "before": 94,
+        "after": 100
+      },
+      {
+        "label": "All of src/ and scripts/",
+        "before": 86,
+        "after": 94
+      }
+    ]
+  },
+  "mutation": {
+    "unit": "percent of mutants killed",
+    "source": "mutmut 3.8.0 in the mutation_gate job on the CI runner, pipeline 2987035333",
+    "rows": [
+      {
+        "label": "src/afaw_web/app.py",
+        "before": 62.2,
+        "after": 95.6,
+        "killed_before": 28,
+        "total_before": 45,
+        "killed_after": 43,
+        "total_after": 45
+      },
+      {
+        "label": "src/afaw_web/search.py",
+        "before": 78.0,
+        "after": 84.7,
+        "killed_before": 46,
+        "total_before": 59,
+        "killed_after": 50,
+        "total_after": 59
+      }
+    ]
+  },
+  "minutes": {
+    "unit": "minutes",
+    "source": "timestamps of the issue, the merge request and the pipelines read from the GitLab API",
+    "rows": [
+      {
+        "label": "Repair: wrong address check, push to green",
+        "value": 12.1
+      },
+      {
+        "label": "Repair: wrong gated score, push to green",
+        "value": 13.2
+      },
+      {
+        "label": "Build: sci_estimate, issue to merge",
+        "value": 29.4
+      },
+      {
+        "label": "Build: cost_summary, issue to merge",
+        "value": 28.1
+      }
+    ]
+  },
+  "hard_builds": [
+    {
+      "tool": "scripts/sci_estimate.py",
+      "mr": 40,
+      "hidden_passed": 17,
+      "hidden_total": 17,
+      "own_tests": 33,
+      "coverage": 96
+    },
+    {
+      "tool": "scripts/cost_summary.py",
+      "mr": 43,
+      "hidden_passed": 10,
+      "hidden_total": 10,
+      "own_tests": 33,
+      "coverage": 97
+    },
+    {
+      "tool": "scripts/benchmark_report.py",
+      "mr": 54,
+      "hidden_passed": 12,
+      "hidden_total": 12,
+      "own_tests": 14,
+      "coverage": 97
+    }
+  ],
+  "guard_merges": [
+    {
+      "mr": 35,
+      "merged_utc": "2026-10-25 18:47"
+    },
+    {
+      "mr": 43,
+      "merged_utc": "2026-10-25 19:47"
+    },
+    {
+      "mr": 40,
+      "merged_utc": "2026-10-25 19:47"
+    },
+    {
+      "mr": 18,
+      "merged_utc": "2026-10-25 19:51"
+    },
+    {
+      "mr": 47,
+      "merged_utc": "2026-10-25 19:52"
+    },
+    {
+      "mr": 17,
+      "merged_utc": "2026-10-25 19:52"
+    },
+    {
+      "mr": 16,
+      "merged_utc": "2026-10-25 19:59"
+    }
+  ],
+  "repairs": {
+    "planted": 3,
+    "repaired": 3,
+    "real_defects_found": 1
+  },
+  "credits": {
+    "used": 156,
+    "budget": 500,
+    "read_by": "the human, from the GitLab Credits dashboard"
+  },
+  "environment": {
+    "source": "CI job seconds from docs/submission/mutation-tools-measurement.md; coefficients and grid data from docs/adr/0009-measure-sustainability-with-sci.md",
+    "runs": [
+      {
+        "tool": "cosmic-ray",
+        "job_seconds": 309,
+        "score": 77.1
+      },
+      {
+        "tool": "mutmut",
+        "job_seconds": 56,
+        "score": 71.2
+      }
+    ],
+    "assumptions": {
+      "vcpus": 2,
+      "utilization": 0.5,
+      "min_watts": 0.71,
+      "max_watts": 4.26,
+      "pue": 1.1,
+      "embodied_g": 0,
+      "functional_units": 1
+    },
+    "grids": [
+      {
+        "region": "us-east1",
+        "g_per_kwh": 579
+      },
+      {
+        "region": "us-east5",
+        "g_per_kwh": 343
+      }
+    ],
+    "limits": [
+      "Power is estimated from published per-vCPU coefficients, not measured on the runner.",
+      "Embodied emissions are not estimated: this is an SCI without M.",
+      "Only one comparison was measured: two mutation tools on the same code."
+    ]
+  }
+}
