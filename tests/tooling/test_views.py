@@ -99,6 +99,13 @@ def test_invalid_state_is_rejected_with_all_errors():
     assert "task_002: $.priority: 9 is greater than the maximum 5" in message
 
 
+def assert_only_the_live_panel_script(html: str) -> None:
+    """The one script of the page is the live panel's; nothing from a task reaches a tag."""
+    assert html.count("<script") == 1
+    assert html.index('id="live"') < html.index("<script")
+    assert "</script></section>" in html  # the script closes the live section
+
+
 def test_dashboard_escapes_and_labels_lights_in_text():
     tasks, deltas, facts = sample()
     html = build(tasks, deltas, facts, None, AS_OF)["dashboard.html"]
@@ -106,7 +113,7 @@ def test_dashboard_escapes_and_labels_lights_in_text():
     assert "&lt;script&gt;" in html
     assert "Red · CI failing on the latest commit" in html
     assert "Difficulty 2 (estimate)" in html
-    assert "<script" not in html.replace("&lt;script", "")
+    assert_only_the_live_panel_script(html)
 
 
 def test_dashboard_shows_creation_and_start_age():
@@ -203,7 +210,8 @@ def test_dashboard_has_progress_and_charts_without_scripts():
     assert "40%" in html  # 2 done of 5 open or done tasks; none cancelled
     assert '<details class="chart"><summary>Tasks by status (pie)</summary>' in html
     assert '<details class="chart"><summary>Tasks merged per day (bars)</summary>' in html
-    assert "<svg" in html and "<script" not in html.replace("&lt;script", "")
+    assert "<svg" in html
+    assert_only_the_live_panel_script(html)
 
 
 def test_dashboard_warns_when_no_facts():
