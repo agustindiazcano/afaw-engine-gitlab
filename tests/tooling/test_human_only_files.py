@@ -194,6 +194,9 @@ def test_list_prints_the_patterns_one_per_line_without_base(
     assert capsys.readouterr().out.splitlines() == hof.protected_patterns()
 
 
+@pytest.mark.characterization(
+    reason="--base was already required; this pins that it stays required without --list"
+)
 def test_without_list_and_without_base_still_fails(capsys: pytest.CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit) as raised:
         hof.main([])
