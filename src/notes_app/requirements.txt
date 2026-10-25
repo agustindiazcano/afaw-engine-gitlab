@@ -1,0 +1,5 @@
+# Runtime dependencies of the demo app image, pinned to the versions the tests ran against.
+fastapi==0.141.1
+starlette==1.7.0
+pydantic==2.12.5
+uvicorn==0.40.0
