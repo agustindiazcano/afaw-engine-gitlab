@@ -1,0 +1,14 @@
+{
+  "task_id": "task_047",
+  "files_touched": [
+    "scripts/mutation_engine.py",
+    "scripts/mutmut_results.py",
+    "tests/tooling/test_mutation_engine.py",
+    "tests/tooling/test_mutmut_results.py"
+  ],
+  "summary": "The mutation_gate job now installs mutmut 3.8.0 (the version measured on the runner), runs scripts.mutation_engine, which mutates the required files and writes build/mutation.json, and then scripts.mutation_ci, which gates on those results. The results file is kept as an artifact for a week. With no required file the engine prints NO MANDATORY FILES and runs nothing, so every merge request that does not touch a critical path behaves as before. This edits .gitlab-ci.yml, a human-only file, so the human opens and merges it, after task_046 (the scripts) and before task_048 (the critical path and the minimum in state/config.json): with the path set and no job, every change to src/afaw_web would fail for lack of results. Checked: tests/tooling/test_gitlab_ci.py passes. Not run: this job on a real merge request; the job is not claimed to work until it has.",
+  "next": [
+    "Human: merge task_046, then this merge request, then task_048",
+    "After the first merge request that touches src/afaw_web, read the mutation_gate log and the build/mutation.json artifact"
+  ]
+}
