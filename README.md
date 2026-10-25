@@ -39,12 +39,12 @@ Expected, not measured: no figure below has been measured yet.
 
 | | AFAW (upstream) | AFAW Engine (this repository) | Status |
 |---|---|---|---|
-| Merge | A human approves every pull request | The human approves the **policy**; the deterministic engine approves **each merge** ([ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md)) | Policy documented; the automatic merge rule is Planned (task 012). Until then a human merges |
+| Merge | A human approves every pull request | The human approves the **policy**; the deterministic engine approves **each merge** ([ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md)) | Policy documented; the automatic merge rule is merged (task 012, `merge_guard`) and has never run on a real merge request. Every merge so far was a person's |
 | Measuring | The AI decides, the engine measures | Unchanged | Done |
 | Forge | GitHub | GitLab (REST API v4); the GitHub path is kept | Done for facts: they are read from the GitLab API ([`docs/facts.md`](docs/facts.md), task 010) |
 | Agents | Coding agents that open pull requests | GitLab Duo flows, configured to run under a group service account instead of a personal token ([`docs/duo.md`](docs/duo.md)) | Configuration merged; no flow has run yet |
 | Guardrails | Human reviews each diff | Human-only files (a weak control, see [limits](#guardrails-and-known-limits)) and a red-first check that a new test fails on the old code | Done |
-| | | Cap of 3 automatic fix attempts per merge request, merge only when the full pipeline is green | Planned (task 012) |
+| | | Cap of 3 automatic fix attempts per merge request, merge only when the full pipeline is green | Code and tests merged (task 012); never run on a real merge request |
 
 The loop is the target design; the status of each link is in [Hands-off status](#hands-off-status):
 
@@ -107,8 +107,8 @@ Verified in docs.gitlab.com (Oct 24, 2026): the SAST and secret-detection templa
 | Developer Flow opens a merge request from an issue | Planned. No such merge request exists |
 | Fix CI/CD Pipeline Flow repairs a failed pipeline | Planned. No such session or commit exists |
 | Code Review Flow comments on a merge request | Planned. No such session exists |
-| Cap of 3 automatic fix attempts per merge request | Planned (task 012) |
-| Automatic merge when every gate is green | Planned (task 012). Until then a human merges every merge request |
+| Cap of 3 automatic fix attempts per merge request | Merged (task 012, `merge_guard`); never reached on a real merge request |
+| Automatic merge when every gate is green | Merged (task 012): continuous deployment when `AFAW_AUTO_MERGE=true` with `AFAW_MERGE_TOKEN`, continuous delivery otherwise ([`docs/autohealing.md`](docs/autohealing.md)). Never run on a real merge request; every merge so far was a person's |
 | Deploy to Cloud Run and live monitor | Done (applied and run once by a person; the deploy job itself runs on every pipeline of `main`) |
 | Summary comment on the original issue | Planned. No documented event after a merge can start it ([`docs/duo.md`](docs/duo.md)) |
 
@@ -175,7 +175,7 @@ The base method was committed on Sep 29 and 30, 2026. Since Oct 5, from `git log
 | Oct 24 | Read-only service and Terraform for Cloud Run (task 013) | MR !5, release v0.15; deployed and checked in [this pipeline](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985631519) | Done |
 | Oct 24 | Duo configuration, custom agent and flow sources (task 011) | MR !6, release v0.20 | Merged; the flows must be enabled by a person |
 | Oct 24 | GitLab fact collection (task 010) | MR !7, release v0.23 | Done |
-| pending | Merge guardrails and automatic merge rule (task 012) | | Planned |
+| Oct 24 | Merge guardrails and automatic merge rule (task 012) | MR !10 | Merged; never run on a real merge request |
 | pending | Demo script and Devpost text (task 014) | | Planned |
 | pending | SCI experiment (task 015) | | Planned, conditional |
 
@@ -250,7 +250,7 @@ GitLab does not copy branch protection, CI/CD variables or Duo settings when a p
 1. One terminal per agent; answer its `ROLE:`. The session-start hook injects the generated `LASTCONTEXT.md` and `PENDING.md`.
 2. The agent creates its branch, works with TDD running only its own test, and pushes; the pipeline verifies the rest.
 3. At the end it writes `summary` and `next`, fills `files_touched` with `python -m scripts.check_task_delta --base origin/main --write task_NNN`, records any decision as an ADR, and asks before opening the merge request. Use the name of your GitLab remote in place of `origin` if it differs.
-4. A person opens and merges the merge request. Until the automatic merge rule exists (task 012, Planned), every merge is a person's.
+4. A person opens and merges the merge request. The automatic merge rule exists (task 012) but is off until `AFAW_AUTO_MERGE=true`, so today every merge is a person's.
 5. Ask for status at any time, or open the dashboard.
 
 ## Project structure

@@ -22,7 +22,7 @@ Read on docs.gitlab.com on 2026-10-25.
 | A flow opens or comments on an issue | `create_issue` and `create_issue_note` | [Tools](https://docs.gitlab.com/user/duo_agent_platform/agents/tools/) |
 | A CI job opens or comments on an issue | `CI_JOB_TOKEN` cannot create an issue or a note on an issue | [Job token](https://docs.gitlab.com/ci/jobs/ci_job_token/) |
 | Start the Developer Flow with no click | Not documented. Assign, mention, the **Implement** button or a status change; a trigger on work item created does not start it | [Developer Flow](https://docs.gitlab.com/user/project/merge_requests/developer/) |
-| A tool that merges a merge request | None, and none sets auto-merge | [Tools](https://docs.gitlab.com/user/duo_agent_platform/agents/tools/) |
+| A Duo tool that merges a merge request | None, and none sets auto-merge. This is about Duo only: the merge is done by `merge_guard`, see the section on delivery and deployment | [Tools](https://docs.gitlab.com/user/duo_agent_platform/agents/tools/) |
 | Automatic review | Runs when a merge request is created and is not a draft, when a draft is marked ready, on a manual request, and on a push if **Start a new review on push** is on | [Duo in merge requests](https://docs.gitlab.com/user/project/merge_requests/duo_in_merge_requests/) |
 
 Three consequences, each to be confirmed by running it:

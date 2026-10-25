@@ -69,7 +69,7 @@ decision between Hands-off and Supervised is made from this table.
 | Automatic review | Not run | | | The merge requests are drafts and no trigger exists |
 | A failed pipeline opens an issue | Not run | | | The triage flow and the triggers do not exist yet ([`docs/autohealing.md`](../autohealing.md)) |
 | Fix CI/CD Pipeline Flow | Ran once, by hand | Pipeline [2985662569](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985662569) | 2026-10-24 23:46 | Launched by a person; decision `add_comment`, no commits. Not started by a trigger |
-| Merge when the gates are green | Not run | | | `AFAW_AUTO_MERGE` is not set; every merge so far was a person's (!14, !15). No tool that merges is documented |
+| Merge when the gates are green | Not run | | | `AFAW_AUTO_MERGE` is not set; every merge so far was a person's. `merge_guard` (task 012) merges through the API in continuous deployment mode and has never run it on a real merge request. Duo has no merge tool, but the merge does not depend on Duo |
 | Release, deploy, monitor | Ran after a person's merge | Pipeline [2985700049](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985700049) on `main` | 2026-10-25 00:10 | 18 jobs success, including `deploy_cloud_run`, `monitor` and `monitor_live` |
-| Summary comment on the issue | Not run | | | No documented event after a merge can start it |
+| Summary comment on the issue | Not run | | | No documented event after a merge can start it. A deterministic CI job with a project access token could post it ([`docs/duo.md`](../duo.md)); not built |
 
