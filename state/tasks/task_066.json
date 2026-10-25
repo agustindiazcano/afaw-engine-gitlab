@@ -1,0 +1,13 @@
+{
+  "id": "task_066",
+  "title": "Experiment plan v2: real repair, hard builds with hidden tests, measured test writing",
+  "role": "architect",
+  "type": "chore",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "docs/task-066-experiment-plan",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Documents only. Results are added to the tables when each experiment ends."
+}

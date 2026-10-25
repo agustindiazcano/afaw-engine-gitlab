@@ -1,0 +1,13 @@
+{
+  "id": "task_073",
+  "title": "Fix the mutation engine: mutmut reads only_mutate one pattern per line",
+  "role": "architect",
+  "type": "fix",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "duo/fix/19-mutation-only-mutate-multiline",
+  "priority": 2,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Issue 19. With two required files the comma-joined only_mutate matched no file, so mutmut mutated nothing."
+}

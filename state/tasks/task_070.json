@@ -1,13 +1,13 @@
 {
   "id": "task_070",
-  "title": "Fix the mutation engine: mutmut reads only_mutate one pattern per line",
+  "title": "merge_guard ignores the request_fix job, which is skipped on every green pipeline",
   "role": "architect",
   "type": "fix",
   "status": "in_progress",
   "owner": "agent",
-  "branch": "duo/fix/19-mutation-only-mutate-multiline",
-  "priority": 2,
+  "branch": "fix/task-070-guard-ignores-request-fix",
+  "priority": 1,
   "difficulty": 1,
   "blocked_by": [],
-  "notes": "Issue 19. With two required files the comma-joined only_mutate matched no file, so mutmut mutated nothing."
+  "notes": "Found by the experiment: the first merge requests made after task_060 were held by 'request_fix is skipped'."
 }
