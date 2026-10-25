@@ -1,0 +1,26 @@
+[
+  {
+    "iid": 6,
+    "state": "merged",
+    "created_at": "2026-10-24T23:40:52.389Z",
+    "updated_at": "2026-10-24T23:48:58.614Z",
+    "merged_at": "2026-10-24T23:48:58.167Z",
+    "closed_at": null,
+    "source_branch": "feat/task-011-duo-agent-flow",
+    "target_branch": "main",
+    "sha": "9dffd345c738b39d6883c37f21270cfa297040f7",
+    "web_url": "https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/6"
+  },
+  {
+    "iid": 5,
+    "state": "merged",
+    "created_at": "2026-10-24T23:23:30.802Z",
+    "updated_at": "2026-10-24T23:27:44.561Z",
+    "merged_at": "2026-10-24T23:27:44.758Z",
+    "closed_at": null,
+    "source_branch": "feat/task-013-cloud-run",
+    "target_branch": "main",
+    "sha": "b2c42013c528801c991ac79d2e28d988c848cba5",
+    "web_url": "https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/5"
+  }
+]

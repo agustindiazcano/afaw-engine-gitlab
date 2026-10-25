@@ -1,0 +1,23 @@
+{
+  "task_id": "task_010",
+  "files_touched": [
+    "scripts/afaw_state/derive.py",
+    "scripts/afaw_state/facts.py",
+    "scripts/collect_facts.py",
+    "tests/tooling/fixtures/gitlab/branch_pipelines.json",
+    "tests/tooling/fixtures/gitlab/merge_requests.json",
+    "tests/tooling/fixtures/gitlab/mr6_commits.json",
+    "tests/tooling/fixtures/gitlab/mr6_pipelines.json",
+    "tests/tooling/fixtures/gitlab/pipeline_2985416324_jobs.json",
+    "tests/tooling/test_collect_facts_cli.py",
+    "tests/tooling/test_derive.py",
+    "tests/tooling/test_facts_gitlab.py",
+    "tests/tooling/test_gitlab_ci.py"
+  ],
+  "summary": "collect_facts now reads the GitLab REST API v4 and still reads GitHub. In scripts/afaw_state/facts.py: a GitLab class next to GitHub (both expose branch_facts, so collect() is forge-agnostic and keeps its cache for merged tasks), the pure parsers mr_facts and gitlab_ci_facts, http_get_json (30 s timeout, four attempts with exponential backoff on 429, 5xx and network errors, other errors raised), a page cap of 10 that fails loudly instead of truncating, and forge_from_env, which picks GitLab from CI_API_V4_URL plus CI_PROJECT_ID and GitHub from GITHUB_REPOSITORY, and fails with a reason when neither, half of the GitLab pair, or both are set. Per merge request the fields of the GitHub path are kept (started_at, pr_opened_at, first_green_at, merged_at, last_activity_at, ci_status, job_minutes) and ci adds job_seconds, missing_durations, pipelines, retried_jobs, pipeline_retries and retries for the SCI experiment (task 015). Definition of a retry: a job that ran again with the same name in the same pipeline, or an extra pipeline for the same commit and the same source; a new commit is new work. A started job without a duration is missing: job_seconds and job_minutes become null and missing_durations counts it, and derive.ci_cost treats that task's CI cost as not measured instead of zero. Tests: parsers on trimmed recorded payloads of the public project (tests/tooling/fixtures/gitlab: merge requests, commits, pipelines, jobs of project 88052530, without user data), HTTP injected, red_check reported 25 added tests failing on the old code. The monitor job no longer prints a NOTICE stub: it runs collect_facts and passes --facts to build_state. Verified on docs.gitlab.com on 2026-10-24: the CI/CD job token page lists the merge request list and the single merge request, but not the merge request commits, the merge request pipelines, the pipeline list or the pipeline jobs, and the Jobs API entry covers only GET /job; the pipeline jobs page does not say whether JOB-TOKEN is accepted. So CI sends no token and relies on the project being public (the unauthenticated limit returned was 500 requests per minute); GITLAB_TOKEN is an optional PRIVATE-TOKEN header for a private project. Job logs are not read. Documentation: docs/facts.md, README stage table and file tree, PENDING.md. CLAUDE.md now starts by saying the repository is afaw-engine-gitlab and lives on GitLab; the same line for AGENTS.md waits for the merge request that rebuilds the paper PDF. No Duo trigger is defined in the repository (triggers are created in the UI); docs/duo.md step 5 would create one for pipeline failures.",
+  "next": [
+    "Task 012: cap of 3 automatic fix attempts per merge request and the auto-merge rule",
+    "First real retry in the history: confirm retried_jobs and pipeline_retries on it (the recorded merge requests have none)",
+    "Human: before creating the Pipeline events > Failed trigger of docs/duo.md, remember that main is red on purpose until terraform apply"
+  ]
+}

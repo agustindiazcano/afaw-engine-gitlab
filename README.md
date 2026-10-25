@@ -40,7 +40,7 @@ Several coding agents working on one repository fail in predictable ways: they c
 | package | `Dockerfile` of the read-only web service (`src/afaw_web`) | GitLab Container Registry; `docker:dind`, with Buildah as fallback | 009, 013 |
 | configure | `check_ci_config`: `state/config.json` against its schema and the CI variables, by name only; `terraform fmt` and `validate` of `deploy/terraform` | Protected CI/CD variables | 009, 013 |
 | release | `gcp_access_token.sh`, `gcloud run deploy` | `release:` keyword with `glab` (a GitLab Release per merge); `id_tokens` with Workload Identity Federation to Artifact Registry and Cloud Run | 009, 013 |
-| monitor | `collect_facts`, `build_state`, `check_live` (fails if the live `/health` or `/api/state` does not answer) | Job artifacts; `collect_facts` reads the GitLab REST API v4 from task 010 | 009, 010, 013 |
+| monitor | `collect_facts`, `build_state`, `check_live` (fails if the live `/health` or `/api/state` does not answer) | Job artifacts; `collect_facts` reads the GitLab REST API v4 (see [`docs/facts.md`](docs/facts.md)) | 009, 010, 013 |
 
 `test` is a technical stage: the GitLab SAST and secret-detection templates require it to exist, and none of our jobs runs in it. The nine DevSecOps stages are the other nine. Verified in docs.gitlab.com (Oct 24, 2026): the SAST and secret-detection templates run in the `test` stage and only in branch pipelines by default, so `.gitlab-ci.yml` moves them to `secure` and also runs them in merge request pipelines. Basic Semgrep SAST and the secret-detection JSON report are in every tier; findings in the merge request and Advanced SAST need Ultimate. Kaniko is marked as no longer maintained, so Buildah is the fallback.
 
@@ -258,7 +258,7 @@ A static HTML page (no scripts) with progress, tasks by status, tasks merged per
 ├── scripts/
 │   ├── afaw_state/                # Model, facts, lights, durations, views, dashboard
 │   ├── build_state.py             # Derived views from a git ref
-│   ├── collect_facts.py           # Measured facts from git and the GitHub API
+│   ├── collect_facts.py           # Measured facts from git and the GitLab or GitHub API
 │   ├── check_task_files.py        # Lifecycle, declared values only, unique ids
 │   ├── check_task_delta.py        # files_touched equals the diff (--write fills it)
 │   ├── check_docs.py              # ADRs, gotchas, links
