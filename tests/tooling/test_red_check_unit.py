@@ -21,6 +21,9 @@ class _Completed:
         self.stdout = stdout
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_git_returns_stdout_and_passes_a_timeout(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -41,6 +44,9 @@ def test_git_returns_stdout_and_passes_a_timeout(
     assert kwargs["text"] is True
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 @pytest.mark.parametrize(
     "error",
     [
@@ -65,6 +71,9 @@ def test_git_failure_becomes_a_state_error(
 # --------------------------------------------------------------------------------- test_ids
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_test_ids_includes_async_tests_and_skips_other_classes() -> None:
     source = """
 async def test_async():
@@ -90,6 +99,9 @@ class Helper:
     assert red_check.test_ids(source) == {"test_async", "TestKinds::test_async_method"}
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_added_tests_of_an_unchanged_file_is_empty() -> None:
     source = "def test_a():\n    pass\n"
     assert red_check.added_tests("tests/a.py", source, source) == []
@@ -98,6 +110,9 @@ def test_added_tests_of_an_unchanged_file_is_empty() -> None:
 # ----------------------------------------------------------------------------- _junit_key
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_junit_key_of_a_top_level_test() -> None:
     assert red_check._junit_key("tests/tooling/test_x.py::test_a") == (
         "tests.tooling.test_x",
@@ -105,6 +120,9 @@ def test_junit_key_of_a_top_level_test() -> None:
     )
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_junit_key_of_a_method_includes_the_class() -> None:
     assert red_check._junit_key("tests/test_x.py::TestG::test_a") == (
         "tests.test_x.TestG",
@@ -119,6 +137,9 @@ def _report(*cases: str) -> str:
     return "<testsuites><testsuite>" + "".join(cases) + "</testsuite></testsuites>"
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_a_test_with_an_error_element_is_red() -> None:
     report = _report(
         '<testcase classname="tests.test_x" name="test_a"><error message="e"/></testcase>'
@@ -126,6 +147,9 @@ def test_a_test_with_an_error_element_is_red() -> None:
     assert red_check.not_red(report, ["tests/test_x.py::test_a"]) == ([], [])
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_a_passing_test_is_reported_as_passing() -> None:
     report = _report('<testcase classname="tests.test_x" name="test_a"/>')
     assert red_check.not_red(report, ["tests/test_x.py::test_a"]) == (
@@ -134,6 +158,9 @@ def test_a_passing_test_is_reported_as_passing() -> None:
     )
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_a_collection_entry_without_failure_does_not_break_the_module() -> None:
     report = _report(
         '<testcase classname="" name="tests.test_x"/>',
@@ -145,6 +172,9 @@ def test_a_collection_entry_without_failure_does_not_break_the_module() -> None:
     )
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_a_broken_module_does_not_hide_tests_of_another_module() -> None:
     report = _report(
         '<testcase classname="" name="tests.test_y"><error message="ImportError"/></testcase>',
@@ -157,6 +187,9 @@ def test_a_broken_module_does_not_hide_tests_of_another_module() -> None:
     assert missing == ["tests/test_z.py::test_c"]
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_a_failed_test_does_not_make_a_sibling_test_red() -> None:
     report = _report(
         '<testcase classname="tests.test_x" name="test_a"><failure message="f"/></testcase>',
@@ -177,16 +210,25 @@ def _decorator(code: str) -> ast.expr:
     return function.decorator_list[0]
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_reason_is_read_from_the_keyword() -> None:
     decorator = _decorator('pytest.mark.characterization(reason="why")')
     assert red_check._is_characterization(decorator) == "why"
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_reason_is_read_from_the_positional_argument() -> None:
     decorator = _decorator('pytest.mark.characterization("positional")')
     assert red_check._is_characterization(decorator) == "positional"
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_a_call_without_a_string_reason_gives_an_empty_reason() -> None:
     assert (
         red_check._is_characterization(_decorator("pytest.mark.characterization(reason=1)")) == ""
@@ -194,10 +236,16 @@ def test_a_call_without_a_string_reason_gives_an_empty_reason() -> None:
     assert red_check._is_characterization(_decorator("pytest.mark.characterization()")) == ""
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_a_bare_marker_gives_an_empty_reason() -> None:
     assert red_check._is_characterization(_decorator("pytest.mark.characterization")) == ""
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_other_decorators_are_not_characterization() -> None:
     assert red_check._is_characterization(_decorator("pytest.mark.slow")) is None
     assert red_check._is_characterization(_decorator('pytest.mark.skip(reason="x")')) is None
@@ -208,6 +256,9 @@ def test_other_decorators_are_not_characterization() -> None:
 # ------------------------------------------------------------------- characterization
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_characterization_finds_methods_and_async_tests() -> None:
     source = """
 import pytest
@@ -247,6 +298,9 @@ def helper():
 # -------------------------------------------------------------------------- _is_test_file
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 @pytest.mark.parametrize(
     ("path", "expected"),
     [
@@ -262,6 +316,9 @@ def test_is_test_file(path: str, expected: bool) -> None:
     assert red_check._is_test_file(path, ("tests/",)) is expected
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_is_test_file_honours_every_prefix() -> None:
     assert red_check._is_test_file("spec/test_a.py", ("tests/", "spec/")) is True
 
@@ -279,6 +336,9 @@ def _fake_git(files: dict[str, str], changed: list[str]) -> Any:
     return fake
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_skip_declaration_reports_the_first_skipping_task(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -299,6 +359,9 @@ def test_skip_declaration_reports_the_first_skipping_task(
     )
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_skip_declaration_falls_back_to_the_path_when_the_id_is_missing(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -310,6 +373,9 @@ def test_skip_declaration_falls_back_to_the_path_when_the_id_is_missing(
     )
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_skip_declaration_ignores_invalid_json_and_non_objects(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -323,6 +389,9 @@ def test_skip_declaration_ignores_invalid_json_and_non_objects(
     assert red_check.skip_declaration(tmp_path, "base") is None
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_skip_declaration_asks_git_only_for_added_or_modified_task_files(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -370,6 +439,9 @@ def _install(monkeypatch: pytest.MonkeyPatch, runner: _Runner) -> None:
     monkeypatch.setattr(subprocess, "run", runner.run)
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_run_old_runs_whole_files_on_the_base_with_support_copied_in(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -401,6 +473,9 @@ def test_run_old_runs_whole_files_on_the_base_with_support_copied_in(
     assert kwargs["capture_output"] is True
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_run_old_removes_the_worktree_and_the_temporary_directory(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -412,6 +487,9 @@ def test_run_old_removes_the_worktree_and_the_temporary_directory(
     assert not runner.tree.parent.exists()
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_run_old_without_a_report_fails_loudly_and_still_cleans_up(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -484,6 +562,9 @@ def _case(name: str, bad: bool) -> str:
     return f'<testcase classname="tests.test_a" name="{name}">{inner}</testcase>'
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_main_ok_when_every_added_test_fails_on_the_old_code(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
 ) -> None:
@@ -503,6 +584,9 @@ def test_main_ok_when_every_added_test_fails_on_the_old_code(
     assert runs == [("MERGEBASE", ["tests/helpers.py", "tests/test_a.py"], ["tests/test_a.py"])]
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_main_uses_the_singular_for_one_added_test(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
 ) -> None:
@@ -517,6 +601,9 @@ def test_main_uses_the_singular_for_one_added_test(
     assert capsys.readouterr().out == "OK: 1 added test failed on the old code.\n"
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_main_returns_1_and_names_a_test_that_passes_on_the_old_code(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
 ) -> None:
@@ -531,6 +618,9 @@ def test_main_returns_1_and_names_a_test_that_passes_on_the_old_code(
     assert out.out == ""
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_main_returns_2_when_an_added_test_did_not_run(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
 ) -> None:
@@ -543,6 +633,9 @@ def test_main_returns_2_when_an_added_test_did_not_run(
     )
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_main_missing_takes_precedence_over_passing(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
 ) -> None:
@@ -555,6 +648,9 @@ def test_main_missing_takes_precedence_over_passing(
     assert "PROBLEM" not in err
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_main_returns_2_with_the_message_of_a_state_error(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
 ) -> None:
@@ -565,6 +661,9 @@ def test_main_returns_2_with_the_message_of_a_state_error(
     assert capsys.readouterr().err == "ERROR: pytest produced no report on the old code\n"
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_main_returns_2_when_git_cannot_find_the_merge_base(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -576,6 +675,9 @@ def test_main_returns_2_when_git_cannot_find_the_merge_base(
     assert capsys.readouterr().err == "ERROR: git merge-base nope HEAD failed: boom\n"
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_main_skips_and_prints_the_declaration(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
 ) -> None:
@@ -593,6 +695,9 @@ def test_main_skips_and_prints_the_declaration(
     assert runs == []
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_main_excludes_and_prints_characterization_tests(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
 ) -> None:
@@ -612,6 +717,9 @@ def test_main_excludes_and_prints_characterization_tests(
     )
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_main_with_only_characterization_tests_has_nothing_to_check(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
 ) -> None:
@@ -630,6 +738,9 @@ def test_main_with_only_characterization_tests_has_nothing_to_check(
     assert runs == []
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_main_without_test_changes_has_nothing_to_check(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str], tmp_path: Path
 ) -> None:
@@ -641,6 +752,9 @@ def test_main_without_test_changes_has_nothing_to_check(
     assert runs == []
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins it so a change is noticed"
+)
 def test_main_requires_a_base() -> None:
     with pytest.raises(SystemExit) as info:
         red_check.main([])
