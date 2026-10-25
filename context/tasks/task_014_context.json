@@ -1,0 +1,10 @@
+{
+  "task_id": "task_014",
+  "files_touched": [],
+  "summary": "Submission texts in docs/submission: demo-script.md (a 2 minute 50 second table of what to show, in order, with the exact pages, pipeline links and commands, each checked on 2026-10-24 and 2026-10-25: red_check log and the failed main pipeline are in the project history, collect_facts and merge_guard were run against the public API of project 88052530 and their output was read), devpost.md (what it does, the problem, how GitLab is used per stage with the real job names, what was measured, challenges, what is not done) and path-b.md (what was added since Oct 5, from git log, merge requests !1 to !7 and releases v0.9, v0.15, v0.20 and v0.23). Anything that has not run is marked as such or left as a placeholder: no Duo flow session exists, the Cloud Run service is not deployed, the merge guard (task 012) and the README (task 016) are in review, and no saving in time, cost or carbon is claimed. The only figures are captured ones (task 011: 4 pipelines, 75 jobs, 76 job minutes, 0 retries) and are labelled as captured. The SCI task (015) is not started.",
+  "next": [
+    "Fill the placeholders after the first Duo session, the Terraform apply and the video: Duo sessions, Cloud Run URL, demo video URL, merge request numbers of tasks 012, 014 and 016",
+    "Record the demo after the deploy so the live segment can be shown",
+    "Task 015 (SCI experiment) on Sunday"
+  ]
+}
