@@ -1,0 +1,10 @@
+{
+  "task_id": "task_019",
+  "files_touched": [],
+  "summary": "Documents the first real deploy. After the human applied the Terraform (11 resources added, 0 changed, 0 destroyed) and set the seven protected GCP_* variables, a pipeline started by hand on main (2985631519) passed all 19 jobs: check_configuration, publish_image and deploy_cloud_run with Workload Identity Federation, and monitor and monitor_live. The service answers from outside: /health returns status ok, /api/state, / and /live/ return 200, and /api/ask cites repository files. The two open points of docs/google-cloud.md are now confirmed by a real token: the issuer https://gitlab.com is accepted and the string(ref_protected) condition holds. README, PENDING.md, docs/google-cloud.md and docs/submission change their status from Merged, not deployed to Done and carry the public URL; the budget alert is marked as reported by the human because this repository cannot see it. Not changed: the Duo rows (no flow session exists: the 12 merge requests and the 30 latest pipelines are all by the human, and the only issue is the hackathon welcome issue), the merge guard rows, and the placeholders DEVPOST_URL and DEMO_VIDEO_URL.",
+  "next": [
+    "Human: enable the Duo flows and run a first session; then update the Duo rows of the README",
+    "Fill DEVPOST_URL and DEMO_VIDEO_URL when they exist",
+    "Task 015 (SCI experiment) on Sunday"
+  ]
+}

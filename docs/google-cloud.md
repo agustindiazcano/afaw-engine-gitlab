@@ -155,13 +155,13 @@ impersonation; GitLab-managed Terraform state; the Cloud Run and workload-identi
 Terraform arguments. `terraform fmt`, `validate` and a `plan` against the real backend were run
 locally.
 
-Not verified until the first run on `main` (nothing here is claimed to work before then):
+Confirmed by the first run on `main` on 2026-10-24 ([pipeline 2985631519](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985631519), started by hand after the human applied Terraform and set the variables; all 19 jobs passed and `/health` answered `{"status":"ok"}`):
 
-| Open point | Why it is open |
+| Point | Result |
 |---|---|
-| Issuer string | GitLab's discovery document says `https://gitlab.com`; GitLab's Google page mentions a trailing slash. The provider uses the discovery value, which is what the token's `iss` claim carries. A real token confirms it |
-| Type of `ref_protected` | The GitLab example shows a string, the description reads like a boolean. The condition uses `string(...)` so it holds for both, and fails closed otherwise |
-| The deploy jobs | They cannot run before the human applies Terraform and sets the variables |
+| Issuer string | GitLab's discovery document says `https://gitlab.com`; GitLab's Google page mentions a trailing slash. The provider uses the discovery value, which is what the token's `iss` claim carries. The real token was accepted with the issuer `https://gitlab.com` |
+| Type of `ref_protected` | The GitLab example shows a string, the description reads like a boolean. The condition uses `string(...)` so it holds for both, and fails closed otherwise. The real token was accepted, so the condition holds for the type GitLab sends |
+| The deploy jobs | `publish_image`, `deploy_cloud_run` and `monitor_live` passed |
 
 Known gap, accepted: a public endpoint with no rate limiting. The cost is bounded by the maximum
 of two instances and by the fact that no request makes a paid call.

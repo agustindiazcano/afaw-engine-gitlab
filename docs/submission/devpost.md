@@ -60,7 +60,7 @@ first session is pending.">
 
 Terraform in `deploy/terraform` creates a Cloud Run service (minimum 0, maximum 2 instances), an
 Artifact Registry repository and a Workload Identity Federation pool for GitLab, with no service
-account keys. <State here: deployed and the URL, or "merged, applied by a human, URL pending".>
+account keys. Deployed on Oct 24, 2026 and running at https://afaw-handsoff-ljm5hefnsq-uc.a.run.app; the pipeline of `main` deploys it with Workload Identity Federation.
 
 ## What we measured
 
@@ -72,8 +72,9 @@ done, and nothing in the project says otherwise.
 
 ## Challenges
 
-- Fail loudly: a job that cannot get what it needs must be red, not green. `main` stays red until
-  a person applies the Terraform and sets the Google Cloud variables, on purpose.
+- Fail loudly: a job that cannot get what it needs must be red, not green. `main` stayed red
+  until a person applied the Terraform and set the Google Cloud variables, on purpose; those red
+  pipelines are in the history.
 - Honest controls: the job that protects the human-only files lives in `.gitlab-ci.yml`, so the
   same merge request can edit it away. It is labelled weak. The strong control (a pipeline
   execution policy or code owner approval) depends on the role and tier.
@@ -97,4 +98,4 @@ GitLab Container Registry, Google Cloud Run, Artifact Registry, Workload Identit
 
 Project: https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase ·
 Original MIT project: https://github.com/agustindiazcano/afaw-anti-fragile-agentic-workflow ·
-Demo video: <DEMO_VIDEO_URL> · Live service: <CLOUD_RUN_URL>
+Demo video: <DEMO_VIDEO_URL> · Live service: https://afaw-handsoff-ljm5hefnsq-uc.a.run.app

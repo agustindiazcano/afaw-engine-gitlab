@@ -1,0 +1,12 @@
+{
+  "id": "task_015",
+  "title": "SCI experiment and its ADR (optional Most Environmentally Impactful prize)",
+  "role": "architect",
+  "type": "feature",
+  "status": "backlog",
+  "owner": "agent",
+  "priority": 3,
+  "difficulty": 3,
+  "blocked_by": [],
+  "notes": "Planned for Sunday 2026-10-26 18:00 GMT-3. Verify the SCI specification and its ISO number before writing; every figure measured or cited, assumptions labelled. README says 'not yet measured' until data exists."
+}

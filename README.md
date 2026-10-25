@@ -10,7 +10,7 @@ AFAW Engine is the entry of the AFAW (Anti-Fragile Agentic Workflow) method to t
 - Also targeted: **Most Stages Covered**, **Google Cloud bonus** (Cloud Run)
 - Optional, only if measured: **Most Environmentally Impactful** (see [Sustainability](#sustainability))
 - Demo video: <DEMO_VIDEO_URL>
-- Live service (Google Cloud Run): <CLOUD_RUN_URL>
+- Live service (Google Cloud Run): https://afaw-handsoff-ljm5hefnsq-uc.a.run.app
 - Source of truth: https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase (a mirror is kept at https://github.com/agustindiazcano/afaw-engine-gitlab)
 - Original project (MIT, upstream): https://github.com/agustindiazcano/afaw-anti-fragile-agentic-workflow
 - License: [MIT](LICENSE)
@@ -73,9 +73,9 @@ flowchart LR
 | Text description | Planned | Derived from this README |
 | Demo video under 3 minutes, YouTube, no third-party trademarks or copyrighted music | Planned | <DEMO_VIDEO_URL> |
 | Path B: what was added or changed since Oct 5, 2026 | Done | [Added since Oct 5](#added-on-or-after-oct-5-2026) |
-| Path B: deployed project URL, kept live until about Nov 16 | Merged, not deployed | <CLOUD_RUN_URL> |
+| Path B: deployed project URL, kept live until about Nov 16 | Done | https://afaw-handsoff-ljm5hefnsq-uc.a.run.app (`/health` answered `ok` on Oct 24, 2026) |
 | Path B: URL of the original MIT project | Done | Link at the top |
-| Google Cloud bonus: deployment code in the repository and public URL | Merged, not deployed | `deploy/terraform` ([`cloud_run.tf`](deploy/terraform/cloud_run.tf)), [`docs/google-cloud.md`](docs/google-cloud.md) |
+| Google Cloud bonus: deployment code in the repository and public URL | Done | `deploy/terraform` ([`cloud_run.tf`](deploy/terraform/cloud_run.tf)), [`docs/google-cloud.md`](docs/google-cloud.md) |
 | Most Environmentally Impactful (opt-in, SCI) | Planned, conditional | [Sustainability](#sustainability) |
 
 ## The nine stages
@@ -90,9 +90,9 @@ flowchart LR
 | secure | `semgrep-sast`, `secret_detection`, `security_gate` (blocks on any secret or a Critical or High SAST finding) | SAST template (Semgrep) and pipeline secret detection | Done | 009 |
 | govern | `paper_pdf`, `equivalent_mutants_report`, `human_only_files` (a **weak** backup control: the same merge request can edit it away) | Strong control deferred: pipeline execution policy or CODEOWNERS with required approval, depending on the tier | Done (weak); strong control Planned | 009, 012 |
 | package | `package_docker` (service `Dockerfile`); `package_buildah` as the fallback, selected with `PACKAGE_BUILDER=buildah` | GitLab Container Registry | Done for `package_docker`; the Buildah path has not run | 009, 013 |
-| configure | `check_configuration` (`check_ci_config`: config schema and CI variables, by name only), `terraform_validate` | Protected CI/CD variables | Merged, not deployed: `check_configuration` fails on `main` until a human sets the `GCP_*` variables | 009, 013 |
-| release | `release` (`glab`), `publish_image` and `deploy_cloud_run` (`gcp_access_token.sh`, `gcloud run deploy`) | `release:` keyword (a GitLab Release per pipeline on `main`); `id_tokens` with Workload Identity Federation | `release` Done; `publish_image` and `deploy_cloud_run` Merged, not deployed | 009, 013 |
-| monitor | `monitor` (`collect_facts`, `build_state`), `monitor_live` (`check_live`: fails if live `/health` or `/api/state` does not answer) | Job artifacts | `monitor` Done (it runs `collect_facts` on the GitLab API; it ran in a branch pipeline and is skipped on `main` while `main` is red); `monitor_live` Merged, not deployed | 009, 010, 013 |
+| configure | `check_configuration` (`check_ci_config`: config schema and CI variables, by name only), `terraform_validate` | Protected CI/CD variables | Done: `check_configuration` passes on `main` since the `GCP_*` variables were set by a human ([pipeline](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985631519)) | 009, 013 |
+| release | `release` (`glab`), `publish_image` and `deploy_cloud_run` (`gcp_access_token.sh`, `gcloud run deploy`) | `release:` keyword (a GitLab Release per pipeline on `main`); `id_tokens` with Workload Identity Federation | Done: `release`, `publish_image` and `deploy_cloud_run` passed on `main` with Workload Identity Federation | 009, 013 |
+| monitor | `monitor` (`collect_facts`, `build_state`), `monitor_live` (`check_live`: fails if live `/health` or `/api/state` does not answer) | Job artifacts | Done: `monitor` runs `collect_facts` on the GitLab API and `monitor_live` checks the live service; both passed on `main` | 009, 010, 013 |
 
 Verified in docs.gitlab.com (Oct 24, 2026): the SAST and secret-detection templates run in the `test` stage and only in branch pipelines by default, so `.gitlab-ci.yml` moves them to `secure` and also runs them in merge request pipelines. Basic Semgrep SAST and the secret-detection JSON report are in every tier; findings in the merge request and Advanced SAST need Ultimate. Kaniko is marked as no longer maintained, so Buildah is the fallback.
 
@@ -109,7 +109,7 @@ Verified in docs.gitlab.com (Oct 24, 2026): the SAST and secret-detection templa
 | Code Review Flow comments on a merge request | Planned. No such session exists |
 | Cap of 3 automatic fix attempts per merge request | Planned (task 012) |
 | Automatic merge when every gate is green | Planned (task 012). Until then a human merges every merge request |
-| Deploy to Cloud Run and live monitor | Merged, not deployed |
+| Deploy to Cloud Run and live monitor | Done (applied and run once by a person; the deploy job itself runs on every pipeline of `main`) |
 | Summary comment on the original issue | Planned. No documented event after a merge can start it ([`docs/duo.md`](docs/duo.md)) |
 
 ## Features
@@ -119,7 +119,7 @@ Verified in docs.gitlab.com (Oct 24, 2026): the SAST and secret-detection templa
 - **Governance:** human-only files (`.gitlab-ci.yml`, `AGENTS.md`, `state/equivalent_mutants.json`, `deploy/`, and the mutation and gate settings in `state/config.json`), merge requests judged by the identity of their author and of the pusher, a task file and a delta per task, decision records (ADRs).
 - **Derived state:** task board, metrics, traffic lights, `LASTCONTEXT.md` and a static dashboard, rebuilt from git and the forge API and never committed. Reading the GitLab API is Done (task 010, [`docs/facts.md`](docs/facts.md)).
 - **Read-only service (`src/afaw_web`):** `/`, `/live/`, `/health`, `/api/state` (derived metrics verbatim), and `/api/ask`, a deterministic file search that cites paths and copies measured numbers verbatim. No language model call, GET only.
-- **Deploy:** Terraform for Cloud Run (public, minimum 0 and maximum 2 instances), Artifact Registry, Workload Identity Federation from GitLab OIDC, no JSON keys. Merged, not deployed.
+- **Deploy:** Terraform for Cloud Run (public, minimum 0 and maximum 2 instances), Artifact Registry, Workload Identity Federation from GitLab OIDC, no JSON keys. Done: applied by a person on Oct 24, 2026.
 
 ## Stack
 
@@ -144,7 +144,7 @@ flowchart TB
 ## Guardrails and known limits
 
 - `human_only_files` is a weak control: it lives in `.gitlab-ci.yml`, so the same merge request can remove it. The strong control (a pipeline execution policy in a separate project, or CODEOWNERS with required approval) is planned and depends on the role and tier available.
-- `main` is red on purpose until a human runs `terraform apply` and sets the protected `GCP_*` CI/CD variables: `check_configuration` and `publish_image` fail without them, and `deploy_cloud_run`, `monitor` and `monitor_live` are then skipped. Steps: [`docs/google-cloud.md`](docs/google-cloud.md).
+- `main` was red on purpose until a human ran `terraform apply` and set the protected `GCP_*` CI/CD variables (`check_configuration` and `publish_image` fail without them); the pipelines of `main` before that stay red in the history. The service is public with no rate limiting; its cost is bounded by a maximum of two instances. Steps: [`docs/google-cloud.md`](docs/google-cloud.md).
 - Security scanners do not block on lower severities; those are counted and printed.
 - The account has 500 GitLab Credits per month, which bounds how many flow runs fit ([ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md)).
 - `collect_facts` reads the GitLab REST API v4. Tasks 001 to 006 and 999 have no facts (their branches were never merge requests in this project), tasks 007 and 008 have no CI facts (no pipeline existed before the pipeline of task 009), and `started_at` of task 007 comes from the imported history, so its lead time is not a real working time. `monitor` is skipped on `main` while `main` is red.
@@ -172,7 +172,7 @@ The base method was committed on Sep 29 and 30, 2026. Since Oct 5, from `git log
 | Oct 24 | Repository imported into the GitLab project | MR !2 | Done |
 | Oct 24 | Merge policy ADR 0007, README and roadmap (task 008) | MR !3 | Done |
 | Oct 24 | Nine-stage pipeline and security gate (task 009) | MR !4, release v0.9 | Done |
-| Oct 24 | Read-only service and Terraform for Cloud Run (task 013) | MR !5, release v0.15 | Merged, not deployed |
+| Oct 24 | Read-only service and Terraform for Cloud Run (task 013) | MR !5, release v0.15; deployed and checked in [this pipeline](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985631519) | Done |
 | Oct 24 | Duo configuration, custom agent and flow sources (task 011) | MR !6, release v0.20 | Merged; the flows must be enabled by a person |
 | Oct 24 | GitLab fact collection (task 010) | MR !7, release v0.23 | Done |
 | pending | Merge guardrails and automatic merge rule (task 012) | | Planned |
