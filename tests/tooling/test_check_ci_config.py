@@ -87,3 +87,62 @@ def test_gcp_variables_are_not_demanded_on_unprotected_refs(
     project.write("state/config.json", {})
     assert _run(project, REQUIRED) == 0
     assert "GCP_PROJECT_ID: not checked (protected variable" in capsys.readouterr().out
+
+
+def _declare(monkeypatch: pytest.MonkeyPatch, required: tuple[str, ...]) -> None:
+    monkeypatch.setattr(check_ci_config, "REQUIRED", required)
+    monkeypatch.setattr(check_ci_config, "PROTECTED_REQUIRED", ())
+
+
+@pytest.mark.characterization(reason="a valid list of names already passes; it must stay so")
+def test_valid_name_list_passes(
+    project: Project, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    project.write("state/config.json", {})
+    _declare(monkeypatch, ("CI_REGISTRY_IMAGE", "CI_DEFAULT_BRANCH"))
+    assert _run(project, REQUIRED) == 0
+    assert "PROBLEM" not in capsys.readouterr().err
+
+
+def test_duplicated_name_fails_and_is_listed_without_values(
+    project: Project, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    project.write("state/config.json", {})
+    _declare(monkeypatch, ("CI_REGISTRY_IMAGE", "CI_DEFAULT_BRANCH", "CI_REGISTRY_IMAGE"))
+    assert _run(project, REQUIRED) == 3
+    captured = capsys.readouterr()
+    assert "duplicated" in captured.err and "CI_REGISTRY_IMAGE" in captured.err
+    assert "CI_DEFAULT_BRANCH" not in captured.err
+    assert "registry.example" not in captured.out + captured.err
+
+
+def test_duplicate_across_required_and_protected_lists_fails(
+    project: Project, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    project.write("state/config.json", {})
+    monkeypatch.setattr(check_ci_config, "REQUIRED", ("CI_REGISTRY_IMAGE",))
+    monkeypatch.setattr(check_ci_config, "PROTECTED_REQUIRED", ("CI_REGISTRY_IMAGE",))
+    assert _run(project, REQUIRED) == 3
+    assert "CI_REGISTRY_IMAGE" in capsys.readouterr().err
+
+
+def test_empty_name_fails(
+    project: Project, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    project.write("state/config.json", {})
+    _declare(monkeypatch, ("CI_REGISTRY_IMAGE", ""))
+    assert _run(project, {**REQUIRED, "": "secret-value"}) == 3
+    captured = capsys.readouterr()
+    assert "empty" in captured.err and "''" in captured.err
+    assert "secret-value" not in captured.out + captured.err
+
+
+def test_whitespace_only_name_fails(
+    project: Project, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    project.write("state/config.json", {})
+    _declare(monkeypatch, ("CI_REGISTRY_IMAGE", "  ", "\t"))
+    assert _run(project, {**REQUIRED, "  ": "secret-value"}) == 3
+    captured = capsys.readouterr()
+    assert "empty" in captured.err and "'  '" in captured.err and "'\\t'" in captured.err
+    assert "secret-value" not in captured.out + captured.err
