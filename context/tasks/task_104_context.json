@@ -1,0 +1,9 @@
+{
+  "task_id": "task_104",
+  "files_touched": [],
+  "summary": "Added docs/method-handsoff.md with Mermaid diagrams of the hands-off loop, self-repair, the merge decision, control layers and observability. The README loop diagram now shows what runs (no Code Review Flow or summary comment), and the upstream method sections say they describe the human-in-the-loop version. The new white paper (last task) must use these diagrams, not docs/img.",
+  "next": [
+    "The new white paper uses docs/method-handsoff.md",
+    "Replace the upstream diagrams in docs/img only in the new paper"
+  ]
+}
