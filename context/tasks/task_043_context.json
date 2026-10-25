@@ -1,0 +1,9 @@
+{
+  "task_id": "task_043",
+  "files_touched": [
+    "scripts/check_ci_config.py",
+    "tests/tooling/test_check_ci_config.py"
+  ],
+  "summary": "scripts/check_ci_config.py now validates its own list of required variable names before checking any variable: a duplicated, empty or whitespace-only name exits 3 and the message lists the offending names (repr for blank ones), never a value. Tests were written first and the four new failing-case tests failed on the old code; the valid-list test is a declared characterization. The module docstring documents the rule and the new exit code.",
+  "next": []
+}
