@@ -89,3 +89,8 @@ def test_the_page_names_the_app_and_loads_the_notes(client: TestClient) -> None:
     assert "text/html" in response.headers["content-type"]
     assert "AFAW demo notes" in response.text
     assert "/api/notes" in response.text
+
+
+def test_the_page_styles_the_button_with_the_brand_colour(client: TestClient) -> None:
+    # The end to end tests read this colour from the rendered page, so a wrong colour is caught.
+    assert "#0b5fff" in client.get("/").text
