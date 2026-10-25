@@ -1,0 +1,12 @@
+{
+  "task_id": "task_018",
+  "files_touched": [
+    "tests/tooling/test_gitlab_ci.py"
+  ],
+  "summary": "The AGENTS.md merge request that PENDING.md had deferred, plus the CI job that makes it possible to rebuild the paper PDF without LaTeX on the human's machine. AGENTS.md: the first line says this repository is afaw-engine-gitlab and lives on GitLab (work against the gitlab remote); section 1.2 says an agent always reads LASTCONTEXT.md and PENDING.md before anything else, with or without the hook; section 6.1 keeps the rule for the application and states the one exception, GitLab Duo flows (service account, only a branch of a merge request, never merge, never edit human-only files, not trusted until every gate passes); section 17.3 no longer says the human-only files are guarded by CI and states that human_only_files is a weak backup control and that the strong control is not in place yet. scripts/rules_to_tex.py accepts the new first-line quote (checked by converting AGENTS.md). Job paper_build in .gitlab-ci.yml (stage govern): image texlive/texlive:TL2025-historic, a fixed TeX Live release whose tag exists on Docker Hub (2.6 GB, checked 2026-10-24), installs fonts-liberation and python3, runs rules_to_tex, runs xelatex twice, and exposes docs/paper/afaw.pdf as an artifact; it runs in merge request and branch pipelines when AGENTS.md, docs/paper/afaw.tex or docs/img change, and on a manual run. The job does not commit anything: the PDF is downloaded from the artifact and committed in the same merge request, which is what paper_pdf requires. The old assertion that no job called paper_build exists was removed from test_gitlab_ci.py because it existed only to forbid a placeholder; the placeholder check stays. Why the PDF was out of step: task 008 (MR !3) changed AGENTS.md before the paper_pdf job existed (it arrived with !4), so the GitHub mirror check Paper PDF rebuilt with its sources failed on the cumulative diff of pull request #2. The mirror becomes green only when the rebuilt PDF is on main. README, PENDING.md, docs/duo.md and docs/paper/README.md are updated.",
+  "next": [
+    "Download the paper_build artifact of the merge request pipeline, commit docs/paper/afaw.pdf in this merge request, and check that paper_pdf passes",
+    "After the merge: update sync/gitlab-main from gitlab/main and check the mirror pull request on GitHub",
+    "Human: read the new text of AGENTS.md sections 1.2, 6.1 and 17.3 before merging; AGENTS.md is a human-only file"
+  ]
+}

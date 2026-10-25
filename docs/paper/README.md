@@ -4,7 +4,7 @@
 - **Source:** `afaw.tex`. Its appendix is generated from `AGENTS.md`, so the rules exist in one place
   only; the figures are the ones in `docs/img/`, rendered from `docs/diagrams/*.dot`.
 
-Rebuild (XeLaTeX, Liberation Sans or Arial installed), then commit `afaw.pdf` in the same pull
+Rebuild without installing LaTeX: the `paper_build` job of `.gitlab-ci.yml` compiles the paper in a pinned TeX Live image; download its artifact `docs/paper/afaw.pdf`. Or rebuild locally (XeLaTeX, Liberation Sans or Arial installed). Then commit `afaw.pdf` in the same pull
 request as the source change. CI fails a pull request that changes `afaw.tex`, `AGENTS.md` or
 `docs/img/` without changing the PDF
 ([gotcha 0002](../gotchas/0002-committed-pdf-drifts-from-its-source.md)).

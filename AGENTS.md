@@ -1,3 +1,5 @@
+> **This repository is `afaw-engine-gitlab` (AFAW Hands-off) and it lives on GitLab.** Work against the `gitlab` remote and `gitlab/main`; `origin` can be a stale GitHub copy.
+
 # Instructions for coding agents
 
 Rules reusable in any project. `AGENTS.md` is the single source; `CLAUDE.md` imports it.
@@ -9,7 +11,7 @@ Rules reusable in any project. `AGENTS.md` is the single source; `CLAUDE.md` imp
 
 ## 1. Session start, tasks and context
 1. **In the first message, always ask the human for `ROLE:`** (which role this agent has in the project).
-2. At session start the hook builds the derived views from `origin/main` and injects `LASTCONTEXT.md` and `PENDING.md`. Without the hook, run `git fetch` and `python -m scripts.build_state --ref origin/main`, then read, in order: `README.md`, the reference documents listed in `LASTCONTEXT.md`, `build/state/context/global/LASTCONTEXT.md`, `build/state/context/roles/<role>/LASTCONTEXT.md`, and the ADRs and gotchas the task needs.
+2. **An agent always reads `LASTCONTEXT.md` and `PENDING.md` before anything else, with or without the hook.** At session start the hook builds the derived views from `origin/main` and injects both. Without the hook, run `git fetch` and `python -m scripts.build_state --ref origin/main`, then read, in order: `README.md`, the reference documents listed in `LASTCONTEXT.md`, `build/state/context/global/LASTCONTEXT.md`, `build/state/context/roles/<role>/LASTCONTEXT.md`, and the ADRs and gotchas the task needs.
 3. **An agent writes only two state files:** its task file `state/tasks/task_NNN.json` (declared values: id, title, role, type, status, owner, priority, difficulty, blocked_by, branch) and its delta `context/tasks/task_NNN_context.json` (`summary`, `next`, `files_touched`). Timestamps, CI results and the traffic light are measured, never declared; CI rejects a task file that contains them.
 4. **Status lifecycle:** `backlog`, `pending`, `in_progress`, `done`, `cancelled`. Any open status may reach `done` in one pull request; `done` and `cancelled` are final. Task files are never deleted: set `cancelled`. A new task takes the next free id; CI rejects an id that already exists on `origin/main`.
 5. **Owner:** `agent` by default; `human` for actions only the human can take (approve a PR, rotate a key, change a repository setting). A human task needs no branch. A pull request never changes both the owner and the status of a task.
@@ -80,7 +82,7 @@ When the project status is requested, build the views from `origin/main` (`git f
 19. Work on temporary copies, never in place, when the target repo is the basis of the documented metrics.
 
 ## 6. Agents and LLMs
-1. **The LLM never executes tools with side effects:** only deterministic code does, and every write tool is idempotent by `request_id`.
+1. **In the application, the LLM never executes tools with side effects:** only deterministic code does, and every write tool is idempotent by `request_id`. GitLab Duo flows are the one exception, because writing code is their job: they run under a service account, write only to a branch of a merge request, never merge, and never edit the human-only files of section 18.10. What they write is not trusted until every deterministic gate of the pipeline has passed.
 2. **Never trust the LLM's output:** revalidate it on the server with strict Pydantic schemas (`extra="forbid"`) and business limits.
 3. The user-facing agent has minimum privilege: no access to the database, the knowledge table or the tool server. It only proposes a structured intent and, if it cannot map the message, asks instead of guessing a field.
 4. A prompt injection/jailbreak filter before the message reaches the agent, which fails fast.
@@ -187,7 +189,7 @@ When the project status is requested, build the views from `origin/main` (`git f
    - Model, router or tool-registry files (list the impact before deleting or moving).
    - Published numbers without a real measurement behind them.
 2. Before a migration, verify the current revision (`alembic current`) and confirm the target with the user; this applies equally to the cloud database.
-3. Hard-deny hooks protect what only the human may change: `PENDING.md` can be edited but never deleted or emptied; `state/equivalent_mutants.json` is never written by an agent; nothing under `build/` is edited; nothing is pushed to `main`. The other human-only files of section 18.10 are guarded by CI (the `govern` job).
+3. Hard-deny hooks protect what only the human may change: `PENDING.md` can be edited but never deleted or emptied; `state/equivalent_mutants.json` is never written by an agent; nothing under `build/` is edited; nothing is pushed to `main`. The other human-only files of section 18.10 are only checked by the `human_only_files` job of `.gitlab-ci.yml`, a weak backup control: the same merge request can edit it away, and it stops nothing on its own. The strong control (a pipeline execution policy or required code owner approval) is not in place yet, so a human reviews every change to those files.
 4. When refusing an action, always state the correct alternative in the same reply.
 
 ## 18. Linters, branches, commits and PRs

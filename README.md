@@ -150,7 +150,7 @@ flowchart TB
 - `collect_facts` reads the GitLab REST API v4. Tasks 001 to 006 and 999 have no facts (their branches were never merge requests in this project), tasks 007 and 008 have no CI facts (no pipeline existed before the pipeline of task 009), and `started_at` of task 007 comes from the imported history, so its lead time is not a real working time. `monitor` is skipped on `main` while `main` is red.
 - Branch protection, approvals and group settings of the GitLab project are set by its maintainers; this repository does not verify them.
 - `/api/ask` is a deterministic search; it does not generate answers.
-- The paper PDF is not rebuilt in this repository's CI: changes to `AGENTS.md` are batched in one later merge request that also rebuilds `docs/paper/afaw.pdf`.
+- The paper PDF is compiled by the `paper_build` job but not committed by CI: after a change to `AGENTS.md`, `docs/paper/afaw.tex` or `docs/img/`, download the job's artifact and commit `docs/paper/afaw.pdf` in the same merge request; `paper_pdf` fails otherwise.
 - No claim about speed, cost, defect rate or carbon is made anywhere in this repository without a measurement.
 
 ## Sustainability
