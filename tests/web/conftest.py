@@ -35,6 +35,8 @@ def data_dir(tmp_path: Path) -> Path:
     (live / "pending.json").write_text(json.dumps(PENDING), encoding="utf-8")
     (live / "history.json").write_text(json.dumps(HISTORY), encoding="utf-8")
     (live / "dashboard.html").write_text("<html>live dashboard</html>", encoding="utf-8")
+    (live / "experiments.html").write_text("<html>experiments page</html>", encoding="utf-8")
+    (live / "environment.html").write_text("<html>environment page</html>", encoding="utf-8")
     (live / "context" / "global" / "LASTCONTEXT.md").write_text(LASTCONTEXT, encoding="utf-8")
     (tmp_path / "demo").mkdir()
     (tmp_path / "demo" / "index.html").write_text("<html>demo dashboard</html>", encoding="utf-8")

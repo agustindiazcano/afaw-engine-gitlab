@@ -136,6 +136,8 @@ def nav() -> str:
         '<header class="top"><nav aria-label="Main">'
         f'<a class="brand" href="/">{LOGO}<span>{NAME}</span></a>'
         '<a class="item" href="/">Dashboard</a>'
+        '<a class="item" href="/experiments/">Experiments</a>'
+        '<a class="item" href="/environment/">Environment</a>'
         '<a class="item" href="/demo/">Demo (invented data)</a>'
         '<a class="item" href="/api/state">State API</a>'
         f'<a class="item" href="{REPOSITORY}/-/blob/main/docs/submission/evidence.md">Evidence</a>'
