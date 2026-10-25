@@ -1,0 +1,11 @@
+{
+  "task_id": "task_070",
+  "files_touched": [
+    "scripts/mutation_engine.py",
+    "tests/tooling/test_mutation_engine.py"
+  ],
+  "summary": "mutation_gate failed on the measurement branch with 'could not find any test case for any mutant'. Root cause: scripts/mutation_engine.py wrote only_mutate as a comma-separated line, and mutmut 3.8.0 treats that as a single glob pattern (it only splits on newlines), so with two required files (app.py and search.py) no file matched and mutmut mutated 0 files. With one file it worked by accident. The config now writes one pattern per line. Added a test for the multi-file config. Measured locally on the measurement branch's files: 104 mutants, app.py 95.56% and search.py 84.75% killed, mutation_ci passed.",
+  "next": [
+    "Re-run the pipeline of branch duo/chore/15-task-delta-measure-063 after this merges"
+  ]
+}
