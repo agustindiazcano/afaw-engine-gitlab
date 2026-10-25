@@ -345,3 +345,11 @@ def test_e2e_live_runs_after_both_deploys_and_before_request_fix(ci: dict[str, A
     text = _script(job)
     assert "NOTES_URL=\"$DEMO_APP_URL\"" in text and "DASHBOARD_URL=\"$GCP_SERVICE_URL\"" in text
     assert job["rules"] == [{"if": "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"}]
+
+
+def test_deploy_jobs_share_one_lock(ci: dict[str, Any]) -> None:
+    # A burst of merges starts several pipelines of main; without a lock one deploy overwrites
+    # another and the version check of the earlier job sees the later commit (task_106).
+    names = ("publish_image", "deploy_cloud_run", "publish_demo_image", "deploy_demo_app")
+    groups = {ci[name].get("resource_group") for name in names}
+    assert groups == {"deploy"}

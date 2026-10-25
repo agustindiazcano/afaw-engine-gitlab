@@ -1,0 +1,13 @@
+{
+  "id": "task_106",
+  "title": "Serialize the deploy jobs of main with a resource group",
+  "role": "architect",
+  "type": "fix",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "fix/task-106-deploy-lock",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Found by the burst of seven merges (EXP-05). Touches .gitlab-ci.yml (human-only): merge request opened with the human token."
+}
