@@ -113,6 +113,13 @@ Verified in docs.gitlab.com (Oct 24, 2026): the SAST and secret-detection templa
 | Deploy to Cloud Run and live monitor | Done (applied and run once by a person; the deploy job itself runs on every pipeline of `main`) |
 | Summary comment on the original issue | Planned. No documented event after a merge can start a flow; a deterministic CI job with a project access token could post it ([`docs/duo.md`](docs/duo.md)) |
 
+## Demo app
+
+`src/notes_app` is a small notes app deployed on its own Cloud Run service. The dashboard shows the
+project; this app is the product the agents change through issues, so a reader can open it and see
+what an agent did. Details, limits and pipeline jobs: [`docs/demo-app.md`](docs/demo-app.md). Status:
+code merged or in review (task 091); the service is created by a person with Terraform (task 092).
+
 ## Features
 
 - **Verification gates:** red-first check (a new test must fail on the old code), mutation gate on the diff, lint, strict typing, tests, in parallel.

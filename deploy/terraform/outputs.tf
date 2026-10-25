@@ -19,3 +19,7 @@ output "artifact_repository" {
 output "service_url" {
   value = google_cloud_run_v2_service.web.uri
 }
+
+output "demo_service_url" {
+  value = google_cloud_run_v2_service.demo.uri
+}

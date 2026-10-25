@@ -50,3 +50,8 @@ variable "placeholder_image" {
   default     = "us-docker.pkg.dev/cloudrun/container/hello"
   description = "Image of the first apply only; CI deploys the real one with gcloud run deploy."
 }
+
+variable "demo_service_name" {
+  type    = string
+  default = "afaw-demo-app"
+}

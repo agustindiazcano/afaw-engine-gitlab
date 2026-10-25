@@ -1,0 +1,13 @@
+{
+  "id": "task_092",
+  "title": "Deploy the demo notes app: Terraform service and pipeline jobs",
+  "role": "architect",
+  "type": "feature",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "feat/task-092-demo-app-deploy",
+  "priority": 1,
+  "difficulty": 2,
+  "blocked_by": ["task_091"],
+  "notes": "Touches .gitlab-ci.yml and deploy/ (human-only): merge request opened with the human token. Terraform apply is a human step."
+}
