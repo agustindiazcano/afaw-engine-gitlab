@@ -215,6 +215,16 @@ def test_monitor_collects_facts_and_rebuilds_the_dashboard(ci: dict[str, Any]) -
     assert "build/" in str(ci["monitor"]["artifacts"]["paths"])
 
 
+def test_merge_guard_runs_last_in_merge_request_pipelines_only(ci: dict[str, Any]) -> None:
+    job = ci["merge_guard"]
+    assert job["stage"] == "monitor"  # the last stage: it waits for every other job
+    assert "python -m scripts.merge_guard" in _script(job)
+    assert '--mr "$CI_MERGE_REQUEST_IID"' in _script(job)
+    assert [r["if"] for r in job["rules"]] == ['$CI_PIPELINE_SOURCE == "merge_request_event"']
+    assert not job.get("allow_failure")
+    assert "AFAW_MERGE_TOKEN" not in str(job)  # the token comes from a CI/CD variable, not the file
+
+
 def test_monitor_always_collects_facts_on_gitlab(ci: dict[str, Any]) -> None:
     script = _script(ci["monitor"])
     assert "NOTICE" not in script and "GITHUB_REPOSITORY" not in script
