@@ -399,6 +399,7 @@ release:
 # Google Cloud variables are protected, so these jobs run only on main.
 publish_image:
   stage: release
+  resource_group: deploy # one deploy at a time: a burst of merges must not overwrite itself
   image: docker:24.0.5-cli
   services:
     - docker:24.0.5-dind
@@ -425,6 +426,7 @@ publish_image:
 
 deploy_cloud_run:
   stage: release
+  resource_group: deploy # one deploy at a time: a burst of merges must not overwrite itself
   image: google/cloud-sdk:590.0.1 # pinned; tag verified on Docker Hub
   needs: [publish_image]
   id_tokens:
@@ -439,6 +441,7 @@ deploy_cloud_run:
 
 publish_demo_image:
   stage: release
+  resource_group: deploy # one deploy at a time: a burst of merges must not overwrite itself
   image: docker:24.0.5-cli
   services:
     - docker:24.0.5-dind
@@ -463,6 +466,7 @@ publish_demo_image:
 # to the next jobs (the end to end tests) in a dotenv report.
 deploy_demo_app:
   stage: release
+  resource_group: deploy # one deploy at a time: a burst of merges must not overwrite itself
   image: google/cloud-sdk:590.0.1 # pinned; tag verified on Docker Hub
   needs: [publish_demo_image]
   variables:
