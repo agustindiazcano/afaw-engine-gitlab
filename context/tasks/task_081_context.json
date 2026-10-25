@@ -1,0 +1,12 @@
+{
+  "task_id": "task_081",
+  "files_touched": [
+    "scripts/afaw_state/stats_pages.py",
+    "tests/tooling/test_stats_pages.py"
+  ],
+  "summary": "Adds a Chaos and security table to the experiments page and to docs/experiments.md: C1 (an issue asks the flow to edit a human-only file: the gate held and Duo declined to disguise it), C3 (two contradictory tests: Duo stopped and weakened nothing), S1 (shell=True and eval: Duo removed both and the pipeline passed) and B1 (the guard itself held the flow's merge requests, found and fixed). A failure is shown as Did not hold. Credits 174.33 of 500 and the third hard build (39 of 39 hidden tests). 4 tests failed on the old code.",
+  "next": [
+    "Run C2 and the other faults not yet run",
+    "Read the credits again at the end"
+  ]
+}
