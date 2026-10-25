@@ -171,6 +171,9 @@ def test_a_copy_identical_to_the_target_is_not_a_change():
     assert errors == []
 
 
+@pytest.mark.characterization(
+    reason="a differing copy was always checked; the test pins that the skip stays narrow"
+)
 def test_a_task_that_differs_from_the_target_is_still_checked():
     on_target = make_task(status="in_progress", branch="docs/other")
     on_branch = make_task(status="in_progress", branch="docs/other", title="Another task")
