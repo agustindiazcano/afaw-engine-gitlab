@@ -35,6 +35,7 @@ SUBAGENT_DIR = ".agents/agents"
 CUSTOM_FLOW = "duo/custom-flow.yaml"
 AUDITOR_SPEC = "duo/custom-agent.md"
 PLANNER_SPEC = "duo/custom-planner.md"
+TRIAGE_FLOW = "duo/triage-flow.yaml"
 
 # Tools documented on docs.gitlab.com/user/duo_agent_platform/agents/tools.
 DOCUMENTED_TOOLS = frozenset(
@@ -96,6 +97,16 @@ AGENT_FORBIDDEN_TOOLS = frozenset(
 IDE_ONLY_TOOLS = frozenset(
     {"find_files", "grep", "read_file", "read_files", "list_dir", "run_command"}
 )
+
+# The autohealing triage flow (duo/triage-flow.yaml) reads a failed pipeline and opens one issue per
+# failing job. It is the one flow that may create an issue; it changes nothing else.
+TRIAGE_TOOLS = frozenset(
+    """gitlab_api_get get_pipeline_failing_jobs get_job_logs list_issues create_issue
+    create_issue_note""".split()
+)
+TRIAGE_FORBIDDEN_TOOLS = (FLOW_FORBIDDEN_TOOLS | AGENT_FORBIDDEN_TOOLS | IDE_ONLY_TOOLS) - {
+    "create_issue"
+}
 
 FLOW_KEYS = {"version", "environment", "components", "prompts", "routers", "flow"}
 FLOW_REJECTED = {"name", "description", "product_group"}
@@ -245,9 +256,18 @@ def check_agent_spec(
     return problems
 
 
-def check_flow(flow: Any, size: int = 0) -> list[str]:
-    """Problems of a custom flow (Flow Registry v1) against the documented schema."""
-    where = CUSTOM_FLOW
+def check_flow(
+    flow: Any,
+    size: int = 0,
+    where: str = CUSTOM_FLOW,
+    allowed: frozenset[str] | None = None,
+    forbidden: frozenset[str] = FLOW_FORBIDDEN_TOOLS,
+) -> list[str]:
+    """Problems of a custom flow (Flow Registry v1) against the documented schema.
+
+    ``where`` names the file in the messages. With ``allowed`` the toolset must stay inside that
+    list; ``forbidden`` tools are rejected by name either way.
+    """
     if size > FLOW_MAX_BYTES:
         return [f"{where}: the flow is over 40 KiB"]
     if not isinstance(flow, dict):
@@ -266,9 +286,9 @@ def check_flow(flow: Any, size: int = 0) -> list[str]:
     components = [c for c in flow.get("components", []) if isinstance(c, dict)]
     names = {c.get("name") for c in components}
     for comp in components:
-        problems += _check_component(comp, prompts)
+        problems += _check_component(comp, prompts, where, allowed, forbidden)
     for prompt in prompts.values():
-        problems += _check_prompt(prompt, components)
+        problems += _check_prompt(prompt, components, where)
     for router in flow.get("routers", []):
         if router.get("from") not in names:
             problems.append(f"{where}: router starts at unknown component {router.get('from')!r}")
@@ -280,8 +300,14 @@ def check_flow(flow: Any, size: int = 0) -> list[str]:
     return problems
 
 
-def _check_component(comp: dict[str, Any], prompts: dict[Any, Any]) -> list[str]:
-    where, name = CUSTOM_FLOW, comp.get("name")
+def _check_component(
+    comp: dict[str, Any],
+    prompts: dict[Any, Any],
+    where: str,
+    allowed: frozenset[str] | None,
+    forbidden: frozenset[str],
+) -> list[str]:
+    name = comp.get("name")
     problems: list[str] = []
     if comp.get("type") not in COMPONENT_TYPES:
         problems.append(f"{where}: component {name!r} has unsupported type {comp.get('type')!r}")
@@ -300,15 +326,21 @@ def _check_component(comp: dict[str, Any], prompts: dict[Any, Any]) -> list[str]
         tool_name = tool if isinstance(tool, str) else next(iter(tool), "")
         if tool_name not in DOCUMENTED_TOOLS:
             problems.append(f"{where}: component {name!r} uses unknown tool {tool_name!r}")
-        elif tool_name in FLOW_FORBIDDEN_TOOLS:
+        elif tool_name in forbidden:
             problems.append(
                 f"{where}: component {name!r} may not use {tool_name!r} (it changes code or the MR)"
+            )
+        elif allowed is not None and tool_name not in allowed:
+            problems.append(
+                f"{where}: component {name!r} uses {tool_name!r}, which is not in the allow list"
             )
     return problems
 
 
-def _check_prompt(prompt: dict[str, Any], components: list[dict[str, Any]]) -> list[str]:
-    where, pid = CUSTOM_FLOW, prompt.get("prompt_id")
+def _check_prompt(
+    prompt: dict[str, Any], components: list[dict[str, Any]], where: str
+) -> list[str]:
+    pid = prompt.get("prompt_id")
     problems: list[str] = []
     if "unit_primitives" not in prompt:
         problems.append(f"{where}: prompt {pid!r} lacks unit_primitives (use [] when empty)")
@@ -361,6 +393,17 @@ def main(argv: list[str] | None = None) -> int:
         problems += check_flow(_load(flow_path), flow_path.stat().st_size)
     else:
         problems.append(f"{CUSTOM_FLOW} does not exist")
+    triage_path = root / TRIAGE_FLOW
+    if triage_path.is_file():
+        problems += check_flow(
+            _load(triage_path),
+            triage_path.stat().st_size,
+            where=TRIAGE_FLOW,
+            allowed=TRIAGE_TOOLS,
+            forbidden=TRIAGE_FORBIDDEN_TOOLS,
+        )
+    else:
+        problems.append(f"{TRIAGE_FLOW} does not exist")
     for rel, allowed, optional in (
         (AUDITOR_SPEC, AUDITOR_TOOLS, AUDITOR_OPTIONAL_TOOLS),
         (PLANNER_SPEC, PLANNER_TOOLS, frozenset[str]()),

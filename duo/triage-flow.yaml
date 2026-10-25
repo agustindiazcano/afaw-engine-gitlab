@@ -1,0 +1,73 @@
+# Custom flow "AFAW triage". Source of the YAML pasted in AI > Flows > New flow.
+# Format: Flow Registry v1 (docs.gitlab.com/user/duo_agent_platform/flows/custom_flows_schema).
+# The display name, description and visibility are set in the UI, not here.
+#
+# It is started by a trigger on Pipeline events > Failed (see docs/autohealing.md). A flow
+# receives only the address of the project and the action, so it first finds the failed pipeline
+# with a read-only API call. It opens one issue per failing job and short commit sha, or adds a
+# note to the issue that already exists. It changes no code, branch, merge request or existing
+# issue. The Fix CI/CD Pipeline Flow runs on the same event through its own trigger: a custom flow
+# cannot start another flow.
+version: "v1"
+environment: ambient
+components:
+  - name: "triage"
+    type: AgentComponent
+    prompt_id: "afaw_triage"
+    inputs:
+      - from: "context:goal"
+        as: "goal"
+      - from: "context:project_id"
+        as: "project_id"
+    toolset:
+      - "gitlab_api_get"
+      - "get_pipeline_failing_jobs"
+      - "get_job_logs"
+      - "list_issues"
+      - "create_issue"
+      - "create_issue_note"
+prompts:
+  - prompt_id: "afaw_triage"
+    name: "AFAW triage"
+    unit_primitives: []
+    prompt_template:
+      system: |
+        You triage the most recent failed CI pipeline of an AFAW project. You never change code,
+        a branch, a merge request, or the title, description, labels or state of an existing
+        issue. The only things you write are new issues and notes.
+
+        Steps:
+        1. Find the failed pipeline with the read-only API tool: a GET of the path
+           /projects/<the project id from the request>/pipelines?status=failed&order_by=id&sort=desc&per_page=1
+           Note its id, ref, sha and web address. If there is none, say so and stop.
+        2. Read its failing jobs and the log of each failing job. Copy the first error line of each
+           log exactly.
+        3. For each failing job build the key "autoheal: <job name> @ <first 8 characters of the sha>".
+           Search the open issues for that key in the title.
+           - If an open issue with the key exists, add one note with the pipeline id, the pipeline
+             address and the first error line, and do nothing else for that job.
+           - Otherwise create one issue whose title is exactly the key. Its description has the
+             pipeline id and address, the ref, the job name and stage, the first error line, the
+             last 20 lines of the job log in a code block, and a last line that reads exactly
+             /label ~afaw-autoheal
+        4. Never create a second issue for the same key. Create at most 5 issues in one run; if more
+           jobs failed, say how many you did not handle.
+
+        Rules:
+        - Copy ids, statuses, durations, error lines and log lines exactly as the tools returned
+          them. Never estimate, round, sum or reword a number. If a value is missing, write
+          "not available".
+        - Do not say that anything was fixed or will be fixed. You only report the failure.
+        - Write in English.
+
+        Stop when every failing job has an issue or a note. Your final answer is the list of
+        issue addresses and the pipeline id.
+      user: |
+        Project ID: {{ project_id }}
+        Event: {{ goal }}
+      placeholder: history
+routers:
+  - from: "triage"
+    to: "end"
+flow:
+  entry_point: "triage"

@@ -270,3 +270,80 @@ def test_the_auditor_prompt_does_not_claim_to_run_tests() -> None:
     text = (REPO_ROOT / "duo" / "custom-agent.md").read_text(encoding="utf-8")
     assert "You cannot run tests yourself" in text
     assert "not verified" in text
+
+
+TRIAGE_TOOLS = [
+    "gitlab_api_get",
+    "get_pipeline_failing_jobs",
+    "get_job_logs",
+    "list_issues",
+    "create_issue",
+    "create_issue_note",
+]
+
+
+def _triage(tools: list[str]) -> dict[str, Any]:
+    flow = copy.deepcopy(FLOW)
+    flow["components"][0]["toolset"] = tools
+    return flow
+
+
+def _check_triage(flow: dict[str, Any]) -> list[str]:
+    return duo.check_flow(
+        flow,
+        where=duo.TRIAGE_FLOW,
+        allowed=duo.TRIAGE_TOOLS,
+        forbidden=duo.TRIAGE_FORBIDDEN_TOOLS,
+    )
+
+
+def test_the_triage_flow_may_create_issues_and_notes_and_read() -> None:
+    assert _check_triage(_triage(TRIAGE_TOOLS)) == []
+
+
+def test_the_triage_allow_list_is_documented_and_not_forbidden() -> None:
+    assert duo.TRIAGE_TOOLS <= duo.DOCUMENTED_TOOLS
+    assert not duo.TRIAGE_TOOLS & duo.TRIAGE_FORBIDDEN_TOOLS
+    assert "create_issue" in duo.TRIAGE_TOOLS and "create_issue" in duo.FLOW_FORBIDDEN_TOOLS
+
+
+@pytest.mark.parametrize("tool", sorted(duo.TRIAGE_FORBIDDEN_TOOLS))
+def test_the_triage_flow_may_not_change_code_the_merge_request_or_an_issue(tool: str) -> None:
+    problems = _check_triage(_triage([*TRIAGE_TOOLS, tool]))
+    assert any(tool in p for p in problems)
+
+
+def test_a_documented_tool_outside_the_triage_allow_list_is_rejected() -> None:
+    problems = _check_triage(_triage([*TRIAGE_TOOLS, "get_wiki_page"]))
+    assert any("get_wiki_page" in p and "allow list" in p for p in problems)
+
+
+def test_problems_name_the_file_they_were_found_in() -> None:
+    problems = _check_triage(_triage(["update_issue"]))
+    assert problems and all(p.startswith(duo.TRIAGE_FLOW) for p in problems)
+
+
+def test_the_default_flow_still_may_not_create_an_issue() -> None:
+    flow = copy.deepcopy(FLOW)
+    flow["components"][0]["toolset"] = ["create_issue"]
+    assert any("create_issue" in p for p in duo.check_flow(flow))
+
+
+def test_the_repository_triage_flow_follows_its_lists() -> None:
+    import yaml
+
+    path = REPO_ROOT / "duo" / "triage-flow.yaml"
+    flow = yaml.safe_load(path.read_text(encoding="utf-8"))
+    assert _check_triage(flow) == []
+    prompt = flow["prompts"][0]["prompt_template"]["system"]
+    assert "afaw-autoheal" in prompt and "autoheal: " in prompt
+
+
+def test_a_missing_triage_flow_fails_loudly(tmp_path, capsys: pytest.CaptureFixture[str]) -> None:
+    import shutil
+
+    for rel in (".gitlab", ".agents", "duo"):
+        shutil.copytree(REPO_ROOT / rel, tmp_path / rel)
+    (tmp_path / "duo" / "triage-flow.yaml").unlink(missing_ok=True)
+    assert duo.main(["--root", str(tmp_path)]) == 1
+    assert "duo/triage-flow.yaml does not exist" in capsys.readouterr().err
