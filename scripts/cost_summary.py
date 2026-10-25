@@ -63,7 +63,6 @@ def _empty_stats() -> dict[str, Any]:
     stats: dict[str, Any] = {"runs": 0}
     stats.update({name: Decimal(0) for name in SUMMED})
     stats["missing"] = dict.fromkeys(SUMMED, 0)
-    stats["_zero_unknown"] = True
     return stats
 
 

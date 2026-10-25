@@ -122,6 +122,9 @@ def test_a_service_without_the_version_endpoint_fails_the_expected_commit() -> N
         assert _run_with(url, "--expect-sha", "abc123") == 1
 
 
+@pytest.mark.characterization(
+    reason="the version was never read before; this pins that it still is not without the flag"
+)
 def test_without_an_expected_commit_the_version_is_not_looked_at() -> None:
     with _server(_healthy_routes()) as url:
         assert _run_with(url) == 0
