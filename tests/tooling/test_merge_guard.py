@@ -472,6 +472,9 @@ def test_request_fix_never_decides_the_verdict_whatever_its_status(status):
     assert v.merge, v.reasons
 
 
+@pytest.mark.characterization(
+    reason="a skipped job already held the merge; this pins that only the auxiliary jobs are exempt"
+)
 def test_a_real_job_that_is_skipped_still_holds_the_merge():
     jobs = [*recorded_jobs(), {"name": "lint", "status": "skipped"}]
     v = merge_verdict(mr(), pipe(10, "abc", "running", "2026-10-24T12:00:00Z"), jobs, 0, "main")
