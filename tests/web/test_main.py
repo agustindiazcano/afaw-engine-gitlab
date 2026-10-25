@@ -17,6 +17,9 @@ def _reload_main() -> FastAPI:
     return app
 
 
+@pytest.mark.characterization(
+    reason="the entry point already did this; the test pins it so a change is noticed"
+)
 def test_main_exposes_a_fastapi_app_named_after_the_project(
     monkeypatch: pytest.MonkeyPatch, data_dir: Path
 ) -> None:
@@ -27,6 +30,9 @@ def test_main_exposes_a_fastapi_app_named_after_the_project(
     assert app.docs_url is None and app.redoc_url is None
 
 
+@pytest.mark.characterization(
+    reason="the entry point already did this; the test pins it so a change is noticed"
+)
 def test_main_app_serves_the_data_directory_named_in_the_environment(
     monkeypatch: pytest.MonkeyPatch, data_dir: Path
 ) -> None:
@@ -36,6 +42,9 @@ def test_main_app_serves_the_data_directory_named_in_the_environment(
     assert "demo dashboard" in client.get("/").text
 
 
+@pytest.mark.characterization(
+    reason="the entry point already did this; the test pins it so a change is noticed"
+)
 def test_main_app_without_data_fails_loudly_with_503(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -45,6 +54,9 @@ def test_main_app_without_data_fails_loudly_with_503(
     assert response.json()["status"] == "unavailable"
 
 
+@pytest.mark.characterization(
+    reason="the entry point already did this; the test pins it so a change is noticed"
+)
 def test_main_app_registers_exactly_the_documented_get_routes(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
