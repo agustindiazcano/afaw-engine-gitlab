@@ -8,6 +8,9 @@ loudly; it never reports a pass for something it could not reach. A cold start o
 service is covered by retries with exponential backoff.
 
 Run in CI: python -m scripts.check_live --url "$GCP_SERVICE_URL" --expect-sha "$CI_COMMIT_SHA"
+With ``--json PATH`` it also writes the base URL, the expected sha, the status of every checked
+path and a boolean ok to that file, whether the check passes or fails; the exit code is the same.
+
 Exit codes: 0 ok, 1 the service is not healthy, 2 the arguments are invalid.
 """
 
@@ -56,14 +59,28 @@ def version_problems(base: str, expect_sha: str) -> list[str]:
     return []
 
 
-def problems(base: str, expect_sha: str | None = None, pages: tuple[str, ...] = ()) -> list[str]:
-    """What is wrong with the service at ``base`` right now (empty when it is healthy)."""
+def problems(
+    base: str,
+    expect_sha: str | None = None,
+    pages: tuple[str, ...] = (),
+    statuses: dict[str, int | None] | None = None,
+) -> list[str]:
+    """What is wrong with the service at ``base`` right now (empty when it is healthy).
+
+    When ``statuses`` is given it is filled with the HTTP status of /health, /api/state and each
+    page (None for a path that never answered).
+    """
     found: list[str] = []
+    seen = statuses if statuses is not None else {}
+    seen.clear()
+    seen.update({path: None for path in ("/health", "/api/state", *pages)})
     try:
         status, body = _get(f"{base}/health")
+        seen["/health"] = status
         if status != 200 or not isinstance(body, dict) or body.get("status") != "ok":
             found.append(f"/health answered {status} instead of 200 with status ok")
         status, body = _get(f"{base}/api/state")
+        seen["/api/state"] = status
         if status != 200 or not isinstance(body, dict):
             found.append(f"/api/state answered {status} instead of 200 with the views")
         else:
@@ -72,11 +89,22 @@ def problems(base: str, expect_sha: str | None = None, pages: tuple[str, ...] = 
             found += version_problems(base, expect_sha)
         for page in pages:
             status = _status(f"{base}{page}")
+            seen[page] = status
             if status != 200:
                 found.append(f"{page} answered {status} instead of 200")
     except (urllib.error.URLError, OSError, ValueError) as exc:
         found.append(f"the service did not answer ({exc!r})")
     return found
+
+
+def write_result(
+    path: str, base: str, expect_sha: str | None, statuses: dict[str, int | None], ok: bool
+) -> None:
+    """Write the JSON result of the check to ``path``."""
+    result = {"base_url": base, "expected_sha": expect_sha, "statuses": statuses, "ok": ok}
+    with open(path, "w", encoding="utf-8") as handle:
+        json.dump(result, handle, indent=2)
+        handle.write("\n")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -87,6 +115,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--wait", type=float, default=3.0, help="first backoff in seconds")
     parser.add_argument("--expect-sha", help="the commit /api/version must report")
     parser.add_argument("--page", action="append", default=[], help="a page that must answer 200")
+    parser.add_argument("--json", metavar="PATH", help="also write the result to this JSON file")
     args = parser.parse_args(argv)
     parts = urlsplit(args.url)
     if parts.scheme != "https" and not (parts.scheme == "http" and parts.hostname in LOCAL_HOSTS):
@@ -94,13 +123,18 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     base = args.url.rstrip("/")
     found: list[str] = []
+    statuses: dict[str, int | None] = {}
     for attempt in range(args.attempts):
-        found = problems(base, args.expect_sha, tuple(args.page))
+        found = problems(base, args.expect_sha, tuple(args.page), statuses)
         if not found:
-            sys.stdout.write(f"OK: {base} answers /health and serves the derived views\n")
-            return 0
+            break
         if attempt + 1 < args.attempts:
             time.sleep(args.wait * 2**attempt)
+    if args.json:
+        write_result(args.json, base, args.expect_sha, statuses, not found)
+    if not found:
+        sys.stdout.write(f"OK: {base} answers /health and serves the derived views\n")
+        return 0
     for item in found:
         sys.stderr.write(f"PROBLEM: {item}\n")
     return 1
