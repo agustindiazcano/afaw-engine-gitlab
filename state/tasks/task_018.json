@@ -1,0 +1,12 @@
+{
+  "id": "task_018",
+  "title": "AGENTS.md updates and a CI job that compiles the paper PDF",
+  "role": "architect",
+  "type": "chore",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "docs/task-018-agents-md",
+  "priority": 1,
+  "difficulty": 2,
+  "blocked_by": []
+}

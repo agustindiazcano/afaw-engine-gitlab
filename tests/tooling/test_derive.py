@@ -109,6 +109,11 @@ def test_ci_cost_requires_all_keys():
         ci_cost({"ci": {k: 1 for k in full if k != "job_minutes"}})
 
 
+def test_ci_cost_is_not_measured_when_a_value_is_null():
+    ci = {"runs": 3, "failed_runs": 1, "jobs": 9, "queue_seconds": 40, "job_minutes": None}
+    assert ci_cost({"ci": ci}) is None
+
+
 def test_summarize_counts_missing_and_uses_quartiles():
     s = summarize([10, None, 20, 30, 40, None])
     assert s == {"n": 4, "missing": 2, "median": 25.0, "p25": 17.5, "p75": 32.5}

@@ -1,0 +1,22 @@
+# Execution environment of the Duo flows (Developer, Fix CI/CD Pipeline, custom flows).
+# Keys are the documented ones: docs.gitlab.com/user/duo_agent_platform/flows/execution/agent-config-yaml
+# GitLab reads this file only from the default branch.
+image: python:3.12 # the full image: the AFAW scripts need git
+
+# Runs before the flow starts, outside the sandbox: keep it to installing dependencies.
+setup_script:
+  - python -m pip install --upgrade pip
+  - pip install --group dev
+
+cache:
+  key:
+    files:
+      - pyproject.toml
+  paths:
+    - .cache/pip
+
+network_policy:
+  include_recommended_allowed: true
+  allowed_domains:
+    - pypi.org
+    - files.pythonhosted.org

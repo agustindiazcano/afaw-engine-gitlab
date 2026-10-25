@@ -1,0 +1,3 @@
+# Copy to backend.hcl (git-ignored) and fill in; then: terraform init -backend-config=backend.hcl
+bucket = "<existing-terraform-state-bucket>"
+prefix = "afaw-handsoff"

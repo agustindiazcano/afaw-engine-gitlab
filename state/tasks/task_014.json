@@ -1,0 +1,12 @@
+{
+  "id": "task_014",
+  "title": "Demo script, Devpost text and Path B text",
+  "role": "architect",
+  "type": "chore",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "docs/task-014-submission",
+  "priority": 1,
+  "difficulty": 2,
+  "blocked_by": []
+}

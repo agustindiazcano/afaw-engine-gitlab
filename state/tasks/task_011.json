@@ -1,0 +1,12 @@
+{
+  "id": "task_011",
+  "title": "GitLab Duo custom agent and flow for the loop",
+  "role": "architect",
+  "type": "feature",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "feat/task-011-duo-agent-flow",
+  "priority": 1,
+  "difficulty": 3,
+  "blocked_by": []
+}

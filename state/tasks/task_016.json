@@ -1,0 +1,12 @@
+{
+  "id": "task_016",
+  "title": "README validated against the repository",
+  "role": "architect",
+  "type": "chore",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "docs/readme-validated",
+  "priority": 2,
+  "difficulty": 2,
+  "blocked_by": []
+}

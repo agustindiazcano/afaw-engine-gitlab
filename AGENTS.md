@@ -1,3 +1,5 @@
+> **This repository is `afaw-engine-gitlab` (AFAW Hands-off) and it lives on GitLab.** Work against the `gitlab` remote and `gitlab/main`; `origin` can be a stale GitHub copy.
+
 # Instructions for coding agents
 
 Rules reusable in any project. `AGENTS.md` is the single source; `CLAUDE.md` imports it.
@@ -9,7 +11,7 @@ Rules reusable in any project. `AGENTS.md` is the single source; `CLAUDE.md` imp
 
 ## 1. Session start, tasks and context
 1. **In the first message, always ask the human for `ROLE:`** (which role this agent has in the project).
-2. At session start the hook builds the derived views from `origin/main` and injects `LASTCONTEXT.md` and `PENDING.md`. Without the hook, run `git fetch` and `python -m scripts.build_state --ref origin/main`, then read, in order: `README.md`, the reference documents listed in `LASTCONTEXT.md`, `build/state/context/global/LASTCONTEXT.md`, `build/state/context/roles/<role>/LASTCONTEXT.md`, and the ADRs and gotchas the task needs.
+2. **An agent always reads `LASTCONTEXT.md` and `PENDING.md` before anything else, with or without the hook.** At session start the hook builds the derived views from `origin/main` and injects both. Without the hook, run `git fetch` and `python -m scripts.build_state --ref origin/main`, then read, in order: `README.md`, the reference documents listed in `LASTCONTEXT.md`, `build/state/context/global/LASTCONTEXT.md`, `build/state/context/roles/<role>/LASTCONTEXT.md`, and the ADRs and gotchas the task needs.
 3. **An agent writes only two state files:** its task file `state/tasks/task_NNN.json` (declared values: id, title, role, type, status, owner, priority, difficulty, blocked_by, branch) and its delta `context/tasks/task_NNN_context.json` (`summary`, `next`, `files_touched`). Timestamps, CI results and the traffic light are measured, never declared; CI rejects a task file that contains them.
 4. **Status lifecycle:** `backlog`, `pending`, `in_progress`, `done`, `cancelled`. Any open status may reach `done` in one pull request; `done` and `cancelled` are final. Task files are never deleted: set `cancelled`. A new task takes the next free id; CI rejects an id that already exists on `origin/main`.
 5. **Owner:** `agent` by default; `human` for actions only the human can take (approve a PR, rotate a key, change a repository setting). A human task needs no branch. A pull request never changes both the owner and the status of a task.
@@ -59,7 +61,7 @@ When the project status is requested, build the views from `origin/main` (`git f
 16. Sample or demo data is loaded with separate scripts or jobs, never inside a migration.
 
 ## 5. Architecture
-1. **The AI decides, the engine measures:** every number (coverage, metrics, risk) comes from a deterministic function, never from an estimate, rounding or extrapolation.
+1. **The AI decides, the engine measures:** every number (coverage, metrics, risk) comes from a deterministic function, never from an estimate, rounding or extrapolation. Under the merge policy of section 18, the human approves the policy and the deterministic engine approves each merge.
 2. **Determinism:** same input, same numbers. Two identical runs that differ are a bug.
 3. **Layer separation:** never mix database, routing and AI logic in the same file. The core has no web/CLI/protocol code; the adapters (CLI, server, MCP) are thin and delegate.
 4. Repositories only access the database; external HTTP calls go in services or agents.
@@ -80,7 +82,7 @@ When the project status is requested, build the views from `origin/main` (`git f
 19. Work on temporary copies, never in place, when the target repo is the basis of the documented metrics.
 
 ## 6. Agents and LLMs
-1. **The LLM never executes tools with side effects:** only deterministic code does, and every write tool is idempotent by `request_id`.
+1. **In the application, the LLM never executes tools with side effects:** only deterministic code does, and every write tool is idempotent by `request_id`. GitLab Duo flows are the one exception, because writing code is their job: they run under a service account, write only to a branch of a merge request, never merge, and never edit the human-only files of section 18.10. What they write is not trusted until every deterministic gate of the pipeline has passed.
 2. **Never trust the LLM's output:** revalidate it on the server with strict Pydantic schemas (`extra="forbid"`) and business limits.
 3. The user-facing agent has minimum privilege: no access to the database, the knowledge table or the tool server. It only proposes a structured intent and, if it cannot map the message, asks instead of guessing a field.
 4. A prompt injection/jailbreak filter before the message reaches the agent, which fails fast.
@@ -187,7 +189,7 @@ When the project status is requested, build the views from `origin/main` (`git f
    - Model, router or tool-registry files (list the impact before deleting or moving).
    - Published numbers without a real measurement behind them.
 2. Before a migration, verify the current revision (`alembic current`) and confirm the target with the user; this applies equally to the cloud database.
-3. Hard-deny hooks protect what only the human may change: `PENDING.md` can be edited but never deleted or emptied; `state/equivalent_mutants.json` is never written by an agent; nothing under `build/` is edited; nothing is pushed to `main`.
+3. Hard-deny hooks protect what only the human may change: `PENDING.md` can be edited but never deleted or emptied; `state/equivalent_mutants.json` is never written by an agent; nothing under `build/` is edited; nothing is pushed to `main`. The other human-only files of section 18.10 are only checked by the `human_only_files` job of `.gitlab-ci.yml`, a weak backup control: the same merge request can edit it away, and it stops nothing on its own. The strong control (a pipeline execution policy or required code owner approval) is not in place yet, so a human reviews every change to those files.
 4. When refusing an action, always state the correct alternative in the same reply.
 
 ## 18. Linters, branches, commits and PRs
@@ -203,9 +205,9 @@ When the project status is requested, build the views from `origin/main` (`git f
 7. Conventional Commits: `type(scope): description`.
 
 ### Pull requests
-8. **Never commit or push to `main`.**
-9. **Never merge without an explicit human directive.**
-10. **The human always approves the PR manually.**
+8. **Never commit or push to `main`.** Every change reaches it through a pull or merge request.
+9. **Merge policy ([ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md)):** until the human accepts ADR 0007 and the auto-merge policy of task 012 is merged, **never merge without an explicit human directive**. After that, the human approves the policy and the engine approves each merge: a merge request is merged automatically only when every gate is green, including `red_check` and `mutation_gate`. An agent never merges by any other path.
+10. **Human-only files:** `.gitlab-ci.yml`, `AGENTS.md`, `state/equivalent_mutants.json`, the mutation and gate settings in `state/config.json`, and `deploy/` change only in a merge request authored by a human. The automation never edits them, and the gates may never be weakened by the loop that they gate.
 11. **The agent asks whether to create the PR, unless the human already asked for it in the instruction.**
 12. When creating a PR, deliver the title and a comment with the description in the reply, and also write them in the PR if the environment allows it.
 13. The checks run in CI (`checks.yml`: task files, delta, red-first, ADRs and links, derived views; `scripts-ci.yml`: lint, types, tests); paste the link to the run in the PR, not a local output.
@@ -228,6 +230,7 @@ When the project status is requested, build the views from `origin/main` (`git f
 ## 21. GitLab Transcend and Duo Agent Platform rules (Path B extension)
 1. **Dual-forge fact collection (`collect_facts.py`):** measured facts (`started_at`, `pr_opened_at`, `first_green_at`, `merged_at`, `last_activity_at`, CI status and CI job minutes) are collected deterministically from either the GitHub API or the GitLab REST API v4 (`/api/v4/projects/:id/merge_requests` and `/pipelines`), never declared by an agent.
 2. **Nine-stage GitLab DevSecOps pipeline (`.gitlab-ci.yml`):** the repository covers all nine stages: `plan`, `create`, `verify`, `secure`, `govern`, `package`, `configure`, `release` and `monitor`. Every stage runs deterministic scripts or native GitLab security and compliance checks, and fails loudly on error.
-3. **Supervised autonomy and GitLab Duo agents:** Duo Custom Agents and Flows (Developer Flow, Code Review Flow, Fix CI/CD Pipeline Flow) execute multi-step post-code workflows: they run `red_check.py`, remediate pipeline failures, verify `files_touched` with `check_task_delta.py` and prepare merge requests. Human authority stays absolute: only a human approves and merges a merge request into `main` or records an accepted equivalent mutant in `state/equivalent_mutants.json`.
-4. **Read-only live service on Google Cloud Run:** the deployed web application serves the derived views (`build/index.html`, `LASTCONTEXT.md`, metrics) and the read-only project knowledge assistant. It never writes to the repository, never mutates state files and never paraphrases a measured number.
-5. **Licence:** the MIT `LICENSE` in the root stays intact; this repository extends the base project `afaw-anti-fragile-agentic-workflow` (remote `upstream`).
+3. **Supervised autonomy and GitLab Duo agents:** Duo Custom Agents and Flows (Developer Flow, Code Review Flow, Fix CI/CD Pipeline Flow) execute multi-step post-code workflows: they run `red_check.py`, remediate pipeline failures, verify `files_touched` with `check_task_delta.py` and prepare merge requests. The human approves the policy and the engine approves each merge (section 18.9); only a human records an accepted equivalent mutant in `state/equivalent_mutants.json` or changes the human-only files of section 18.10.
+4. **Service account and caps:** the flows run under the group service account, never a personal token. A merge request gets at most 3 automatic fix attempts, after which the flow comments and stops; flow runs are capped to stay inside the monthly GitLab Credits. A test is edited only if `red_check` confirms it still fails on the old code. Secrets are masked, protected CI/CD variables only.
+5. **Read-only live service on Google Cloud Run:** the deployed web application serves the derived views (`build/index.html`, `LASTCONTEXT.md`, metrics) and the read-only project knowledge assistant. It never writes to the repository, never mutates state files and never paraphrases a measured number.
+6. **Licence:** the MIT `LICENSE` in the root stays intact; this repository extends the base project `afaw-anti-fragile-agentic-workflow` (remote `upstream`).

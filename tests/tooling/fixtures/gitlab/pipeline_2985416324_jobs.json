@@ -1,0 +1,211 @@
+[
+  {
+    "id": 17442825256,
+    "status": "success",
+    "stage": "configure",
+    "name": "check_configuration",
+    "created_at": "2026-10-24T23:42:57.214Z",
+    "started_at": "2026-10-24T23:46:46.007Z",
+    "finished_at": "2026-10-24T23:47:17.450Z",
+    "duration": 31.443803,
+    "queued_duration": 0.07647
+  },
+  {
+    "id": 17442825255,
+    "status": "success",
+    "stage": "package",
+    "name": "package_docker",
+    "created_at": "2026-10-24T23:42:57.214Z",
+    "started_at": "2026-10-24T23:44:09.210Z",
+    "finished_at": "2026-10-24T23:44:53.690Z",
+    "duration": 44.480123,
+    "queued_duration": 0.081967
+  },
+  {
+    "id": 17442825254,
+    "status": "success",
+    "stage": "govern",
+    "name": "equivalent_mutants_report",
+    "created_at": "2026-10-24T23:42:57.214Z",
+    "started_at": "2026-10-24T23:46:08.485Z",
+    "finished_at": "2026-10-24T23:46:38.094Z",
+    "duration": 29.609695,
+    "queued_duration": 0.125757
+  },
+  {
+    "id": 17442825253,
+    "status": "success",
+    "stage": "govern",
+    "name": "human_only_files",
+    "created_at": "2026-10-24T23:42:57.214Z",
+    "started_at": "2026-10-24T23:46:08.367Z",
+    "finished_at": "2026-10-24T23:46:44.515Z",
+    "duration": 36.148174,
+    "queued_duration": 0.086324
+  },
+  {
+    "id": 17442825252,
+    "status": "success",
+    "stage": "govern",
+    "name": "paper_pdf",
+    "created_at": "2026-10-24T23:42:57.214Z",
+    "started_at": "2026-10-24T23:46:08.234Z",
+    "finished_at": "2026-10-24T23:46:37.352Z",
+    "duration": 29.11716,
+    "queued_duration": 0.068359
+  },
+  {
+    "id": 17442825251,
+    "status": "success",
+    "stage": "secure",
+    "name": "security_gate",
+    "created_at": "2026-10-24T23:42:57.214Z",
+    "started_at": "2026-10-24T23:45:35.503Z",
+    "finished_at": "2026-10-24T23:46:06.719Z",
+    "duration": 31.216453,
+    "queued_duration": 0.089972
+  },
+  {
+    "id": 17442825250,
+    "status": "success",
+    "stage": "secure",
+    "name": "secret_detection",
+    "created_at": "2026-10-24T23:42:57.214Z",
+    "started_at": "2026-10-24T23:44:57.804Z",
+    "finished_at": "2026-10-24T23:45:14.842Z",
+    "duration": 17.037966,
+    "queued_duration": 0.061897
+  },
+  {
+    "id": 17442825249,
+    "status": "success",
+    "stage": "secure",
+    "name": "semgrep-sast",
+    "created_at": "2026-10-24T23:42:57.214Z",
+    "started_at": "2026-10-24T23:44:57.734Z",
+    "finished_at": "2026-10-24T23:45:33.305Z",
+    "duration": 35.571155,
+    "queued_duration": 0.071032
+  },
+  {
+    "id": 17442825248,
+    "status": "success",
+    "stage": "verify",
+    "name": "mutation_gate",
+    "created_at": "2026-10-24T23:42:57.214Z",
+    "started_at": "2026-10-24T23:44:09.144Z",
+    "finished_at": "2026-10-24T23:44:40.152Z",
+    "duration": 31.008883,
+    "queued_duration": 0.090275
+  },
+  {
+    "id": 17442825247,
+    "status": "success",
+    "stage": "verify",
+    "name": "red_check",
+    "created_at": "2026-10-24T23:42:57.214Z",
+    "started_at": "2026-10-24T23:44:09.071Z",
+    "finished_at": "2026-10-24T23:44:49.344Z",
+    "duration": 40.27321,
+    "queued_duration": 0.066481
+  },
+  {
+    "id": 17442825246,
+    "status": "success",
+    "stage": "verify",
+    "name": "tests",
+    "created_at": "2026-10-24T23:42:57.214Z",
+    "started_at": "2026-10-24T23:44:09.015Z",
+    "finished_at": "2026-10-24T23:44:56.277Z",
+    "duration": 47.262259,
+    "queued_duration": 0.067094
+  },
+  {
+    "id": 17442825245,
+    "status": "success",
+    "stage": "verify",
+    "name": "typecheck",
+    "created_at": "2026-10-24T23:42:57.214Z",
+    "started_at": "2026-10-24T23:44:08.960Z",
+    "finished_at": "2026-10-24T23:44:53.048Z",
+    "duration": 44.088776,
+    "queued_duration": 0.06058
+  },
+  {
+    "id": 17442825244,
+    "status": "success",
+    "stage": "verify",
+    "name": "lint",
+    "created_at": "2026-10-24T23:42:57.214Z",
+    "started_at": "2026-10-24T23:44:08.906Z",
+    "finished_at": "2026-10-24T23:44:48.871Z",
+    "duration": 39.965138,
+    "queued_duration": 0.083549
+  },
+  {
+    "id": 17442825243,
+    "status": "success",
+    "stage": "create",
+    "name": "web_data",
+    "created_at": "2026-10-24T23:42:57.214Z",
+    "started_at": "2026-10-24T23:43:36.597Z",
+    "finished_at": "2026-10-24T23:44:07.319Z",
+    "duration": 30.721378,
+    "queued_duration": 0.085088
+  },
+  {
+    "id": 17442825242,
+    "status": "success",
+    "stage": "create",
+    "name": "derived_views",
+    "created_at": "2026-10-24T23:42:57.214Z",
+    "started_at": "2026-10-24T23:43:36.552Z",
+    "finished_at": "2026-10-24T23:44:05.556Z",
+    "duration": 29.003298,
+    "queued_duration": 0.082252
+  },
+  {
+    "id": 17442825241,
+    "status": "success",
+    "stage": "create",
+    "name": "task_delta",
+    "created_at": "2026-10-24T23:42:57.214Z",
+    "started_at": "2026-10-24T23:43:36.538Z",
+    "finished_at": "2026-10-24T23:44:07.131Z",
+    "duration": 30.593516,
+    "queued_duration": 0.13108
+  },
+  {
+    "id": 17442825240,
+    "status": "success",
+    "stage": "plan",
+    "name": "duo_config",
+    "created_at": "2026-10-24T23:42:57.214Z",
+    "started_at": "2026-10-24T23:42:57.794Z",
+    "finished_at": "2026-10-24T23:43:34.895Z",
+    "duration": 37.100719,
+    "queued_duration": 0.080159
+  },
+  {
+    "id": 17442825239,
+    "status": "success",
+    "stage": "plan",
+    "name": "docs_check",
+    "created_at": "2026-10-24T23:42:57.214Z",
+    "started_at": "2026-10-24T23:42:57.733Z",
+    "finished_at": "2026-10-24T23:43:26.840Z",
+    "duration": 29.10719,
+    "queued_duration": 0.071542
+  },
+  {
+    "id": 17442825238,
+    "status": "success",
+    "stage": "plan",
+    "name": "task_files",
+    "created_at": "2026-10-24T23:42:57.214Z",
+    "started_at": "2026-10-24T23:42:57.697Z",
+    "finished_at": "2026-10-24T23:43:28.106Z",
+    "duration": 30.408534,
+    "queued_duration": 0.094634
+  }
+]

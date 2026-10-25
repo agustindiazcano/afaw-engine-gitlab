@@ -1,0 +1,45 @@
+# Custom instructions for the Code Review Flow.
+# Format: docs.gitlab.com/user/duo_agent_platform/customize/review_instructions
+# These are guidance for the AI reviewer, not enforced policy. The gates that decide a merge are
+# deterministic and run in CI (red_check, mutation_gate, security_gate, human_only_files).
+instructions:
+  - name: AFAW rules
+    instructions: |
+      Review against AGENTS.md, which is the single source of the project rules.
+      1. Strict TDD: every new function or endpoint has a test, and a bug fix has a test that
+         reproduces the bug. Flag production code that arrives without a test.
+      2. The AI decides, the engine measures: every number in code, docs or messages must come
+         from a deterministic function or a cited source. Flag any figure that is estimated,
+         rounded or invented, and any savings or performance claim that was not measured.
+      3. A test must not be edited to pass. Flag a changed assertion unless the change is
+         explained and the test still fails on the old code.
+      4. Everything is in English: code, comments, docs, commit messages and CI job names.
+      5. Do not accept new dependencies without a stated reason; the scripts prefer the
+         standard library.
+      6. State files are written only by their task: state/tasks/task_NNN.json and
+         context/tasks/task_NNN_context.json. Anything under build/ is generated.
+  - name: Human-only files
+    fileFilters:
+      - ".gitlab-ci.yml"
+      - "AGENTS.md"
+      - "state/equivalent_mutants.json"
+      - "state/config.json"
+      - "deploy/**"
+    instructions: |
+      These files are human-only (AGENTS.md section 18.10). If this merge request was authored
+      by an automated flow, say so clearly in the review. Flag any change that lowers a mutation
+      threshold, accepts an equivalent mutant, weakens a gate or widens an IAM role.
+  - name: Terraform and Google Cloud
+    fileFilters:
+      - "deploy/terraform/**"
+    instructions: |
+      Least privilege: no project-wide IAM resource, no admin, owner or editor role, no
+      service-account key, and no allUsers binding except run.invoker on the one public service.
+      No project ID, project number, billing account or bucket name may be written in a file.
+  - name: Pipeline
+    fileFilters:
+      - ".gitlab-ci.yml"
+    instructions: |
+      Every job must fail loudly: no job may pass without having measured something, and no job
+      may be designed to fail. Images must be pinned to a version, never latest. Secrets only as
+      masked, protected CI/CD variables, never printed.

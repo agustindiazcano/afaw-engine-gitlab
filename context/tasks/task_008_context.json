@@ -1,0 +1,9 @@
+{
+  "task_id": "task_008",
+  "files_touched": [],
+  "summary": "Documented the hands-off merge policy. Added ADR 0007 (proposed): the human approves the policy and the deterministic engine approves each merge, with five compensating controls. Updated AGENTS.md sections 5.1, 17.3, 18.8-18.10 and 21 (merge policy, human-only files, service account, retry cap). Added the AFAW Hands-off section to README.md (differences table, nine stages, loop diagram, changes since Oct 5, Cloud Run URL placeholder). Replaced the template roadmap in PENDING.md. No code changed.",
+  "next": [
+    "Task 009: .gitlab-ci.yml with the nine stages",
+    "Rebuild docs/paper/afaw.pdf and appendix_rules.tex from the new AGENTS.md (needs a LaTeX toolchain, not installed here)"
+  ]
+}

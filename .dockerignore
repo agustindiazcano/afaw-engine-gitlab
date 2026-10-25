@@ -1,0 +1,16 @@
+.git
+.cache
+build/*
+!build/web-data
+__pycache__
+*.pyc
+tests
+docs
+.env
+.env.*
+*.pem
+*.key
+*.p12
+secrets/
+credentials*
+*.token
