@@ -36,10 +36,12 @@ def test_the_page_is_read_once_at_app_creation(
     assert "AFAW demo notes" in client.get("/").text
 
 
+@pytest.mark.characterization(reason="budget guard: the old page was already small")
 def test_the_page_stays_under_the_weight_budget(html: str) -> None:
     assert len(html.encode("utf-8")) < MAX_PAGE_BYTES
 
 
+@pytest.mark.characterization(reason="guard: the old page already had both")
 def test_the_page_declares_language_and_viewport(html: str) -> None:
     assert '<html lang="en"' in html
     assert re.search(r'<meta name="viewport" content="width=device-width', html)
@@ -81,6 +83,7 @@ def test_the_page_has_a_logo_and_the_subtitle(html: str) -> None:
     assert "changed by AFAW agents" in html
 
 
+@pytest.mark.characterization(reason="guard: the old page already loaded nothing external")
 def test_the_page_loads_nothing_from_outside(html: str) -> None:
     assert not re.search(r"(src|href)=\"https?://", html)
     assert "@import" not in html
