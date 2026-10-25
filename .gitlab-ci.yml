@@ -166,6 +166,29 @@ mutation_gate:
     expire_in: 1 week
     paths: [build/mutation.json]
 
+# End to end tests of the demo app in a real browser (Playwright), against the app started in the job.
+# The image tag equals the playwright pin in e2e/requirements.txt. Screenshots are kept as artifacts.
+e2e_local:
+  stage: verify
+  image: mcr.microsoft.com/playwright/python:v1.64.1-noble # pinned; tag verified on mcr.microsoft.com
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - changes:
+        paths: ["src/notes_app/**/*", "e2e/**/*"]
+        compare_to: refs/heads/main
+  script:
+    - pip install --no-cache-dir -r e2e/requirements.txt -r src/notes_app/requirements.txt
+    - export PYTHONPATH=src
+    - python -m uvicorn notes_app.main:app --port 8000 &
+    - sleep 4
+    - curl -fsS http://127.0.0.1:8000/health
+    - export NOTES_URL=http://127.0.0.1:8000
+    - python -m pytest e2e/test_notes_app.py -q
+  artifacts:
+    when: always
+    paths: [e2e-results/]
+    expire_in: 1 week
+
 # ---- secure: GitLab-native SAST and secret detection ---------------------------------------
 # The templates run in the test stage and, by default, only in branch pipelines. Their jobs are
 # moved to the secure stage and also run in merge request pipelines.
@@ -459,6 +482,25 @@ deploy_demo_app:
   artifacts:
     reports:
       dotenv: demo.env
+
+# The same tests against the live services, right after both deploys. They sit in the release stage
+# because request_fix reacts to failures of earlier stages: a failed live test opens an issue for
+# Duo, whose fix is deployed and tested again by the next pipeline of main.
+e2e_live:
+  stage: release
+  image: mcr.microsoft.com/playwright/python:v1.64.1-noble # pinned; tag verified on mcr.microsoft.com
+  needs: [deploy_cloud_run, deploy_demo_app]
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  script:
+    - pip install --no-cache-dir -r e2e/requirements.txt
+    - export NOTES_URL="$DEMO_APP_URL"
+    - export DASHBOARD_URL="$GCP_SERVICE_URL"
+    - python -m pytest e2e -q
+  artifacts:
+    when: always
+    paths: [e2e-results/]
+    expire_in: 1 week
 
 # ---- monitor: measured facts and the dashboard ---------------------------------------------
 monitor:

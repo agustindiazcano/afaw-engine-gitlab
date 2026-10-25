@@ -1,0 +1,13 @@
+{
+  "task_id": "task_094",
+  "files_touched": [
+    "src/notes_app/app.py",
+    "tests/notes/test_app.py",
+    "tests/tooling/test_gitlab_ci.py"
+  ],
+  "summary": "Added Playwright end to end tests (e2e/): behaviour and computed-colour checks of the demo notes app, and navigation, charts, demo banner and live panel checks of the dashboard. Jobs: e2e_local in verify (app started in the job) and e2e_live in release after both deploys, so request_fix sees its failures. The Playwright image tag was read from mcr.microsoft.com and is pinned with a test that checks it equals e2e/requirements.txt. The demo page gets an explicit brand colour for the button. Documented in docs/e2e.md.",
+  "next": [
+    "Run the bug benchmark: plant a visible defect, let e2e_live fail, Duo repair, deploy, e2e_live pass",
+    "One Duo experiment per remaining stage"
+  ]
+}

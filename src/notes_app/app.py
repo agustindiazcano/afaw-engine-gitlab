@@ -23,7 +23,8 @@ PAGE = """<!doctype html>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AFAW demo notes</title>
 <style>body{font:16px system-ui;max-width:36rem;margin:2rem auto;padding:0 1rem}
-li{margin:.4rem 0}small{color:#555}</style></head>
+li{margin:.4rem 0}small{color:#555}
+button{background:#0b5fff;color:#fff;border:0;border-radius:4px;padding:.4rem .9rem}</style></head>
 <body><h1>AFAW demo notes</h1>
 <p><small>The target app of the AFAW hands-off loop: agents change it through issues.
 Notes live in memory and are lost when the instance stops.</small></p>

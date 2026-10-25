@@ -317,3 +317,31 @@ def test_the_demo_deploy_proves_the_commit_and_hands_the_url_on(ci: dict[str, An
 
 def test_the_demo_app_is_type_checked_and_tested(ci: dict[str, Any]) -> None:
     assert "tests/notes" in _script(ci["tests"])
+
+
+def test_the_end_to_end_jobs_use_the_pinned_playwright_image(ci: dict[str, Any]) -> None:
+    pinned = (REPO_ROOT / "e2e" / "requirements.txt").read_text(encoding="utf-8")
+    lines = pinned.splitlines()
+    version = next(x.split("==")[1].strip() for x in lines if x.startswith("playwright=="))
+    for name in ("e2e_local", "e2e_live"):
+        assert ci[name]["image"] == f"mcr.microsoft.com/playwright/python:v{version}-noble"
+        assert "pytest e2e" in _script(ci[name])
+        assert ci[name]["artifacts"]["when"] == "always"
+
+
+def test_e2e_local_starts_the_app_and_runs_in_merge_requests(ci: dict[str, Any]) -> None:
+    job = ci["e2e_local"]
+    assert job["stage"] == "verify"
+    assert "uvicorn notes_app.main:app" in _script(job)
+    assert "NOTES_URL=http://127.0.0.1" in _script(job)
+    assert any("merge_request_event" in str(r) or "changes" in r for r in job["rules"])
+
+
+def test_e2e_live_runs_after_both_deploys_and_before_request_fix(ci: dict[str, Any]) -> None:
+    job = ci["e2e_live"]
+    # request_fix reacts to failures of earlier stages: a live test in monitor would not reach it.
+    assert STAGES.index(job["stage"]) < STAGES.index(ci["request_fix"]["stage"])
+    assert {"deploy_demo_app", "deploy_cloud_run"} <= set(job["needs"])
+    text = _script(job)
+    assert "NOTES_URL=\"$DEMO_APP_URL\"" in text and "DASHBOARD_URL=\"$GCP_SERVICE_URL\"" in text
+    assert job["rules"] == [{"if": "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"}]

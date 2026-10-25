@@ -29,7 +29,7 @@ AFAW Engine is the entry of the AFAW (Anti-Fragile Agentic Workflow) method to t
 | [The loop](#what-this-variant-changes-hands-off) and [Hands-off status](#hands-off-status) | Each link of the loop and whether it ran |
 | [Hackathon requirements](#hackathon-requirements-and-status) | Devpost requirements and their state |
 | [The nine stages](#the-nine-stages) and [Stages and Duo](#stages-and-duo) | The jobs of each stage and where a Duo flow ran |
-| [Demo app](#demo-app) | The deployed app the agents change |
+| [Demo app](#demo-app) and [End to end tests](docs/e2e.md) | The deployed app the agents change, and the browser tests that watch it |
 | [Stack](#stack) | Technologies; Google Cloud, Terraform and CI/CD in [`docs/stack.md`](docs/stack.md) |
 | [Dashboard](#dashboard) | Live, experiments and environment pages |
 | [Guardrails](#guardrails-and-known-limits) and [Sustainability](#sustainability) | Limits and the carbon estimate |
