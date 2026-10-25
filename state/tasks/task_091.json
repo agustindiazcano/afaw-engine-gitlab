@@ -1,0 +1,13 @@
+{
+  "id": "task_091",
+  "title": "A small deployed target app (demo notes) that the Duo flows change through issues",
+  "role": "architect",
+  "type": "feature",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "feat/task-091-demo-app",
+  "priority": 1,
+  "difficulty": 2,
+  "blocked_by": [],
+  "notes": "App and image only. The Cloud Run service, Terraform and deploy jobs are human-only files and follow in task_092."
+}
