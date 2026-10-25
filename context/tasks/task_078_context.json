@@ -1,0 +1,11 @@
+{
+  "task_id": "task_078",
+  "files_touched": [
+    "tests/tooling/test_gitlab_ci.py"
+  ],
+  "summary": "The live dashboard served by Cloud Run said that no measured facts were supplied, so every light showed no data and every duration was empty, because the web_data job built the views with no facts. It now runs collect_facts first (the project is public, so no token) and passes build/facts.json to build_state. If the API does not answer, the job fails and nothing is deployed with a dashboard that looks complete and is not. 1 test failed on the old code.",
+  "next": [
+    "After the next deploy, open /live/ and check that the board shows ages and lights",
+    "Decide whether a failed facts collection should degrade to the old page instead of blocking the deploy"
+  ]
+}
