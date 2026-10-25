@@ -1,6 +1,9 @@
 {
   "task_id": "task_056",
-  "files_touched": [],
+  "files_touched": [
+    "tests/tooling/test_check_task_files.py",
+    "tests/tooling/test_source.py"
+  ],
   "summary": "Adds tests only, with git mocked. New tests/tooling/test_source.py covers git_runner, _load, list_files and read_source. tests/tooling/test_check_task_files.py now also covers the unreadable or legacy base file, non-JSON and non-object task files, the target id check, the branch rule, and main() (exit codes, stderr and stdout). Local measurement with pytest-cov and --cov-branch on these two test files: source.py 34 to 100 percent, check_task_files.py 72 to 97 percent. The pipeline measurement on the merge request is the number that counts. No defect found in the code under test; no xfail added.",
   "next": [
     "Read the coverage of both files from the pipeline of the merge request",
