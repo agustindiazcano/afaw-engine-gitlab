@@ -200,6 +200,18 @@ The live service serves it at its root (`/`; `/live/` is the old address of the 
 
 ![Live dashboard: project name and logo, progress, status tiles and the live GitLab panel.](docs/screenshots/dashboard-live.png)
 
+### Experiments and environment pages
+
+Two more pages of the live service, built when the image is built from [`docs/data/experiments.json`](docs/data/experiments.json), a file in which every figure names its source. Each chart has a table view, a legend when it has two series, and no script.
+
+`/experiments/`: coverage before and after the tests Duo wrote, mutation score measured in CI, minutes from the request to the result, the merge requests merged by `merge_guard`, and the tools built from a specification and judged by tests Duo never saw.
+
+![Experiments page: hidden tests passed, planted defects repaired, merges by the guard, credits, and three charts.](docs/screenshots/dashboard-experiments.png)
+
+`/environment/`: the estimated Software Carbon Intensity of one mutation run with each tool, computed by `scripts/sci_estimate.py` (written by the Duo Developer Flow) from CI job seconds, with the assumptions printed. It claims one measured comparison and nothing more; the limits are on the page.
+
+![Environment page: gCO2eq per mutation run by grid intensity and the runner time of each tool.](docs/screenshots/dashboard-environment.png)
+
 ### Demo dashboard
 
 A dashboard built by `scripts/build_state.py` from mock data: a fictional project whose every task and number is invented ([`examples/mock_dashboard.py`](examples/mock_dashboard.py)). It shows each traffic-light rule firing: CI failing, a blocker not done, no activity for three days, nothing measured.

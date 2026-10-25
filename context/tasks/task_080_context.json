@@ -1,0 +1,19 @@
+{
+  "task_id": "task_080",
+  "files_touched": [
+    "scripts/afaw_state/brand.py",
+    "scripts/afaw_state/source.py",
+    "scripts/afaw_state/stats_pages.py",
+    "scripts/build_state.py",
+    "src/afaw_web/app.py",
+    "tests/tooling/test_stats_pages.py",
+    "tests/web/conftest.py",
+    "tests/web/test_app.py"
+  ],
+  "summary": "The dashboard had only a task board and demo data. Adds two pages built with the image from docs/data/experiments.json, where each section names its source: /experiments/ (coverage before and after, mutation score, minutes from the request to the result, merges by merge_guard, hidden-test results) and /environment/ (the SCI of one mutation run with each tool, computed with scripts/sci_estimate.py, with the assumptions printed and the limits stated: power estimated, no embodied emissions, one comparison). Charts are inline SVG with a legend for two series, direct value labels, a table view and no script; the two series colours pass the palette validator in light and dark. The nav links to both pages. 25 tests failed on the old code.",
+  "next": [
+    "Update docs/data/experiments.json when a new experiment ends",
+    "Add the chaos results (C1 to C3) and the security remediation to the experiments page",
+    "Read the credits again at the end"
+  ]
+}
