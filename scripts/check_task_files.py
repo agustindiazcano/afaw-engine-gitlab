@@ -30,6 +30,9 @@ from scripts.afaw_state.model import check_transition, validate_task
 from scripts.afaw_state.source import Runner, git_runner
 
 PREFIX = "state/tasks/"
+# A pull request from sync/* mirrors what GitLab already merged: it may carry the task files of
+# several branches. Only the rule that a task file belongs to the PR's branch is skipped.
+MIRROR_PREFIX = "sync/"
 # v1.0 task files used other statuses and a free-text owner. Read on the base side only, so a
 # migrated file is compared as the same task rather than as a reopened or reassigned one.
 LEGACY_STATUSES = {"completed": "done", "blocked": "pending"}
@@ -77,7 +80,9 @@ def _check_changed(
         if problem:
             errors.append(f"{path}: {problem}")
     moved = new_status in {"in_progress", "done"} and new_status != old_status
-    if owner == "agent" and head_branch and moved and task.get("branch") != head_branch:
+    mirror = head_branch is not None and head_branch.startswith(MIRROR_PREFIX)
+    wrong_branch = head_branch and task.get("branch") != head_branch
+    if owner == "agent" and moved and wrong_branch and not mirror:
         errors.append(
             f"{path}: branch {task.get('branch')!r} is not this pull request's branch "
             f"{head_branch!r}"
