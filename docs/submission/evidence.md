@@ -42,6 +42,28 @@ None of these ran a Duo flow: they were written and merged by a person and an ag
 session. They add no link to the hands-off table below. The `mutation_gate` job has not yet been
 observed on a change to `src/afaw_web`.
 
+## Stage experiments, demo app and repairs (2026-10-25, 22:41 to 23:36 UTC)
+
+Read from the GitLab API on 2026-10-25 (notes with the token of the human, commits public). For each
+merge request below the only commit author is `Duo Developer` and the system notes "marked this merge
+request as ready" and "enabled an automatic merge" appear one to eight seconds apart (the person's name is
+shown because `AFAW_MERGE_TOKEN` is theirs). Times per stage are in
+[`experiments.md`](../experiments.md#stage-experiments-and-the-burst-exp-05).
+
+| What ran | Link | Result |
+|---|---|---|
+| One Duo-authored change for each of seven stages (plan, secure, package, release, configure, monitor, govern), issues #37 to #43 created through the API in 15 s | [!79](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/79), [!77](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/77), [!75](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/75), [!80](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/80), [!76](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/76), [!81](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/81), [!78](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/78) | All seven opened by the flow 95 to 132 s after assignment, merged by `merge_guard` between 22:50:53 and 22:51:54 UTC. With create and verify, 9 of 9 stages have a Duo-authored merge request |
+| Duo redesign of the demo app UI (issue #44) | [!83](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/83) | Merged by the guard 23:02:37 UTC, 14 min 43 s from issue to merge; live at https://afaw-demo-app-ljm5hefnsq-uc.a.run.app |
+| Duo repairs from issues opened by `request_fix` | [!85](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/85) (`check_live` accepts a newer deploy), [!87](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/87) (task id collision) | Both merged by the guard 23:14 UTC |
+| Defect of ours found by the burst | Task 106, [gotcha 0006](../gotchas/0006-parallel-pipelines-of-main-overwrite-each-others-deploy.md) | Seven merges within 61 s made parallel deploys overwrite each other; three pipelines were red with correct code; fixed with a deploy resource group |
+| `e2e_live` (Playwright against both live services) on `main` | Jobs [17453004618](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/jobs/17453004618) and [17453154339](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/jobs/17453154339) | Both success (23:14 and 23:25 UTC); both services report the same `commit_sha` at `/api/version` |
+| Autonomy statistics | [!88](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/88), [`data/autonomy-stats.md`](../data/autonomy-stats.md) | 83 merge requests, 29 only by agents, 22 of those merged, 16 with a recorded automatic merge, median 24.6 min. !88 itself was merged through the API by an agent session with the human's token, not by the guard |
+| False autoheal issue closed | Issue #49 | Failure on the author's own branch (task id collisions fixed by merging main); closed before Duo spent credits |
+
+Not run in this period: the Code Review Flow, the summary comment on the issue, the bug benchmarks on
+the demo app, the orchestrator, the claims auditor. GitLab Credits read by the human: 204.26, 219.38,
+253.40 of 500 (see [`experiments.md`](../experiments.md)).
+
 ## Not yet observed
 
 | Item | State |

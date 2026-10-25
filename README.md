@@ -125,19 +125,21 @@ Stages Covered prize ([rules](docs/submission/rules-and-coverage.md)).
 
 | Stage | Job that runs | A Duo flow ran here | Evidence |
 |---|---|---|---|
-| plan | `task_files`, `docs_check`, `duo_config` | No | Planned experiment |
+| plan | `task_files`, `docs_check`, `duo_config` | Duo-authored change to `check_task_files` (a count of files checked), merged by `merge_guard` | [#37](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/work_items/37) → [!79](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/79) |
 | create | `task_delta`, `derived_views`, `web_data` | Yes: the Developer Flow opened merge requests from issues | [evidence](docs/submission/evidence.md) |
 | verify | `lint`, `typecheck`, `tests`, `red_check`, `mutation_gate` | Yes: Fix CI/CD once; repairs from `request_fix` issues | [evidence](docs/submission/evidence.md), [experiments](docs/experiments.md) |
-| secure | `semgrep-sast`, `secret_detection`, `security_gate` | No | Planned experiment |
-| package | `package_docker`, `package_demo_app` | No | Planned experiment |
-| release | `release`, `publish_image`, `deploy_cloud_run` | No | Planned experiment |
-| configure | `check_configuration`, `terraform_validate` | No | Planned experiment |
-| monitor | `monitor`, `monitor_live`, `merge_guard`, `request_fix` | No | Planned experiment |
-| govern | `paper_pdf`, `human_only_files`, `equivalent_mutants_report` | No | Planned experiment |
+| secure | `semgrep-sast`, `secret_detection`, `security_gate` | Duo-authored change to `security_gate` (JSON summary), merged by `merge_guard` | [#38](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/work_items/38) → [!77](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/77) |
+| package | `package_docker`, `package_demo_app` | Duo-authored change to the demo app image (`HEALTHCHECK`), merged by `merge_guard` | [#39](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/work_items/39) → [!75](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/75) |
+| release | `release`, `publish_image`, `deploy_cloud_run` | Duo-authored change to `release_notes`, merged by `merge_guard` | [#40](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/work_items/40) → [!80](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/80) |
+| configure | `check_configuration`, `terraform_validate` | Duo-authored change to `check_ci_config` (summary line), merged by `merge_guard` | [#41](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/work_items/41) → [!76](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/76) |
+| monitor | `monitor`, `monitor_live`, `merge_guard`, `request_fix` | Duo-authored change to `check_live` (JSON result file), merged by `merge_guard`; later Duo repaired `check_live` twice ([!85](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/85), [!87](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/87)) | [#42](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/work_items/42) → [!81](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/81) |
+| govern | `paper_pdf`, `human_only_files`, `equivalent_mutants_report` | Duo-authored change to `human_only_files` (`--list`), merged by `merge_guard` | [#43](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/work_items/43) → [!78](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/78) |
 
-All nine stages have a job that runs; a Duo flow ran in 2 of 9. Experiments to make a flow act in
-each remaining stage are listed in [`PENDING.md`](PENDING.md); each row above is linked when its
-experiment has run.
+All nine stages have a job that runs, and each has a Duo-authored merge request that went through the
+pipeline (9 of 9). "A Duo flow ran here" means a change to a script or file of that stage written by the
+Developer Flow, not that Duo ran inside the stage's job. Times and the burst that produced the seven new
+rows are in [`docs/experiments.md`](docs/experiments.md#stage-experiments-and-the-burst-exp-05); the undraft
+and the merge are done by `merge_guard` with a person's token, so GitLab shows that person's name.
 
 ## Hands-off status
 
