@@ -1,0 +1,10 @@
+{
+  "task_id": "task_093",
+  "files_touched": [],
+  "summary": "Added docs/stack.md (stack, Terraform, identity, CI/CD and variables by name), a README index, the Stages and Duo table (9 of 9 stages with a job, 2 of 9 with a Duo flow) and the hackathon link in the header and footer. PENDING.md lists one Duo experiment per remaining stage.",
+  "next": [
+    "Run one Duo experiment per stage and link the evidence in the README table",
+    "Playwright end to end",
+    "Orchestrator and context handoff"
+  ]
+}

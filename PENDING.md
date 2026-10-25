@@ -47,8 +47,9 @@ A valid submission exists after tasks 009 and 010.
 
 ## Phase 5: the demo app, the orchestrator and the end to end loop (added 2026-10-25)
 - [x] Task 091: the notes demo app `src/notes_app` with its image and tests (see [`docs/demo-app.md`](docs/demo-app.md))
-- [ ] Task 092: Terraform service `afaw-demo-app`, and the `package_demo_app`, `publish_demo_image` and `deploy_demo_app` jobs. Human: `terraform apply` (steps in `docs/google-cloud.md`), then merge the human-only MR
+- [x] Task 092 (merged, Terraform applied 2026-10-25): Terraform service `afaw-demo-app`, and the `package_demo_app`, `publish_demo_image` and `deploy_demo_app` jobs. Human: `terraform apply` (steps in `docs/google-cloud.md`), then merge the human-only MR
 - [x] Task 094 (in review): Playwright end to end on both apps, see [`docs/e2e.md`](docs/e2e.md); `e2e_live` has not run on `main` yet
+- [ ] One Duo experiment per stage that has none (plan, secure, package, release, configure, monitor, govern): an issue per stage, Duo changes it, evidence linked in the README table "Stages and Duo"
 - [ ] Bug benchmarks on the demo app: plant a button that does nothing, a wrong result and a wrong colour; Playwright detects each, `request_fix` opens the issue, Duo repairs it, the deploy runs, Playwright passes and the issue closes. Record time per link and credits
 - [ ] Orchestrator (scrum) agent: reads the same derived views as the dashboard (`build/state/pending.json`, `LASTCONTEXT.md`, metrics), picks the next task by priority and light, and files the issue. Design first as an ADR: deterministic selection in code, the agent only writes the issue text
 - [ ] Context handoff rule: when an agent session reaches a context threshold it writes the prompt for the next session (what is done, what is pending, what to read first) to a file, clears, and the new session reads that file first. Design first as an ADR; the mechanism is a hook plus a `state/handoff/` file, never a secret in it
