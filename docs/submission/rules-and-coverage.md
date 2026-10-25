@@ -53,7 +53,7 @@ Self-assessment from the evidence. It is not a score.
 | Innovation/Idea | "The AI decides, the engine measures"; identity by commit author and pipeline user; red-first | |
 | Presentation | Script written | No video |
 
-## Level of autonomy: 8 of 13 links ran at least once (62 %), 0 of 13 without a person
+## Level of autonomy: 11 of 14 links ran at least once (79 %); the feature path ran once with no click after the issue
 
 The 13 links are the rows of the table in [`evidence.md`](evidence.md#hands-off-loop-link-by-link).
 
@@ -61,7 +61,7 @@ The 13 links are the rows of the table in [`evidence.md`](evidence.md#hands-off-
 |---|---|---|
 | Assisted | Yes | A person starts every flow and merges |
 | Supervised | Yes, with the issue-to-merge-request and deploy parts | A person starts the flow, marks the draft ready and approves; the gates, the deploy and the monitor ran on their own |
-| Hands-off | **No, not proven** | The Draft state, the review, the triggers, the merge by `merge_guard` and the summary on the issue have not run. A level is claimed only with evidence per link |
+| Hands-off | **Partly**: the feature path (issue, Duo merge request, gates, undraft, merge, release, deploy, monitor) ran once with no click, on !35. The autoheal path (a failure opens the repair by itself), the automatic review and the summary on the issue have not run. The merge identity is a person's token | A level is claimed only with evidence per link |
 
 The decision between Hands-off and Supervised is made on 2026-10-26 14:00 from the evidence table.
 
@@ -69,7 +69,7 @@ The decision between Hands-off and Supervised is made on 2026-10-26 14:00 from t
 
 | Prize | Amount | Coverage | Basis |
 |---|---|---|---|
-| Path B Best Hands-off Agent | $5,000 | Not claimable today | 0 of 13 links ran with no person |
+| Path B Best Hands-off Agent | $5,000 | Partly demonstrated | The feature path ran once with no click; the autoheal path has not run |
 | Path B Best Supervised Agent | $4,000 | Claimable | See the level table |
 | Path B Best Assisted Agent | $4,000 | Claimable | Fits, but only one level is submitted |
 | Most Stages Covered (Path B) | $5,000 | **9 of 9 stages have a running job** (100 %); 2 of 9 with a Duo flow that ran (create: Developer Flow; verify: Fix CI/CD, once) | Pipeline of `main`; Duo evidence is in `evidence.md` |
