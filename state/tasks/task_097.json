@@ -1,0 +1,13 @@
+{
+  "id": "task_097",
+  "title": "security_gate: optional JSON summary of the findings",
+  "role": "architect",
+  "type": "feature",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "feat/task-097-security-gate-summary-json",
+  "priority": 3,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Stage experiment (secure), issue #38."
+}
