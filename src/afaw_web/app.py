@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -48,6 +49,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if missing:
             return unavailable(missing)
         return {v: json.loads((data_dir / "live" / f"{v}.json").read_text("utf-8")) for v in VIEWS}
+
+    @app.get("/api/version", summary="The release tag and commit sha this service runs.")
+    def version() -> dict[str, str]:
+        """Read from AFAW_RELEASE_TAG and AFAW_COMMIT_SHA; an unset or empty one is "unknown"."""
+        return {
+            "release_tag": os.environ.get("AFAW_RELEASE_TAG") or "unknown",
+            "commit_sha": os.environ.get("AFAW_COMMIT_SHA") or "unknown",
+        }
 
     @app.get("/", response_class=HTMLResponse, response_model=None)
     def demo() -> HTMLResponse | JSONResponse:
