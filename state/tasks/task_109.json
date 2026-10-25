@@ -1,0 +1,13 @@
+{
+  "id": "task_109",
+  "title": "check_task_files: skip task files that are identical on the target branch",
+  "role": "architect",
+  "type": "fix",
+  "status": "done",
+  "owner": "agent",
+  "branch": "duo/fix/49-task-files-identical-copies",
+  "priority": 2,
+  "difficulty": 2,
+  "blocked_by": [],
+  "notes": "Autoheal issue 49: task_files failed on feat/task-108-autonomy-stats."
+}

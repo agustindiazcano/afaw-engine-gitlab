@@ -1,0 +1,11 @@
+{
+  "task_id": "task_109",
+  "files_touched": [
+    "scripts/check_task_files.py",
+    "tests/tooling/test_check_task_files.py"
+  ],
+  "summary": "Issue 49: task_files failed on feat/task-108-autonomy-stats because that branch merged main with a one-parent merge commit, so task_104 to task_107 (already on main, with other branches) looked added against the merge base. check_task_files now skips a task file that is byte-identical on the target branch, since merging it changes nothing. A new id or a changed file is still checked in full. Run on the real failing branch, the check went from failing to OK (13 task files checked). The failed branch's own task_108 is valid and untouched.",
+  "next": [
+    "Re-run the pipeline of feat/task-108-autonomy-stats after this merges"
+  ]
+}
