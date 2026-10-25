@@ -1,0 +1,9 @@
+{
+  "task_id": "task_017",
+  "files_touched": [],
+  "summary": "The GitHub check Checks / state-and-docs failed on pull request #2 (sync/gitlab-main into main) with 'branch ... is not this pull request's branch' for tasks 008, 009, 011 and 013. Cause: check_task_files requires the branch of every task file a pull request moves to in_progress or done to be the pull request's own branch, and the mirror pull request carries four tasks that GitLab already merged. Fix in scripts/check_task_files.py: a head branch that starts with sync/ is a mirror and is exempt from that one rule; the status transitions, the owner and status rule, the declared-values rule, the deletion rule and the unique id rule still apply to it (a test checks that an illegal transition on a sync/ branch is still reported). Names like feat/sync/x, synchronize and sync are not mirrors (characterization test). Tests first: two added tests failed on the old code. The fix reaches GitHub only when the GitLab merge request is merged and sync/gitlab-main is updated from gitlab/main, because the workflow runs the script from the pull request's own head.",
+  "next": [
+    "After the merge on GitLab: update sync/gitlab-main from gitlab/main and check that Checks / state-and-docs on pull request #2 passes",
+    "Human: decide whether to merge pull request #2 into main on GitHub and change its default branch (feat/gitlab-agents-english-rule today)"
+  ]
+}
