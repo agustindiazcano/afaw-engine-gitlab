@@ -454,3 +454,28 @@ def test_marking_ready_sends_only_the_new_title_and_the_token_in_a_header():
     assert sent["headers"]["PRIVATE-TOKEN"] == "s3cret"
     assert sent["body"] == {"title": "feat: x"}
     assert "s3cret" not in sent["url"]
+
+
+# ------------------------------------------------------------------ auxiliary jobs
+
+
+def test_a_skipped_request_fix_does_not_hold_the_merge():
+    jobs = [*recorded_jobs(), {"name": "request_fix", "status": "skipped"}]
+    v = merge_verdict(mr(), pipe(10, "abc", "running", "2026-10-24T12:00:00Z"), jobs, 0, "main")
+    assert v.merge, v.reasons
+
+
+@pytest.mark.parametrize("status", ["failed", "canceled", "manual", "created"])
+def test_request_fix_never_decides_the_verdict_whatever_its_status(status):
+    jobs = [*recorded_jobs(), {"name": "request_fix", "status": status}]
+    v = merge_verdict(mr(), pipe(10, "abc", "running", "2026-10-24T12:00:00Z"), jobs, 0, "main")
+    assert v.merge, v.reasons
+
+
+@pytest.mark.characterization(
+    reason="a skipped job already held the merge; this pins that only the auxiliary jobs are exempt"
+)
+def test_a_real_job_that_is_skipped_still_holds_the_merge():
+    jobs = [*recorded_jobs(), {"name": "lint", "status": "skipped"}]
+    v = merge_verdict(mr(), pipe(10, "abc", "running", "2026-10-24T12:00:00Z"), jobs, 0, "main")
+    assert not v.merge and "lint is skipped" in v.reasons
