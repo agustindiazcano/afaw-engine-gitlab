@@ -1,11 +1,11 @@
 {
-  "id": "task_110",
+  "id": "task_112",
   "title": "Orchestrator: pick the next task in code from the pending view (ADR 0010) and propose the handoff ADR (0011)",
   "role": "architect",
   "type": "feature",
   "status": "done",
   "owner": "agent",
-  "branch": "feat/task-110-orchestrator",
+  "branch": "feat/task-112-orchestrator",
   "priority": 1,
   "difficulty": 2,
   "blocked_by": [],
