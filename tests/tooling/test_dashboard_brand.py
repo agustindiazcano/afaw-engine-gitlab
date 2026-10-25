@@ -75,6 +75,9 @@ def test_the_live_panel_has_a_fallback_without_scripts(live: str) -> None:
     assert "<noscript>" in live
 
 
+@pytest.mark.characterization(
+    reason="the page had no live panel before, so it held already; this pins that it stays so"
+)
 def test_the_demo_with_invented_data_never_shows_real_gitlab_data(html: str) -> None:
     assert 'id="live"' not in html and "<script" not in html and API not in html
 
@@ -83,6 +86,9 @@ def test_the_page_has_one_main_landmark_between_the_nav_and_the_footer(html: str
     assert html.index("<nav") < html.index("<main") < html.index("<footer")
 
 
+@pytest.mark.characterization(
+    reason="the build was already deterministic; this pins that the new parts keep it so"
+)
 def test_the_build_is_still_deterministic(tmp_path: Path) -> None:
     mock_dashboard.build_demo(tmp_path / "a")
     mock_dashboard.build_demo(tmp_path / "b")
