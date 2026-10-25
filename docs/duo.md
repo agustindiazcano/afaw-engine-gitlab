@@ -30,9 +30,11 @@ custom flow covers only step 8.
 | `.gitlab/duo/mr-review-instructions.yaml` | AFAW review rules (TDD, no estimated numbers, English, human-only files, least privilege) | Code Review Flow. Guidance for the reviewer, not enforced policy |
 | `.agents/agents/afaw-reviewer.md` | Workspace subagent that checks a change against `AGENTS.md`; tools `read_file` and `grep` only | Developer Flow; an experiment, read from the default branch only |
 | `duo/custom-flow.yaml` | Source of the custom flow, pasted in **AI > Flows > New flow** | Not read by GitLab from here |
+| `duo/triage-flow.yaml` | Source of the custom flow "AFAW triage": on a failed pipeline it opens one issue per failing job (the one flow allowed to create issues), pasted in **AI > Flows > New flow**. Design and UI steps: [`autohealing.md`](autohealing.md) | Not read by GitLab from here |
+| `.gitlab/issue_templates/duo-feature.md` | Issue template whose last line assigns the Duo Developer account; whether the quick action starts the flow is an experiment (see [`autohealing.md`](autohealing.md)) | GitLab, from the default branch |
 | `duo/custom-agent.md` | Source of the custom agent "AFAW auditor" (reads only; 26 read tools, plus two optional note tools), pasted in **AI > Agents > New agent** | Not read by GitLab from here |
 | `duo/custom-planner.md` | Source of the custom agent "AFAW planner" (9 tools; it leaves a plan as a note on an issue and creates no issue), pasted in **AI > Agents > New agent** | Not read by GitLab from here |
-| `scripts/check_duo_config.py` | CI check (`duo_config` job) that these files use only documented keys, tools and limits, and that each custom agent keeps to its allow list and uses no forbidden or IDE-only tool | CI |
+| `scripts/check_duo_config.py` | CI check (`duo_config` job) that these files use only documented keys, tools and limits, and that each custom agent and each custom flow keeps to its allow list and uses no forbidden or IDE-only tool | CI |
 
 The custom agents and the custom flow are created in the UI because the documentation describes no
 repository file for them. The files in `duo/` are the reviewed source, not something GitLab loads.
