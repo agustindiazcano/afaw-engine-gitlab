@@ -46,6 +46,11 @@ supported; the mode is the CI/CD variable `AFAW_AUTO_MERGE`.
 | Continuous delivery | unset or not `true` | A person, after `merge_guard` prints `merge: yes` | Every merge so far (!1 to !25) |
 | Continuous deployment | `true`, with `AFAW_MERGE_TOKEN` and `AFAW_BOT_USER_IDS` set | `merge_guard`, with no person, then release, deploy and monitor run on `main` | Code and tests exist; **never run on a real merge request** |
 
+Only the token is a secret. `AFAW_AUTO_MERGE` (the literal `true`) and `AFAW_BOT_USER_IDS` (ids
+separated by commas) must not be masked: GitLab masks only values of 8 or more characters from a
+restricted alphabet, with no comma, so a masked `true` is refused and `truetrue` is read as off,
+because the guard compares with exactly `true`. Leave both variables unmasked and unprotected.
+
 The verdict is the same in both modes: green pipeline including `red_check`, `mutation_gate` and
 `security_gate`, no protected file, no draft, cap of 3 automatic fixes, and a pipeline user and
 commit authors that are all service accounts. Only the last step differs.
