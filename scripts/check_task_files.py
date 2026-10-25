@@ -10,6 +10,10 @@ Rejects a pull request that:
     target branch (two parallel branches picked the same next id);
   - moves an agent's task to in progress or done on a branch other than the pull request's.
 
+A task file that is already identical on the target branch is skipped: a branch that merged
+the target without keeping its history (a one-parent merge) shows those files as added against
+the merge base, but merging them changes nothing.
+
 Run in CI:
     python -m scripts.check_task_files --base "$(git merge-base origin/main HEAD)" \\
         --head-branch "$GITHUB_HEAD_REF" --target origin/main
@@ -62,6 +66,14 @@ def _exists_on(run: Runner, ref: str, path: str) -> bool:
     return True
 
 
+def _same_on(run: Runner, ref: str, path: str, text: str) -> bool:
+    """True when the file at ``ref`` is byte-for-byte the given text."""
+    try:
+        return run(["show", f"{ref}:{path}"]) == text
+    except subprocess.CalledProcessError:
+        return False
+
+
 def _check_changed(
     path: str,
     task: dict[str, Any],
@@ -107,8 +119,11 @@ def check(
         if status == "D":
             errors.append(f"{path}: task files are never deleted; set the status to cancelled")
             continue
+        head_text = read_head(path)
+        if target and _same_on(run, target, path, head_text):
+            continue  # merging it changes nothing on the target, so there is nothing to check
         try:
-            task = json.loads(read_head(path))
+            task = json.loads(head_text)
         except json.JSONDecodeError as exc:
             errors.append(f"{path}: not valid JSON: {exc}")
             continue
