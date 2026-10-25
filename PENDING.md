@@ -51,8 +51,12 @@ A valid submission exists after tasks 009 and 010.
 - [x] Task 094 (in review): Playwright end to end on both apps, see [`docs/e2e.md`](docs/e2e.md); `e2e_live` has not run on `main` yet
 - [ ] One Duo experiment per stage that has none (plan, secure, package, release, configure, monitor, govern): an issue per stage, Duo changes it, evidence linked in the README table "Stages and Duo"
 - [ ] Bug benchmarks on the demo app: plant a button that does nothing, a wrong result and a wrong colour; Playwright detects each, `request_fix` opens the issue, Duo repairs it, the deploy runs, Playwright passes and the issue closes. Record time per link and credits
+- [ ] Telemetry report, budget guardrails and branch overlap check: plan in [`docs/plan-telemetry-and-budget.md`](docs/plan-telemetry-and-budget.md) (build after the Duo experiments)
 - [ ] Orchestrator (scrum) agent: reads the same derived views as the dashboard (`build/state/pending.json`, `LASTCONTEXT.md`, metrics), picks the next task by priority and light, and files the issue. Design first as an ADR: deterministic selection in code, the agent only writes the issue text
 - [ ] Context handoff rule: when an agent session reaches a context threshold it writes the prompt for the next session (what is done, what is pending, what to read first) to a file, clears, and the new session reads that file first. Design first as an ADR; the mechanism is a hook plus a `state/handoff/` file, never a secret in it
+
+## FINAL, last of all: new white paper
+- [ ] Write a new white paper for AFAW Engine (hands-off automation end to end: CI/CD, testing, security, deployment, self-repair and observability) and cite the original AFAW paper (DOI 10.5281/zenodo.23050310) instead of editing it. Write it only after the experiments, the telemetry report and the evidence table are final, so every figure in it is measured. `docs/paper/afaw.pdf` stays as the original; the new one goes in its own folder, and `paper_pdf` must keep passing
 
 ## Low priority: security hardening
 Recorded on 2026-10-25. None of these blocks the loop; do them after it works.
