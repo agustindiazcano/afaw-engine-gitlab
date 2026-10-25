@@ -332,6 +332,9 @@ def test_without_any_service_account_id_nothing_is_auto_merged():
     assert not v.merge and any("AFAW_BOT_USER_IDS" in r for r in v.reasons)
 
 
+@pytest.mark.characterization(
+    reason="the guard never read the merge request author; this pins that it still does not"
+)
 def test_the_mr_author_does_not_matter_only_the_pusher_and_the_commits(capsys):
     api = FakeApi(mr(author={"id": 1, "username": "agus"}), GREEN, recorded_jobs())
     assert run(api, {"AFAW_AUTO_MERGE": "true"}) == 0
