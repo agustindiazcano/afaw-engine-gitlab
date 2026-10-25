@@ -1,6 +1,9 @@
 {
   "task_id": "task_076",
-  "files_touched": [],
+  "files_touched": [
+    "scripts/benchmark_report.py",
+    "tests/tooling/test_benchmark_report.py"
+  ],
   "summary": "Added scripts/benchmark_report.py with lead_times, pipeline_stats, render and a command line (--merge-requests FILE --pipelines FILE) that prints the two benchmark tables; a missing file, invalid JSON or a non-list prints a message on stderr and exits 2. Standard library only. 14 tests in tests/tooling/test_benchmark_report.py cover offsets, fractional seconds, rounding, odd and even medians, None values and the exit codes; ruff and mypy --strict pass on both files.",
   "next": [
     "Use the script to regenerate the tables in docs/experiments.md"
