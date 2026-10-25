@@ -1,0 +1,13 @@
+{
+  "id": "task_047",
+  "title": "Run mutmut in the mutation_gate job on the required files",
+  "role": "architect",
+  "type": "chore",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "chore/task-047-mutation-job",
+  "priority": 2,
+  "difficulty": 1,
+  "blocked_by": ["task_046"],
+  "notes": "Edits .gitlab-ci.yml, a human-only file: the human opens and merges it, after task_046. It must come before the state/config.json change (task_048)."
+}

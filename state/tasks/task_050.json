@@ -1,0 +1,13 @@
+{
+  "id": "task_050",
+  "title": "Align the AGENTS.md directives with the hands-off policy of ADR 0007",
+  "role": "architect",
+  "type": "chore",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "chore/task-050-hands-off-directives",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Edits AGENTS.md, a human-only file: the human reviews and merges it. The paper PDF must be rebuilt from the paper_build artifact in the same merge request."
+}

@@ -1,0 +1,13 @@
+{
+  "id": "task_049",
+  "title": "Record the merged merge requests and the first coverage measurement",
+  "role": "architect",
+  "type": "chore",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "chore/task-049-evidence-coverage",
+  "priority": 2,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Documents only. A coverage gate would edit .gitlab-ci.yml, a human-only file, so it is proposed here and not built."
+}

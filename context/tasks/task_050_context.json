@@ -1,0 +1,10 @@
+{
+  "task_id": "task_050",
+  "files_touched": [],
+  "summary": "AGENTS.md still carried rules of the classic AFAW, where a human reviews and merges every pull request, and GitLab Duo quoted them back (6.1, 18.9) as a reason not to merge automatically. Aligns them with ADR 0007: 18.9 now says the repository is hands-off and merge_guard merges a flow's merge request when its verdict is yes (continuous deployment with AFAW_AUTO_MERGE=true, continuous delivery otherwise); 18.11 lets an agent open its merge request without asking; 18.15 allows the engine to merge; 21.3 says Hands-off autonomy; 21.4 says the merge token is masked and unprotected, because a protected variable does not reach merge request pipelines of unprotected branches, and that a Maintainer or Owner creates it. Kept as human: the human-only files (18.10, 17.3) and accepting an equivalent mutant (ADR 0004), which exist so the loop cannot weaken its own gates. ADR 0007 is still proposed: its status is the human's to set.",
+  "next": [
+    "Human: set ADR 0007 to accepted if the policy is approved",
+    "Rebuild docs/paper/afaw.pdf from the paper_build artifact and commit it in this merge request (paper_pdf fails otherwise)",
+    "Human: review and merge; AGENTS.md is a human-only file"
+  ]
+}

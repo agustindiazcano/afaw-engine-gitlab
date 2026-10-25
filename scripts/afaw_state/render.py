@@ -8,6 +8,7 @@ from datetime import UTC, datetime
 from html import escape
 from typing import Any
 
+from . import brand
 from .derive import parse_ts
 
 COLUMNS = (("in_progress", "In progress"), ("pending", "Pending"), ("backlog", "Backlog"))
@@ -438,15 +439,18 @@ def dashboard(
         "<!doctype html>\n"
         '<html lang="en"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width,initial-scale=1">'
-        f"<title>Project Status</title><style>{SERIES_CSS}{CSS}</style></head><body><main>"
+        f"<title>{brand.NAME} · Project status</title>"
+        f"<style>{SERIES_CSS}{CSS}{brand.CSS}</style></head><body>{brand.nav()}<main>"
         "<h1>Project status</h1>"
         f'<p class="meta">Derived from origin/main as of {escape(metrics["as_of"])}. '
         f"{len(all_rows)} tasks; CI measured for {metrics['ci_measured_tasks']}.</p>"
         f"{banner_html}{warn}{knowledge}{_progress(metrics)}"
         f'<div class="tiles">{tiles_html}</div>'
         f'{_charts(metrics)}'
+        # A banner marks the demo of invented data: it never mixes in the real GitLab project.
+        f"{brand.live_panel() if banner is None else ''}"
         f"<h2>Board</h2>{_board(open_rows, datetime.fromisoformat(metrics['as_of']))}"
         f"<h2>Timing and CI cost</h2>{_summary_table(metrics)}"
         f"<h2>Done</h2>{_history(done_rows)}"
-        "</main></body></html>\n"
+        f"</main>{brand.footer()}</body></html>\n"
     )

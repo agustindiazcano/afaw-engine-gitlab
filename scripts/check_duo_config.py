@@ -11,7 +11,9 @@ instead of at the first flow run. The sources (verified on 2026-10-24):
   - tool names: .../agents/tools
 
 The custom flow may write notes only: it never changes code or the merge request, because the
-merge decision belongs to the deterministic engine (ADR 0007).
+merge decision belongs to the deterministic engine (ADR 0007). The custom agents of duo/ (the
+AFAW auditor and the AFAW planner) may use only the tools of their allow list, none of the
+forbidden tools and none of the IDE-only tools, which a Web UI session does not have.
 
 Run in CI: python -m scripts.check_duo_config
 Exit codes: 0 ok, 1 a problem was found.
@@ -31,6 +33,9 @@ AGENT_CONFIG = ".gitlab/duo/agent-config.yml"
 REVIEW_INSTRUCTIONS = ".gitlab/duo/mr-review-instructions.yaml"
 SUBAGENT_DIR = ".agents/agents"
 CUSTOM_FLOW = "duo/custom-flow.yaml"
+AUDITOR_SPEC = "duo/custom-agent.md"
+PLANNER_SPEC = "duo/custom-planner.md"
+TRIAGE_FLOW = "duo/triage-flow.yaml"
 
 # Tools documented on docs.gitlab.com/user/duo_agent_platform/agents/tools.
 DOCUMENTED_TOOLS = frozenset(
@@ -64,6 +69,44 @@ FLOW_FORBIDDEN_TOOLS = frozenset(
     create_issue create_file_with_contents edit_file mkdir run_command run_git_command
     add_merge_request_reviewers submit_mr_review set_discussion_resolved""".split()
 )
+
+# Custom agents (duo/custom-agent.md, duo/custom-planner.md), created in the GitLab UI. Tools
+# verified on docs.gitlab.com/user/duo_agent_platform/agents/tools on 2026-10-25.
+AUDITOR_TOOLS = frozenset(
+    """get_merge_request list_merge_request_diffs build_review_merge_request_context
+    list_all_merge_request_notes list_mr_discussions get_pipeline_errors
+    get_pipeline_failing_jobs get_job_logs ci_linter get_repository_file get_repository_files
+    list_repository_tree gitlab_blob_search get_commit get_commit_diff list_commits get_issue
+    list_issues list_security_findings get_security_finding_details list_vulnerabilities
+    gitlab_api_get get_commit_comments get_failing_bridge_jobs get_issue_note
+    gitlab_issue_search""".split()
+)
+AUDITOR_OPTIONAL_TOOLS = frozenset({"create_merge_request_note", "create_merge_request_diff_note"})
+PLANNER_TOOLS = frozenset(
+    """create_plan add_new_task set_task_status get_plan get_issue list_issues
+    get_repository_file list_repository_tree create_issue_note""".split()
+)
+# Never given to a custom agent: they change code, the merge request, an issue or a
+# vulnerability, or run tests.
+AGENT_FORBIDDEN_TOOLS = frozenset(
+    """create_commit create_branch create_merge_request update_merge_request create_issue
+    update_issue confirm_vulnerability dismiss_vulnerability revert_to_detected_vulnerability
+    update_vulnerability_severity submit_mr_review set_discussion_resolved run_tests""".split()
+)
+# Available only in the IDE; a custom agent used from the Web UI does not have them.
+IDE_ONLY_TOOLS = frozenset(
+    {"find_files", "grep", "read_file", "read_files", "list_dir", "run_command"}
+)
+
+# The autohealing triage flow (duo/triage-flow.yaml) reads a failed pipeline and opens one issue per
+# failing job. It is the one flow that may create an issue; it changes nothing else.
+TRIAGE_TOOLS = frozenset(
+    """gitlab_api_get get_pipeline_failing_jobs get_job_logs list_issues create_issue
+    create_issue_note""".split()
+)
+TRIAGE_FORBIDDEN_TOOLS = (FLOW_FORBIDDEN_TOOLS | AGENT_FORBIDDEN_TOOLS | IDE_ONLY_TOOLS) - {
+    "create_issue"
+}
 
 FLOW_KEYS = {"version", "environment", "components", "prompts", "routers", "flow"}
 FLOW_REJECTED = {"name", "description", "product_group"}
@@ -181,9 +224,50 @@ def check_subagent(filename: str, text: str) -> list[str]:
     return problems
 
 
-def check_flow(flow: Any, size: int = 0) -> list[str]:
-    """Problems of a custom flow (Flow Registry v1) against the documented schema."""
-    where = CUSTOM_FLOW
+def _tool_row(text: str, label: str) -> list[str] | None:
+    """The backticked tool names of the ``| label | ... |`` row of a spec, None if absent."""
+    for line in text.splitlines():
+        cells = [c.strip() for c in line.strip().strip("|").split("|", 1)]
+        if len(cells) == 2 and cells[0] == label:
+            return re.findall(r"`([A-Za-z0-9_]+)`", cells[1])
+    return None
+
+
+def check_agent_spec(
+    filename: str, text: str, allowed: frozenset[str], optional: frozenset[str]
+) -> list[str]:
+    """Problems of a custom agent spec: its tools must follow the allow and forbidden lists."""
+    required = _tool_row(text, "Tools")
+    if required is None:
+        return [f"{filename}: no Tools row in the field table"]
+    extra = _tool_row(text, "Optional tools") or []
+    problems: list[str] = []
+    rows = (("Tools", required, allowed), ("Optional tools", extra, optional))
+    for row, tools, permitted in rows:
+        for tool in tools:
+            if tool in AGENT_FORBIDDEN_TOOLS:
+                problems.append(f"{filename}: {tool!r} is forbidden for a custom agent")
+            elif tool in IDE_ONLY_TOOLS:
+                problems.append(f"{filename}: {tool!r} is IDE-only and not used")
+            elif tool not in DOCUMENTED_TOOLS:
+                problems.append(f"{filename}: unknown tool {tool!r}")
+            elif tool not in permitted:
+                problems.append(f"{filename}: {tool!r} is not in the allow list of the {row} row")
+    return problems
+
+
+def check_flow(
+    flow: Any,
+    size: int = 0,
+    where: str = CUSTOM_FLOW,
+    allowed: frozenset[str] | None = None,
+    forbidden: frozenset[str] = FLOW_FORBIDDEN_TOOLS,
+) -> list[str]:
+    """Problems of a custom flow (Flow Registry v1) against the documented schema.
+
+    ``where`` names the file in the messages. With ``allowed`` the toolset must stay inside that
+    list; ``forbidden`` tools are rejected by name either way.
+    """
     if size > FLOW_MAX_BYTES:
         return [f"{where}: the flow is over 40 KiB"]
     if not isinstance(flow, dict):
@@ -202,9 +286,9 @@ def check_flow(flow: Any, size: int = 0) -> list[str]:
     components = [c for c in flow.get("components", []) if isinstance(c, dict)]
     names = {c.get("name") for c in components}
     for comp in components:
-        problems += _check_component(comp, prompts)
+        problems += _check_component(comp, prompts, where, allowed, forbidden)
     for prompt in prompts.values():
-        problems += _check_prompt(prompt, components)
+        problems += _check_prompt(prompt, components, where)
     for router in flow.get("routers", []):
         if router.get("from") not in names:
             problems.append(f"{where}: router starts at unknown component {router.get('from')!r}")
@@ -216,8 +300,14 @@ def check_flow(flow: Any, size: int = 0) -> list[str]:
     return problems
 
 
-def _check_component(comp: dict[str, Any], prompts: dict[Any, Any]) -> list[str]:
-    where, name = CUSTOM_FLOW, comp.get("name")
+def _check_component(
+    comp: dict[str, Any],
+    prompts: dict[Any, Any],
+    where: str,
+    allowed: frozenset[str] | None,
+    forbidden: frozenset[str],
+) -> list[str]:
+    name = comp.get("name")
     problems: list[str] = []
     if comp.get("type") not in COMPONENT_TYPES:
         problems.append(f"{where}: component {name!r} has unsupported type {comp.get('type')!r}")
@@ -236,15 +326,21 @@ def _check_component(comp: dict[str, Any], prompts: dict[Any, Any]) -> list[str]
         tool_name = tool if isinstance(tool, str) else next(iter(tool), "")
         if tool_name not in DOCUMENTED_TOOLS:
             problems.append(f"{where}: component {name!r} uses unknown tool {tool_name!r}")
-        elif tool_name in FLOW_FORBIDDEN_TOOLS:
+        elif tool_name in forbidden:
             problems.append(
                 f"{where}: component {name!r} may not use {tool_name!r} (it changes code or the MR)"
+            )
+        elif allowed is not None and tool_name not in allowed:
+            problems.append(
+                f"{where}: component {name!r} uses {tool_name!r}, which is not in the allow list"
             )
     return problems
 
 
-def _check_prompt(prompt: dict[str, Any], components: list[dict[str, Any]]) -> list[str]:
-    where, pid = CUSTOM_FLOW, prompt.get("prompt_id")
+def _check_prompt(
+    prompt: dict[str, Any], components: list[dict[str, Any]], where: str
+) -> list[str]:
+    pid = prompt.get("prompt_id")
     problems: list[str] = []
     if "unit_primitives" not in prompt:
         problems.append(f"{where}: prompt {pid!r} lacks unit_primitives (use [] when empty)")
@@ -297,6 +393,28 @@ def main(argv: list[str] | None = None) -> int:
         problems += check_flow(_load(flow_path), flow_path.stat().st_size)
     else:
         problems.append(f"{CUSTOM_FLOW} does not exist")
+    triage_path = root / TRIAGE_FLOW
+    if triage_path.is_file():
+        problems += check_flow(
+            _load(triage_path),
+            triage_path.stat().st_size,
+            where=TRIAGE_FLOW,
+            allowed=TRIAGE_TOOLS,
+            forbidden=TRIAGE_FORBIDDEN_TOOLS,
+        )
+    else:
+        problems.append(f"{TRIAGE_FLOW} does not exist")
+    for rel, allowed, optional in (
+        (AUDITOR_SPEC, AUDITOR_TOOLS, AUDITOR_OPTIONAL_TOOLS),
+        (PLANNER_SPEC, PLANNER_TOOLS, frozenset[str]()),
+    ):
+        spec_path = root / rel
+        if spec_path.is_file():
+            problems += check_agent_spec(
+                rel, spec_path.read_text(encoding="utf-8"), allowed, optional
+            )
+        else:
+            problems.append(f"{rel} does not exist")
     agents = sorted((root / SUBAGENT_DIR).glob("*.md")) if (root / SUBAGENT_DIR).is_dir() else []
     if not agents:
         problems.append(f"{SUBAGENT_DIR} has no subagent")

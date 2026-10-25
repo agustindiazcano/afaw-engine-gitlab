@@ -1,0 +1,12 @@
+{
+  "id": "task_045",
+  "title": "AFAW triage flow, its allow and forbidden lists, the Duo issue template and the autohealing design",
+  "role": "architect",
+  "type": "feature",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "feat/task-045-autoheal-triage-flow",
+  "priority": 1,
+  "difficulty": 3,
+  "blocked_by": ["task_038"]
+}

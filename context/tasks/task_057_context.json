@@ -1,0 +1,12 @@
+{
+  "task_id": "task_057",
+  "files_touched": [
+    "scripts/merge_guard.py",
+    "tests/tooling/test_merge_guard.py"
+  ],
+  "summary": "The Developer Flow opens draft merge requests and no Duo tool clears the draft state, so the loop could not close without a person. merge_guard now removes the Draft marker from the title (PUT on the merge request) when AFAW_AUTO_MERGE is exactly true and the draft state is the only reason for merge: no, which implies a green pipeline, the required jobs, no conflict, the cap respected and a service account as pipeline user and author of every commit. It then asks for the merge as before. A draft with another reason, of a person, or with the switch off is untouched; a refused write exits 2. 8 new tests failed on the old code (red_check); the suite has 600 tests. Not yet run on a real merge request.",
+  "next": [
+    "Run it on the next merge request opened by the Developer Flow and record the result in docs/submission/evidence.md",
+    "Decide whether a draft should wait for the Code Review Flow before the guard clears it"
+  ]
+}

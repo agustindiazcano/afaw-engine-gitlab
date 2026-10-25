@@ -1,0 +1,12 @@
+{
+  "task_id": "task_062",
+  "files_touched": [
+    "scripts/demo.py",
+    "tests/tooling/test_demo.py"
+  ],
+  "summary": "Adds scripts/demo.py. demo on checks that AFAW_BOT_USER_IDS and AFAW_MERGE_TOKEN exist, sets AFAW_AUTO_MERGE to true and opens the demo issues assigned to the Developer Flow, so the loop runs by itself. demo off sets the switch to false and closes the open demo and autoheal issues. The token is read from GITLAB_TOKEN and never printed; every failure exits 2. 10 tests failed on the old code. Not yet run against the real project.",
+  "next": [
+    "Run demo on and demo off once and record it in docs/submission/evidence.md",
+    "Record the demo video with demo on"
+  ]
+}
