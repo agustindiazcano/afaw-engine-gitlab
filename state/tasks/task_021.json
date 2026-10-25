@@ -1,0 +1,12 @@
+{
+  "id": "task_021",
+  "title": "Review the Maintainer settings of docs/merge-guard.md and accept ADR 0007",
+  "role": "architect",
+  "type": "chore",
+  "status": "pending",
+  "owner": "human",
+  "priority": 2,
+  "difficulty": 2,
+  "blocked_by": [],
+  "notes": "Who may push to main, a real CODEOWNERS (today '* @owner', an unrelated account), Pipelines must succeed, threads, approvals, push rules. Then set the ADR to accepted. Full hands-off also needs AFAW_AUTO_MERGE and a token, or GitLab's merge when pipeline succeeds."
+}

@@ -1,0 +1,12 @@
+{
+  "id": "task_019",
+  "title": "Record the verified Cloud Run deploy in the docs",
+  "role": "architect",
+  "type": "chore",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "docs/task-019-deploy-verified",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": []
+}

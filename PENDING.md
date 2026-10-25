@@ -31,9 +31,9 @@ A valid submission exists after tasks 009 and 010.
 ## Phase 3: Live service and submission
 - [ ] Task 013: read-only FastAPI service (dashboard, `/health`, `/api/state`, `/api/ask`), Dockerfile, `deploy/`, release and deploy job on Cloud Run
   - [x] Service in `src/afaw_web`, its image and the Terraform in `deploy/terraform` (plan: 11 to add, 0 to change, 0 to destroy)
-  - [ ] Human: run `terraform apply` and set the protected `GCP_*` CI/CD variables, as in [`docs/google-cloud.md`](docs/google-cloud.md)
-  - [ ] First run of the deploy on `main`: confirm the issuer string and the `ref_protected` type with a real token, then fill the live URL in the README
-  - [ ] Human: create the budget alert in the Google Cloud console
+  - [x] Human: run `terraform apply` and set the protected `GCP_*` CI/CD variables, as in [`docs/google-cloud.md`](docs/google-cloud.md) (done Oct 24, 2026)
+  - [x] First run of the deploy on `main`: the issuer string and the `ref_protected` type were confirmed with a real token; the live URL is in the README
+  - [x] Human: create the budget alert in the Google Cloud console (reported by the human; this repository cannot see it)
 - [ ] Task 014: demo script (under 3 minutes), Devpost description, Path B explanation of what was added since Oct 5
 
 ## FINAL: strong human-only-files control
