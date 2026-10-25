@@ -1,0 +1,8 @@
+{
+  "task_id": "task_087",
+  "files_touched": [],
+  "summary": "Issue 33: task_files failed on duo/fix/30-human-only-is-human-inversion because state/tasks/task_082.json, brought in from the planted-defect demo branch, declared branch demo/bug-4-human-inverted while the pull request's branch was different. The code defect (inverted bot-id check in is_human) is already correct on main and tests/tooling/test_human_only_files.py passes (22 passed). This branch starts from main, so it carries no planted-defect commits, and its own task file uses the next free id and names this branch.",
+  "next": [
+    "Close merge request 60 and its source branch, which carry the planted-defect task file"
+  ]
+}
