@@ -280,3 +280,21 @@ def test_without_a_token_nothing_is_written():
         api.post_note(7, "x")
     with pytest.raises(FactsError, match="AFAW_MERGE_TOKEN"):
         api.create_issue("t", "d", 1, LABEL)
+
+
+# ------------------------------------------------------------------ whose branch it is
+
+
+@pytest.mark.parametrize("ref", ["feat/task-9-x", "fix/task-9-x", "docs/task-9-x", "chore/x"])
+def test_a_failure_on_a_branch_named_by_a_person_opens_no_issue(ref, capsys):
+    api = FakeApi([job("lint", "failed")])
+    assert request_fix.run(api, {**ENV_BRANCH, "CI_COMMIT_REF_NAME": ref}) == 0
+    assert api.created == []
+    assert "not asked" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("ref", ["main", "demo/task-28-lint", "duo/fix/3-x"])
+def test_main_planted_demo_and_flow_branches_are_repaired(ref):
+    api = FakeApi([job("lint", "failed")])
+    assert request_fix.run(api, {**ENV_BRANCH, "CI_COMMIT_REF_NAME": ref}) == 0
+    assert len(api.created) == 1
