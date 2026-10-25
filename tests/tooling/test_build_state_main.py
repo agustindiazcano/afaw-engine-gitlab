@@ -58,12 +58,18 @@ def metrics_of(out: Path) -> dict[str, object]:
     return json.loads((out / "metrics.json").read_text(encoding="utf-8"))
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins build_state so a change is noticed"
+)
 def test_prepare_out_creates_a_marked_directory(tmp_path: Path) -> None:
     out = tmp_path / "a" / "b"
     build_state.prepare_out(out)
     assert sorted(p.name for p in out.iterdir()) == [build_state.MARKER]
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins build_state so a change is noticed"
+)
 def test_prepare_out_empties_a_marked_directory_and_keeps_the_marker(tmp_path: Path) -> None:
     out = tmp_path / "build"
     out.mkdir()
@@ -75,6 +81,9 @@ def test_prepare_out_empties_a_marked_directory_and_keeps_the_marker(tmp_path: P
     assert [p.name for p in out.iterdir()] == [build_state.MARKER]
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins build_state so a change is noticed"
+)
 def test_prepare_out_refuses_an_unmarked_directory(tmp_path: Path) -> None:
     out = tmp_path / "mine"
     out.mkdir()
@@ -85,6 +94,9 @@ def test_prepare_out_refuses_an_unmarked_directory(tmp_path: Path) -> None:
     assert (out / "keep.txt").read_text() == "mine"
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins build_state so a change is noticed"
+)
 def test_main_writes_the_views_and_reports_them(
     repo: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -99,12 +111,18 @@ def test_main_writes_the_views_and_reports_them(
     assert [row["id"] for row in pending] == ["task_002"]
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins build_state so a change is noticed"
+)
 def test_main_default_ref_is_origin_main(repo: Path) -> None:
     # The temporary repository has no origin/main, so the default ref cannot be read.
     with pytest.raises(subprocess.CalledProcessError):
         build_state.main(["--out", str(repo / "build" / "state")])
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins build_state so a change is noticed"
+)
 def test_main_accepts_an_explicit_as_of(repo: Path, capsys: pytest.CaptureFixture[str]) -> None:
     out = repo / "out"
     assert (
@@ -115,6 +133,9 @@ def test_main_accepts_an_explicit_as_of(repo: Path, capsys: pytest.CaptureFixtur
     assert capsys.readouterr().out.endswith("(as of 2026-10-02T08:00:00+00:00)\n")
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins build_state so a change is noticed"
+)
 def test_main_rejects_as_of_without_time_zone(
     repo: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -129,11 +150,17 @@ def test_main_rejects_as_of_without_time_zone(
     assert not out.exists()
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins build_state so a change is noticed"
+)
 def test_main_rejects_an_unparsable_as_of(repo: Path) -> None:
     with pytest.raises(ValueError):
         build_state.main(["--ref", "main", "--out", str(repo / "out"), "--as-of", "yesterday"])
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins build_state so a change is noticed"
+)
 def test_main_reads_facts_from_a_file(repo: Path) -> None:
     facts = repo / "facts.json"
     facts.write_text(
@@ -163,6 +190,9 @@ def test_main_reads_facts_from_a_file(repo: Path) -> None:
     assert (with_facts / "dashboard.html").read_bytes() != (without / "dashboard.html").read_bytes()
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins build_state so a change is noticed"
+)
 def test_main_fails_loudly_on_invalid_state_and_writes_nothing(
     repo: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -180,6 +210,9 @@ def test_main_fails_loudly_on_invalid_state_and_writes_nothing(
     assert not out.exists()
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins build_state so a change is noticed"
+)
 def test_main_refuses_a_foreign_output_directory(repo: Path) -> None:
     out = repo / "mine"
     out.mkdir()
@@ -190,6 +223,9 @@ def test_main_refuses_a_foreign_output_directory(repo: Path) -> None:
     assert (out / "keep.txt").exists()
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins build_state so a change is noticed"
+)
 def test_running_the_module_exits_with_the_status_of_main(
     repo: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

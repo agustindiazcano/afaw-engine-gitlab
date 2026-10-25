@@ -63,6 +63,9 @@ def repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     return tmp_path
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins check_docs so a change is noticed"
+)
 def test_tracked_files_lists_only_tracked_paths(repo: Path) -> None:
     write(repo, "docs/a.md", "# A\n")
     write(repo, "docs/untracked.md", "# U\n")
@@ -70,11 +73,17 @@ def test_tracked_files_lists_only_tracked_paths(repo: Path) -> None:
     assert check_docs.tracked_files(repo) == {"docs/a.md"}
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins check_docs so a change is noticed"
+)
 def test_tracked_files_outside_a_repository_raises(tmp_path: Path) -> None:
     with pytest.raises(subprocess.CalledProcessError):
         check_docs.tracked_files(tmp_path)
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins check_docs so a change is noticed"
+)
 def test_valid_adr_and_gotcha_have_no_errors(tmp_path: Path) -> None:
     write(tmp_path, "docs/adr/0001-money-in-cents.md", ADR)
     write(tmp_path, "docs/gotchas/0001-a-trap.md", GOTCHA)
@@ -82,18 +91,27 @@ def test_valid_adr_and_gotcha_have_no_errors(tmp_path: Path) -> None:
     assert check_docs.check(tmp_path, existing) == []
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins check_docs so a change is noticed"
+)
 def test_invalid_adr_is_reported_with_its_path(tmp_path: Path) -> None:
     write(tmp_path, "docs/adr/0001-money-in-cents.md", ADR.replace("accepted", "maybe"))
     errors = check_docs.check(tmp_path, {"docs/adr/0001-money-in-cents.md"})
     assert errors == ["docs/adr/0001-money-in-cents.md: invalid status: 'maybe'"]
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins check_docs so a change is noticed"
+)
 def test_bad_file_name_is_reported(tmp_path: Path) -> None:
     write(tmp_path, "docs/gotchas/Trap.md", GOTCHA)
     errors = check_docs.check(tmp_path, {"docs/gotchas/Trap.md"})
     assert "docs/gotchas/Trap.md: file name must be NNNN-slug.md (lowercase, hyphens)" in errors
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins check_docs so a change is noticed"
+)
 def test_nested_and_non_markdown_files_are_not_parsed_as_knowledge(tmp_path: Path) -> None:
     # Only files directly inside docs/adr or docs/gotchas are ADRs or gotchas.
     write(tmp_path, "docs/adr/sub/notes.md", "no front matter\n")
@@ -102,6 +120,9 @@ def test_nested_and_non_markdown_files_are_not_parsed_as_knowledge(tmp_path: Pat
     assert check_docs.check(tmp_path, existing) == []
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins check_docs so a change is noticed"
+)
 def test_duplicate_ids_are_reported(tmp_path: Path) -> None:
     write(tmp_path, "docs/adr/0001-first.md", ADR)
     write(tmp_path, "docs/adr/0001-second.md", ADR)
@@ -111,28 +132,43 @@ def test_duplicate_ids_are_reported(tmp_path: Path) -> None:
     ]
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins check_docs so a change is noticed"
+)
 @pytest.mark.parametrize("top", ["README.md", "AGENTS.md", "CLAUDE.md"])
 def test_broken_link_in_a_top_level_document_is_reported(tmp_path: Path, top: str) -> None:
     write(tmp_path, top, "See [guide](docs/missing.md).\n")
     assert check_docs.check(tmp_path, {top}) == [f"{top}: broken link: docs/missing.md"]
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins check_docs so a change is noticed"
+)
 def test_broken_link_under_docs_is_reported(tmp_path: Path) -> None:
     write(tmp_path, "docs/guide.md", "[x](other.md) and [y](#anchor)\n")
     assert check_docs.check(tmp_path, {"docs/guide.md"}) == ["docs/guide.md: broken link: other.md"]
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins check_docs so a change is noticed"
+)
 def test_link_to_a_tracked_file_resolves(tmp_path: Path) -> None:
     write(tmp_path, "docs/guide.md", "[x](other.md#section)\n")
     write(tmp_path, "docs/other.md", "# Other\n")
     assert check_docs.check(tmp_path, {"docs/guide.md", "docs/other.md"}) == []
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins check_docs so a change is noticed"
+)
 def test_markdown_outside_docs_and_top_level_is_not_link_checked(tmp_path: Path) -> None:
     write(tmp_path, "notes/todo.md", "[x](missing.md)\n")
     assert check_docs.check(tmp_path, {"notes/todo.md"}) == []
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins check_docs so a change is noticed"
+)
 def test_main_returns_zero_and_prints_nothing_when_valid(
     repo: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -144,6 +180,9 @@ def test_main_returns_zero_and_prints_nothing_when_valid(
     assert captured.out == ""
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins check_docs so a change is noticed"
+)
 def test_main_returns_one_and_prints_every_error_to_stderr(
     repo: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -159,6 +198,9 @@ def test_main_returns_one_and_prints_every_error_to_stderr(
     ]
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins check_docs so a change is noticed"
+)
 def test_main_ignores_files_that_are_not_tracked(
     repo: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -167,6 +209,9 @@ def test_main_ignores_files_that_are_not_tracked(
     assert capsys.readouterr().err == ""
 
 
+@pytest.mark.characterization(
+    reason="the code already did this; the test pins check_docs so a change is noticed"
+)
 def test_running_the_module_exits_with_the_status_of_main(
     repo: Path, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
 ) -> None:
