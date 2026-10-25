@@ -1,0 +1,10 @@
+{
+  "task_id": "task_024",
+  "files_touched": [],
+  "summary": "Adds docs/submission/evidence.md, a table of what ran with its link, date and result, read from the public GitLab API and the live service. It records the deploy pipeline 2985631519 (19 jobs, all success), /health on the live service, the first Duo session (pipeline 2985662569, source duo_workflow, run by the Fix CI/CD Pipeline service account, id 33073387, no merge request or commit produced at the time of the check), a local read-only run of merge_guard on !13 and the humans=true lookup that treats the service account as non-human. A section lists what has not been observed yet.",
+  "next": [
+    "Human: fill the GitLab Credits numbers",
+    "Add a row for each Duo merge request and each merge_guard decision once they exist",
+    "Update the Duo rows of the README only when a merge request or commits by a flow service account exist"
+  ]
+}
