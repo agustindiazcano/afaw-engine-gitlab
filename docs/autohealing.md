@@ -47,6 +47,19 @@ Three consequences, each to be confirmed by running it:
 3. There is no filter that keeps a trigger away from `main`. A failure on `main` starts the repair
    as well, and the fix arrives as a new merge request, never as a push.
 
+## Demo on and off
+
+`scripts/demo.py` starts and stops the demonstration. The token is read from the environment
+(`GITLAB_TOKEN`, scope `api`) and is never printed.
+
+| Command | What it does |
+|---|---|
+| `GITLAB_TOKEN=... python -m scripts.demo on [--issues N]` | Checks that `AFAW_BOT_USER_IDS` and `AFAW_MERGE_TOKEN` exist, sets `AFAW_AUTO_MERGE` to `true`, and opens N issues assigned to the Developer Flow with the label `demo`. From there the loop runs by itself: merge request, gates, Draft cleared, merge, release, deploy |
+| `GITLAB_TOKEN=... python -m scripts.demo off` | Sets `AFAW_AUTO_MERGE` to `false` and closes the open issues labelled `demo` or `afaw-autoheal`. It does not delete branches or close merge requests |
+
+Watch it in the Live from GitLab panel of the dashboard (`/live/`). With the switch off,
+`merge_guard` only prints its verdict and `request_fix` does not run.
+
 ## Delivery or deployment: the merge is a setting, not a click
 
 Duo has no tool that merges (see the table above), but the repository does not need one: `merge_guard` runs in
