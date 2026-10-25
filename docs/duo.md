@@ -30,7 +30,7 @@ custom flow covers only step 8.
 | `.gitlab/duo/mr-review-instructions.yaml` | AFAW review rules (TDD, no estimated numbers, English, human-only files, least privilege) | Code Review Flow. Guidance for the reviewer, not enforced policy |
 | `.agents/agents/afaw-reviewer.md` | Workspace subagent that checks a change against `AGENTS.md`; tools `read_file` and `grep` only | Developer Flow; an experiment, read from the default branch only |
 | `duo/custom-flow.yaml` | Source of the custom flow, pasted in **AI > Flows > New flow** | Not read by GitLab from here |
-| `duo/custom-agent.md` | Source of the custom agent "AFAW auditor" (reads only; 22 read tools, plus two optional note tools), pasted in **AI > Agents > New agent** | Not read by GitLab from here |
+| `duo/custom-agent.md` | Source of the custom agent "AFAW auditor" (reads only; 26 read tools, plus two optional note tools), pasted in **AI > Agents > New agent** | Not read by GitLab from here |
 | `duo/custom-planner.md` | Source of the custom agent "AFAW planner" (9 tools; it leaves a plan as a note on an issue and creates no issue), pasted in **AI > Agents > New agent** | Not read by GitLab from here |
 | `scripts/check_duo_config.py` | CI check (`duo_config` job) that these files use only documented keys, tools and limits, and that each custom agent keeps to its allow list and uses no forbidden or IDE-only tool | CI |
 
@@ -44,7 +44,7 @@ Names and availability were checked on docs.gitlab.com/user/duo_agent_platform/a
 
 | Agent | Tools | Optional |
 |---|---|---|
-| AFAW auditor | `get_merge_request`, `list_merge_request_diffs`, `build_review_merge_request_context`, `list_all_merge_request_notes`, `list_mr_discussions`, `get_pipeline_errors`, `get_pipeline_failing_jobs`, `get_job_logs`, `ci_linter`, `get_repository_file`, `get_repository_files`, `list_repository_tree`, `gitlab_blob_search`, `get_commit`, `get_commit_diff`, `list_commits`, `get_issue`, `list_issues`, `list_security_findings`, `get_security_finding_details`, `list_vulnerabilities`, `gitlab_api_get` | `create_merge_request_note`, `create_merge_request_diff_note`: findings go in the chat, or as a merge request note when these are selected |
+| AFAW auditor | `get_merge_request`, `list_merge_request_diffs`, `build_review_merge_request_context`, `list_all_merge_request_notes`, `list_mr_discussions`, `get_pipeline_errors`, `get_pipeline_failing_jobs`, `get_job_logs`, `ci_linter`, `get_repository_file`, `get_repository_files`, `list_repository_tree`, `gitlab_blob_search`, `get_commit`, `get_commit_diff`, `list_commits`, `get_issue`, `list_issues`, `list_security_findings`, `get_security_finding_details`, `list_vulnerabilities`, `gitlab_api_get`, `get_commit_comments`, `get_failing_bridge_jobs`, `get_issue_note`, `gitlab_issue_search` | `create_merge_request_note`, `create_merge_request_diff_note`: findings go in the chat, or as a merge request note when these are selected |
 | AFAW planner | `create_plan`, `add_new_task`, `set_task_status`, `get_plan`, `get_issue`, `list_issues`, `get_repository_file`, `list_repository_tree`, `create_issue_note` | None |
 
 | Group | Tools | Rule |
@@ -98,5 +98,6 @@ Not verified until a human enables the flows and a real session runs:
 | Whether the flows' service accounts are excluded by the `humans=true` user filter | Until confirmed, `AFAW_BOT_USER_IDS` lists them explicitly |
 | The tier of the namespace | Push rules, triggers and `AGENTS.md` customization need Premium or Ultimate |
 | `ui_log_events` and the optional component keys | Not used: only keys named in the documentation appear in the flow |
+| `get_job`, `get_pipeline` and `get_merge_request_conflicts` | The agent created in the UI has them; the tools page does not list them. Rejected by `check_duo_config` until the description shown in the tool selector is read and checked |
 | `read_file` and `grep` in `.agents/agents/afaw-reviewer.md` | The tools page lists both as IDE-only. The subagent follows the documented example, but whether the Developer Flow's sandbox provides them is not verified; a session that does not start would show it |
 | The merge request author of a flow | With composite identity the merge request is attributed to the person who triggered the flow and the commits to the service account ([Composite identity](https://docs.gitlab.com/user/duo_agent_platform/composite_identity/)). How `human_only_files` sees this is confirmed only with the first merge request of a flow |
