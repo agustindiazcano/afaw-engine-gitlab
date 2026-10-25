@@ -1,0 +1,10 @@
+{
+  "task_id": "task_113",
+  "files_touched": [],
+  "summary": "The README table Stages and Duo links the seven stage experiments (issues 37 to 43, merge requests 75 to 81) and states 9 of 9 stages with a Duo-authored merge request. evidence.md has a new section with the burst, the UI redesign, the repairs 85 and 87, e2e_live and the autonomy stats, each read from the API on 2026-10-25. rules-and-coverage.md matches.",
+  "next": [
+    "Bug benchmarks on the demo app",
+    "Orchestrator and handoff ADRs",
+    "Credits reading before and after each Duo batch"
+  ]
+}

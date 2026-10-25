@@ -1,0 +1,13 @@
+{
+  "id": "task_113",
+  "title": "Evidence for the stage experiments: README Stages and Duo table, evidence and coverage files",
+  "role": "architect",
+  "type": "chore",
+  "status": "done",
+  "owner": "agent",
+  "branch": "docs/task-113-stage-evidence",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Documents only."
+}
