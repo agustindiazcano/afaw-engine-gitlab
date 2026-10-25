@@ -45,6 +45,19 @@ so; a person must remove the trigger or the flow from the merge request to stop 
 credits. The count sees only commits that start a pipeline, and only those pushed by an id in
 `AFAW_BOT_USER_IDS`: if that variable is empty the count is always 0.
 
+## Leaving Draft
+
+The Developer Flow opens its merge requests as Draft, and no Duo tool clears the state (the tools
+page has none, and `/ready` does not work through a note). With `AFAW_AUTO_MERGE=true` the guard
+does it: when the **only** reason for `merge: no` is the draft state, which means the pipeline is
+green, the required jobs are present, no conflict, the cap holds and the pipeline user and every
+commit author are service accounts, it writes the title without its `Draft:` marker with
+`PUT /projects/:id/merge_requests/:iid` and then asks for the merge as usual. A draft with any
+other reason, a draft of a person and a draft with the switch off are never touched. The call needs
+`AFAW_MERGE_TOKEN`; without it, or if GitLab refuses, the job exits 2 and nothing changes.
+
+Never run on a real merge request until the first Duo merge request after this change.
+
 ## Turning the merge on
 
 | Variable | Value | Where |
