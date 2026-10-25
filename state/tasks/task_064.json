@@ -1,0 +1,12 @@
+{
+  "id": "task_064",
+  "title": "sci_estimate: the SCI estimate of a CI run as a pure function and a command line",
+  "role": "architect",
+  "type": "feature",
+  "status": "done",
+  "owner": "agent",
+  "branch": "duo/feature/13-sci-estimate",
+  "priority": 3,
+  "difficulty": 1,
+  "blocked_by": []
+}
