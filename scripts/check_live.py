@@ -2,7 +2,9 @@
 
 It requests /health (must be 200 with status ok) and /api/state (must hold the three derived
 views). With ``--expect-sha`` it also requires /api/version to report exactly that commit, which
-proves that the revision serving traffic is the one just deployed; with ``--page`` (repeatable) it
+proves that the revision serving traffic is the one just deployed, or a descendant of it when a
+newer pipeline of the branch has already deployed (an older, unrelated or unknown commit fails);
+with ``--page`` (repeatable) it
 requires each page to answer 200. An unreachable service, a wrong status or a missing view fails
 loudly; it never reports a pass for something it could not reach. A cold start of a scale-to-zero
 service is covered by retries with exponential backoff.
@@ -18,6 +20,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
+import subprocess
 import sys
 import time
 import urllib.error
@@ -28,6 +32,8 @@ from urllib.parse import urlsplit
 TIMEOUT_SECONDS = 20
 VIEWS = ("metrics", "pending", "history")
 LOCAL_HOSTS = ("127.0.0.1", "localhost")
+GIT_TIMEOUT_SECONDS = 60
+SHA_PATTERN = re.compile(r"[0-9a-f]{40}")
 
 
 def _get(url: str) -> tuple[int, Any]:
@@ -48,12 +54,48 @@ def _status(url: str) -> int:
         return exc.code
 
 
+def _git_ok(*args: str) -> bool:
+    """Run git with a timeout; True only when it exits 0 (no repository or git means False)."""
+    try:
+        done = subprocess.run(  # noqa: S603
+            ["git", *args],  # noqa: S607
+            capture_output=True,
+            timeout=GIT_TIMEOUT_SECONDS,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return done.returncode == 0
+
+
+def is_newer_commit(expected: str, reported: object) -> bool:
+    """True when ``reported`` is a strict descendant of ``expected`` in the local repository.
+
+    Pipelines of main can overlap, so a newer deploy may already serve traffic when the monitor of
+    an older pipeline runs. That proves the expected commit was superseded, not that the deploy
+    failed. The reported commit is fetched from ``origin`` when this checkout predates it. Any
+    doubt (not a full sha, no repository, fetch failure, unrelated or older commit) is False.
+    """
+    if not isinstance(reported, str) or not SHA_PATTERN.fullmatch(reported):
+        return False
+    if reported == expected or not SHA_PATTERN.fullmatch(expected):
+        return False
+    if not _git_ok("cat-file", "-e", f"{reported}^{{commit}}"):
+        _git_ok("fetch", "--quiet", "origin", reported)
+    return _git_ok("merge-base", "--is-ancestor", expected, reported)
+
+
 def version_problems(base: str, expect_sha: str) -> list[str]:
     """Why /api/version does not report the commit that was just deployed (empty when it does)."""
     status, body = _get(f"{base}/api/version")
     if status != 200 or not isinstance(body, dict):
         return [f"/api/version answered {status} instead of 200 with the commit"]
     reported = body.get("commit_sha")
+    if reported != expect_sha and is_newer_commit(expect_sha, reported):
+        sys.stdout.write(
+            f"NOTE: /api/version reports newer commit {reported}; a later deploy won\n"
+        )
+        return []
     if reported != expect_sha:
         return [f"/api/version commit_sha is {reported!r}, expected {expect_sha!r}"]
     return []
