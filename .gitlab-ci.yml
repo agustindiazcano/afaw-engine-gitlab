@@ -87,7 +87,9 @@ derived_views:
 web_data:
   stage: create
   script:
-    - python -m scripts.build_state --ref HEAD --out build/web-data/live
+    # The project is public, so the facts need no token; without them the dashboard shows no data.
+    - python -m scripts.collect_facts --ref HEAD --out build/facts.json
+    - python -m scripts.build_state --ref HEAD --out build/web-data/live --facts build/facts.json
     - python -m examples.mock_dashboard build/web-data/demo
     - mkdir -p build/web-data/docs
     - cp -r docs/adr docs/gotchas build/web-data/docs/
