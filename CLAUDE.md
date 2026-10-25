@@ -23,3 +23,23 @@ of the script that would do it, `state/tasks/` and the README status tables.
 
 The mistakes that led to this section, and where each right answer was already written, are in
 [`docs/gotchas/0004-read-the-plan-before-saying-a-capability-is-missing.md`](docs/gotchas/0004-read-the-plan-before-saying-a-capability-is-missing.md).
+
+## Goal and priorities (changed 2026-10-25)
+The goal is to show an agentic flow that does everything by itself: an issue or a broken push
+becomes a fix, a merge request, a review, a merge, a release, a deploy and a comment, with no person
+in the middle. The merge is automatic (continuous deployment, `AFAW_AUTO_MERGE=true`); continuous
+delivery is the fallback, not the design.
+
+* **Working first, security second.** A security recommendation never blocks the loop. Record it in
+  `PENDING.md` under "Low priority: security hardening" and keep going. Do not remove a gate that
+  already exists (the human-only files, `merge_guard`, the red-first check) to make something work.
+* **A level of autonomy is claimed only with evidence per link** (`docs/submission/evidence.md`).
+  Never write Hands-off in a document before a real failure went through the whole loop.
+* **Secrets:** a token pasted in the conversation is used from an environment variable of one
+  command, never written to a file, a commit, a memory or a document. Say once that it was exposed
+  and should be revoked after the tests.
+* **Where to look:** the competition rules and the coverage of each prize are in
+  `docs/submission/rules-and-coverage.md`; the experiments, benchmarks and the data tables are in
+  `docs/experiments.md`; the delivery or deployment modes of the merge are in `docs/autohealing.md`.
+* **Data:** every figure in those tables is read from the API or a log in the same session. LLM
+  tokens are not exposed by GitLab Duo; the unit is the GitLab Credit, read by hand.
