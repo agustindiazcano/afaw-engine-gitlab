@@ -251,6 +251,15 @@ def test_request_fix_runs_only_after_a_failure_and_with_the_switch_on(
     assert "AFAW_MERGE_TOKEN" not in str(job)  # the token comes from a CI/CD variable
 
 
+def test_web_data_builds_the_live_views_from_measured_facts(ci: dict[str, Any]) -> None:
+    script = _script(ci["web_data"])
+    collect = script.index("python -m scripts.collect_facts")
+    build = script.index("--out build/web-data/live")
+    assert collect < build  # the facts exist before the views are built
+    assert "--facts build/facts.json" in script[build:]
+    assert "--out build/facts.json" in script[collect:build]
+
+
 def test_monitor_always_collects_facts_on_gitlab(ci: dict[str, Any]) -> None:
     script = _script(ci["monitor"])
     assert "NOTICE" not in script and "GITHUB_REPOSITORY" not in script
