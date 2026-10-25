@@ -65,9 +65,7 @@ def test_cli_reports_a_missing_file_on_stderr(
     assert "ERROR" in captured.err
 
 
-def test_cli_tag_defaults_to_unreleased(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_cli_tag_defaults_to_unreleased(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     path = tmp_path / "mrs.json"
     path.write_text("[]", encoding="utf-8")
     assert release_notes.main(["--merge-requests", str(path)]) == 0
