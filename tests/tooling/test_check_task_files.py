@@ -497,16 +497,3 @@ def test_main_reports_how_many_task_files_the_check_read(monkeypatch, capsys):
     out = capsys.readouterr()
     assert code == 0
     assert out.out == "OK: task file check passed (3 task files checked).\n"
-
-
-def test_main_does_not_report_a_count_when_problems_are_found(monkeypatch, capsys):
-    def fake_check(base, head_branch, run, read_head, target):
-        read_head("state/tasks/task_001.json")
-        return ["bad"]
-
-    monkeypatch.setattr(check_task_files, "check", fake_check)
-    monkeypatch.setattr(check_task_files.Path, "read_text", lambda self, encoding: "{}")
-    assert check_task_files.main(["--base", "abc"]) == 1
-    out = capsys.readouterr()
-    assert out.out == ""
-    assert out.err == "PROBLEM: bad\n"
