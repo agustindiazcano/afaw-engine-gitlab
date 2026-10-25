@@ -1,0 +1,12 @@
+{
+  "task_id": "task_070",
+  "files_touched": [
+    "scripts/merge_guard.py",
+    "tests/tooling/test_merge_guard.py"
+  ],
+  "summary": "The experiment found that merge_guard counted the request_fix job as not successful: that job is skipped on every green pipeline, so the guard held every merge request made after task_060 with the reason request_fix is skipped (merge requests !40 and !43, pipelines 2987028582 and 2987030591). The guard now ignores its auxiliary jobs, itself and request_fix, whatever their status; a real job that is skipped still holds the merge. 5 tests failed on the old code.",
+  "next": [
+    "Ask the Developer Flow to bring main into !40 and !43 so their next pipeline runs the corrected guard and the guard merges them",
+    "Record the result in docs/submission/evidence.md"
+  ]
+}
