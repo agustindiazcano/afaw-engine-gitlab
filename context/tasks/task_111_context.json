@@ -1,0 +1,8 @@
+{
+  "task_id": "task_111",
+  "files_touched": [],
+  "summary": "Issue 51: task_files failed on duo/fix/50-red-check-characterization because that branch was built on top of duo/fix/49-task-files-identical-copies and carried state/tasks/task_109.json, whose branch is the issue 49 branch, not the pull request's. check_task_files is right to reject it; the code is not at fault. The only change of the issue 50 branch (the characterization marker on test_a_task_that_differs_from_the_target_is_still_checked) is already on the issue 49 branch (commit 574264e), so it is redundant. This branch starts from main, carries no foreign task file, and changes no code or test.",
+  "next": [
+    "Close the superseded merge request 90 (issue 50 branch); merge merge request 89 instead"
+  ]
+}
