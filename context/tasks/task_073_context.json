@@ -1,11 +1,10 @@
 {
   "task_id": "task_073",
-  "files_touched": [
-    "scripts/mutation_engine.py",
-    "tests/tooling/test_mutation_engine.py"
-  ],
-  "summary": "mutation_gate failed on the measurement branch with 'could not find any test case for any mutant'. Root cause: scripts/mutation_engine.py wrote only_mutate as a comma-separated line, and mutmut 3.8.0 treats that as a single glob pattern (it only splits on newlines), so with two required files (app.py and search.py) no file matched and mutmut mutated 0 files. With one file it worked by accident. The config now writes one pattern per line. Added a test for the multi-file config. Measured locally on the measurement branch's files: 104 mutants, app.py 95.56% and search.py 84.75% killed, mutation_ci passed.",
+  "files_touched": [],
+  "summary": "Records the results of 2026-10-25. Repair: three planted defects, each fixed by Duo with the exact inverse line and no test touched, in 12 to 13 minutes from the push; and a real defect in mutation_engine found by Duo from an issue the request_fix job opened, fixed in a merge request that merge_guard merged. Hard builds: sci_estimate and cost_summary passed 27 of 27 acceptance tests that were kept out of the repository. Mutation score in CI: app.py 62.2 to 95.6 percent, search.py 78.0 to 84.7 percent. Load: 992 requests, no error, p50 328 to 419 ms. Seven merges by merge_guard with no click. Two defects of ours found by the experiment: planted commits without a task file, and merge_guard counting the skipped request_fix job (fixed in task_070). Credits 59.67 then 156, read by the human; tokens are not exposed.",
   "next": [
-    "Re-run the pipeline of branch duo/chore/15-task-delta-measure-063 after this merges"
+    "Run the chaos faults C1 to C3 and a security remediation, and record them",
+    "Read the credits again at the end and add the row",
+    "Decide on 2026-10-26 14:00 between Hands-off and Supervised from the evidence table"
   ]
 }
