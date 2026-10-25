@@ -79,6 +79,18 @@
         "value": 13.2
       },
       {
+        "label": "Repair: inverted humans-only lookup, push to merge request",
+        "value": 6.4
+      },
+      {
+        "label": "Repair: energy without the PUE, push to merge request",
+        "value": 6.6
+      },
+      {
+        "label": "Repair: median of an even count, push to merge request",
+        "value": 6.8
+      },
+      {
         "label": "Build: sci_estimate, issue to merge",
         "value": 29.4
       },
@@ -145,8 +157,8 @@
     }
   ],
   "repairs": {
-    "planted": 3,
-    "repaired": 3,
+    "planted": 6,
+    "repaired": 6,
     "real_defects_found": 1
   },
   "credits": {
@@ -221,6 +233,13 @@
       "expected": "Merged when every gate is green",
       "observed": "The guard counted the skipped request_fix job as a failure and held the merge requests of the flow (!40, !43); fixed in task_070",
       "held": false
+    },
+    {
+      "id": "N1",
+      "fault": "A repair merge request fails a check of its own (task files of a planted branch)",
+      "expected": "The chain of issues stops at the cap of 6 open autoheal issues",
+      "observed": "Issues #32 to #34 were opened for task_files failures of the repair branches; the cap of 6 open issues held; the guard merged one of those repairs (!65), which added only task files, and the operator cancelled its task",
+      "held": true
     }
   ]
 }

@@ -1,0 +1,13 @@
+{
+  "id": "task_088",
+  "title": "Final results of the experiments: six defects repaired, the nested chain, and task_087 cancelled",
+  "role": "architect",
+  "type": "chore",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "feat/task-088-final-results",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "The data file and docs/experiments.md carry the same figures; every row was read from the GitLab API in the same session."
+}
