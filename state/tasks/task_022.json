@@ -1,0 +1,12 @@
+{
+  "id": "task_022",
+  "title": "Record the demo video (under 3 minutes) and upload it to YouTube",
+  "role": "architect",
+  "type": "chore",
+  "status": "pending",
+  "owner": "human",
+  "priority": 2,
+  "difficulty": 2,
+  "blocked_by": [],
+  "notes": "Script and the conditions for each segment: docs/submission/demo-script.md. Check /health of the live service right before recording."
+}
