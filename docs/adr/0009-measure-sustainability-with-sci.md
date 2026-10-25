@@ -42,6 +42,37 @@ The Cloud Run service (`us-central1`, 432 gCO2eq/kWh) serves the demo, not a mer
 outside R and reported apart if at all. The energy of the LLM inference behind GitLab Duo is not
 measured and no figure is used for it; GitLab Credits are an accounting unit, not energy.
 
+## Experiment
+The same three small code tasks are done in two modes, chosen and listed before the run.
+
+| Mode | What the agent does | Measured per task |
+|---|---|---|
+| A, "naive agent" | Runs the full test suite locally after each edit and retries until green | Local wall-clock seconds of the full suite, number of runs, retries |
+| B, "AFAW" | Runs only its own test locally; CI runs everything once | Local seconds of its own test; from the public API, CI job minutes, job seconds, pipelines and retries (`scripts.cost_log` and the `collect_facts` parsers) |
+
+Energy and SCI per merged merge request, for both modes, with every assumption listed:
+
+| Term | Mode A | Mode B |
+|---|---|---|
+| E, local | local seconds x laptop power | local seconds of its own test x laptop power |
+| E, CI | none | job seconds / 3600 x 2 vCPUs x 0.71 to 4.26 W x 1.1 (Cloud Carbon Footprint) |
+| Laptop power | ASSUMED 9 to 22 W: 9 to 13 W measured during browser interactions and 15 to 22 W as the fixed values of current reporting models ([Kirkeby and Lagermann, arXiv:2510.12566](https://arxiv.org/abs/2510.12566)). A test run is CPU-bound, so the real value may be higher; the study did not test it | same |
+| I | 343 to 579 gCO2eq/kWh (`us-east5` and `us-east1`), applied to both modes | same |
+| M | Excluded; the result is labelled "SCI without M" | same |
+
+The laptop's own grid is not used, because no verified figure for its location was collected;
+applying the same I range to both modes keeps the comparison on energy. Tokens are recorded only
+if a Duo session exposes them. GitLab documents token counts in the per-event usage export, which
+needs a billing account manager ([GitLab Credits dashboard](https://docs.gitlab.com/subscriptions/gitlab_credits_dashboard/));
+when it is not available the field reads "not measurable".
+
+Limits: three tasks, shared runners whose region and utilization are not visible, assumed power
+for both machines, no statistical claim. The experiment cannot show the energy of the model
+inference behind either agent, how the result scales to other projects, or the effect of
+a different laptop. The README keeps "not yet measured" until data exists, and the Most
+Environmentally Impactful prize is requested only if the experiment is completed with data and
+every assumption listed.
+
 ## Alternatives considered
 - **Estimate energy from GitLab Credits.** Rejected: no source relates credits to kWh.
 - **Use the market-based Google figure (Google CFE%).** Rejected: the specification excludes
