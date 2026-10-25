@@ -153,6 +153,44 @@ def test_new_task_id_must_not_exist_on_the_target_branch():
     ]
 
 
+def test_a_copy_identical_to_the_target_is_not_a_change():
+    # A branch can carry task files of main without its history (a merge with one parent):
+    # against the merge base they look new, but merging them changes nothing on the target.
+    task = make_task(status="in_progress", branch="docs/other")
+
+    def run(args):
+        if args[0] == "diff":
+            return f"A\t{P1}\n"
+        if args[0] == "cat-file":
+            return ""  # exists on origin/main
+        if args[0] == "show" and args[1] == f"origin/main:{P1}":
+            return json.dumps(task)
+        raise subprocess.CalledProcessError(128, "git show")
+
+    errors = check("base", "feat/x", run, lambda path: json.dumps(task), target="origin/main")
+    assert errors == []
+
+
+@pytest.mark.characterization(
+    reason="a differing copy was always checked; the test pins that the skip stays narrow"
+)
+def test_a_task_that_differs_from_the_target_is_still_checked():
+    on_target = make_task(status="in_progress", branch="docs/other")
+    on_branch = make_task(status="in_progress", branch="docs/other", title="Another task")
+
+    def run(args):
+        if args[0] == "diff":
+            return f"A\t{P1}\n"
+        if args[0] == "cat-file":
+            return ""
+        if args[0] == "show" and args[1] == f"origin/main:{P1}":
+            return json.dumps(on_target)
+        raise subprocess.CalledProcessError(128, "git show")
+
+    errors = check("base", "feat/x", run, lambda path: json.dumps(on_branch), target="origin/main")
+    assert any("already exists on origin/main" in e for e in errors)
+
+
 def test_v1_0_task_file_migrates_without_reopening():
     # v1.0 used status "completed" and a free-text owner; the migrated file is the same task.
     old = {"id": "task_001", "status": "completed", "owner": "antigravity", "locked_files": []}
