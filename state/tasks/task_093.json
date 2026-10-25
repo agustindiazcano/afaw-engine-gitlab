@@ -1,0 +1,13 @@
+{
+  "id": "task_093",
+  "title": "Index, stack and infrastructure document, stages and Duo table, hackathon footer",
+  "role": "architect",
+  "type": "chore",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "docs/task-093-stack-index",
+  "priority": 2,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Documents only."
+}

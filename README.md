@@ -5,7 +5,7 @@
 AFAW Engine is the entry of the AFAW (Anti-Fragile Agentic Workflow) method to the GitLab Transcend Hackathon "Life After Code" (Devpost). Agents write and repair code, deterministic tools decide whether a change is acceptable, and the human approves the merge policy instead of every merge.
 
 - Author: **Agustin Diaz-Cano** ([www.agustindiazcano.com](https://www.agustindiazcano.com/))
-- Hackathon: GitLab Transcend, "Life After Code" (Devpost: <DEVPOST_URL>)
+- Hackathon: GitLab Transcend, "Life After Code" ([Devpost](https://gitlab-transcend.devpost.com/))
 - Path: **B, Bring Your Own** (existing MIT project, imported to GitLab)
 - Autonomy track: **Best Hands-off Agent**
 - Also targeted: **Most Stages Covered**, **Google Cloud bonus** (Cloud Run)
@@ -20,6 +20,22 @@ AFAW Engine is the entry of the AFAW (Anti-Fragile Agentic Workflow) method to t
 > Status legend used in this document: **Done** (merged, evidence given), **Merged, not deployed** (code in `main`, needs a human step), **In progress**, **Planned**. Nothing marked Planned or In progress is claimed to work.
 
 ---
+
+## Index
+
+| Section | What is there |
+|---|---|
+| [Problem](#problem) and [Why use it](#why-use-it) | What the project is for |
+| [The loop](#what-this-variant-changes-hands-off) and [Hands-off status](#hands-off-status) | Each link of the loop and whether it ran |
+| [Hackathon requirements](#hackathon-requirements-and-status) | Devpost requirements and their state |
+| [The nine stages](#the-nine-stages) and [Stages and Duo](#stages-and-duo) | The jobs of each stage and where a Duo flow ran |
+| [Demo app](#demo-app) | The deployed app the agents change |
+| [Stack](#stack) | Technologies; Google Cloud, Terraform and CI/CD in [`docs/stack.md`](docs/stack.md) |
+| [Dashboard](#dashboard) | Live, experiments and environment pages |
+| [Guardrails](#guardrails-and-known-limits) and [Sustainability](#sustainability) | Limits and the carbon estimate |
+| [Experiments](docs/experiments.md) and [evidence](docs/submission/evidence.md) | Measured results, link by link |
+| [How to run it](#how-to-run-it) and [Getting started](#getting-started-gitlab) | Setup |
+
 
 ## Problem
 
@@ -97,6 +113,28 @@ flowchart LR
 
 Verified in docs.gitlab.com (Oct 24, 2026): the SAST and secret-detection templates run in the `test` stage and only in branch pipelines by default, so `.gitlab-ci.yml` moves them to `secure` and also runs them in merge request pipelines. Basic Semgrep SAST and the secret-detection JSON report are in every tier; findings in the merge request and Advanced SAST need Ultimate. Kaniko is marked as no longer maintained, so Buildah is the fallback.
 
+## Stages and Duo
+
+Counts are read from the evidence file on the day written; a Duo flow counts only if a session ran
+and left a merge request, a commit, an issue or a note. Touching a stage is enough for the Most
+Stages Covered prize ([rules](docs/submission/rules-and-coverage.md)).
+
+| Stage | Job that runs | A Duo flow ran here | Evidence |
+|---|---|---|---|
+| plan | `task_files`, `docs_check`, `duo_config` | No | Planned experiment |
+| create | `task_delta`, `derived_views`, `web_data` | Yes: the Developer Flow opened merge requests from issues | [evidence](docs/submission/evidence.md) |
+| verify | `lint`, `typecheck`, `tests`, `red_check`, `mutation_gate` | Yes: Fix CI/CD once; repairs from `request_fix` issues | [evidence](docs/submission/evidence.md), [experiments](docs/experiments.md) |
+| secure | `semgrep-sast`, `secret_detection`, `security_gate` | No | Planned experiment |
+| package | `package_docker`, `package_demo_app` | No | Planned experiment |
+| release | `release`, `publish_image`, `deploy_cloud_run` | No | Planned experiment |
+| configure | `check_configuration`, `terraform_validate` | No | Planned experiment |
+| monitor | `monitor`, `monitor_live`, `merge_guard`, `request_fix` | No | Planned experiment |
+| govern | `paper_pdf`, `human_only_files`, `equivalent_mutants_report` | No | Planned experiment |
+
+All nine stages have a job that runs; a Duo flow ran in 2 of 9. Experiments to make a flow act in
+each remaining stage are listed in [`PENDING.md`](PENDING.md); each row above is linked when its
+experiment has run.
+
 ## Hands-off status
 
 | Link of the loop | Status |
@@ -123,6 +161,8 @@ Verified in docs.gitlab.com (Oct 24, 2026): the SAST and secret-detection templa
 - **Deploy:** Terraform for Cloud Run (public, minimum 0 and maximum 2 instances), Artifact Registry, Workload Identity Federation from GitLab OIDC, no JSON keys. Done: applied by a person on Oct 24, 2026.
 
 ## Stack
+
+Infrastructure as code, identity, CI/CD variables and the full table: [`docs/stack.md`](docs/stack.md).
 
 Python, pytest, mypy `--strict`, ruff, FastAPI, Docker, Terraform, GitLab CI/CD, GitLab Duo Agent Platform, GitLab Container Registry, Google Cloud Run, Artifact Registry, Workload Identity Federation.
 
@@ -374,3 +414,7 @@ DOI [10.5281/zenodo.23050310](https://doi.org/10.5281/zenodo.23050310). Author: 
 ## License
 
 MIT
+
+---
+
+Built for the [GitLab Transcend Hackathon, Life After Code](https://gitlab-transcend.devpost.com/). Author: [Agustin Diaz-Cano](https://www.agustindiazcano.com/).
