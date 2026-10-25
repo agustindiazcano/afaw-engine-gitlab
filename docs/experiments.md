@@ -25,7 +25,7 @@ estimate (`AGENTS.md` section 2.2). Rows are added only after the experiment ran
 | EXP-02 | Autoheal, lint | Does a lint failure on a branch with no merge request produce an issue, a fix and a merge? | Not run: needs the triggers |
 | EXP-03 | Autoheal, tests | Same, for a failing test caught by `red_check` | Not run |
 | EXP-04 | Long chain | Four issues, one after the other: how many merge with no person, and how long does each take? | Not run |
-| EXP-05 | Burst | Four issues assigned at once: do the merge requests collide, and how fast do credits burn? | Not run |
+| EXP-05 | Burst | Four issues assigned at once: do the merge requests collide, and how fast do credits burn? | Run with seven issues; found a defect of ours (deploy race), see below. Credits per burst not read separately |
 | EXP-06 | Chaos | Do the gates and the guard hold when things break on purpose? | Run for C1, C3 and a security case; the rest not run |
 | EXP-07 | Service load | How does the live service behave under load, and what does it cost? | Run once (992 requests, 0 errors); the cost is not read |
 | EXP-08 | Agent quality | How good are the Duo flows on standard small tasks? | Not run |
@@ -236,3 +236,36 @@ LLM tokens are not exposed by GitLab Duo.
 1. Run the experiment. 2. `python -m scripts.cost_log --mr <iid> --what "<name>" --session <url>`.
 3. Read the credits from the dashboard by hand. 4. Add the row with its link. A cell that could
 not be measured stays `null` or `not run`.
+
+## Stage experiments and the burst (EXP-05)
+
+Seven issues, one per stage that had no Duo-authored change, were created through the API in 15
+seconds (2026-10-25 22:41:23 to 22:41:38 UTC) and assigned to the Developer Flow account. Times are
+read from the GitLab API. All seven merge requests were opened by the flow, went through the same
+gates, and were merged by `merge_guard`.
+
+| Stage | Issue | Merge request | Opened (UTC) | Merged (UTC) | Issue to merge |
+|---|---|---|---|---|---|
+| plan | #37 | [!79](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/79) | 22:43:21 | 22:51:09 | 9 min 46 s |
+| secure | #38 | [!77](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/77) | 22:43:14 | 22:51:02 | 9 min 37 s |
+| package | #39 | [!75](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/75) | 22:42:58 | 22:51:54 | 10 min 27 s |
+| release | #40 | [!80](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/80) | 22:43:29 | 22:51:18 | 9 min 48 s |
+| configure | #41 | [!76](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/76) | 22:43:09 | 22:50:53 | 9 min 20 s |
+| monitor | #42 | [!81](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/81) | 22:43:35 | 22:51:11 | 9 min 36 s |
+| govern | #43 | [!78](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/78) | 22:43:14 | 22:50:56 | 9 min 18 s |
+
+Issue to merge request: 95 to 132 seconds. The UI redesign of the demo app (issue #44, created
+22:47:54, [!83](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/83),
+opened 22:51:53, merged 23:02:37) took 14 min 43 s from issue to merge.
+
+**What the burst found.** Seven merges within 61 seconds started seven pipelines of `main` at
+once. Their deploy jobs overwrote one another: the check of an earlier deploy saw a later commit and
+failed, three pipelines went red (`deploy_demo_app`, `monitor_live`), and `request_fix` opened three
+issues (#45 to #47) for the flow. The code was fine; the pipeline had no deploy lock. The author
+closed the issues before the flow acted and fixed the pipeline in task 106 (a resource group for
+the deploy jobs). Two earlier issues (#35, #36) had the same origin: `request_fix` also reacts to
+failures on the author's own branches. See
+[gotcha 0006](gotchas/0006-parallel-pipelines-of-main-overwrite-each-others-deploy.md).
+
+What this does not show: the credits spent by the burst were not read separately; the readings are
+204.26 (about 18:05 GMT-3) and 219.38 (after the burst was launched, hour not recorded).

@@ -1,0 +1,12 @@
+{
+  "task_id": "task_106",
+  "files_touched": [
+    "tests/tooling/test_gitlab_ci.py",
+    "tests/tooling/test_stats_pages.py"
+  ],
+  "summary": "A burst of seven merges started seven pipelines of main whose deploys overwrote each other; three went red and request_fix opened three issues for the flow, which the author closed. The four deploy jobs now share resource_group deploy. The burst, its timings (issue to merge about 9.5 to 10.5 minutes, issue to merge request 95 to 132 seconds) and the defect are recorded in docs/experiments.md, gotcha 0006 and the credits reading (219.38).",
+  "next": [
+    "Set the process mode of the deploy resource group to oldest_first with the API",
+    "Close issues opened by request_fix on the author's own branches or make it ignore them"
+  ]
+}

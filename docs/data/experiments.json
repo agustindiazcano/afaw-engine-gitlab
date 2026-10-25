@@ -170,9 +170,9 @@
     "real_defects_found": 1
   },
   "credits": {
-    "used": 174.33,
+    "used": 219.38,
     "budget": 500,
-    "read_by": "the human, from the GitLab Credits dashboard"
+    "read_by": "the human, from the GitLab Credits dashboard, on 2026-10-25 after the stage experiments were launched (the hour was not recorded)"
   },
   "environment": {
     "source": "CI job seconds from docs/submission/mutation-tools-measurement.md; coefficients and grid data from docs/adr/0009-measure-sustainability-with-sci.md",
