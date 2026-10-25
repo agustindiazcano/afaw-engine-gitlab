@@ -53,7 +53,7 @@ Self-assessment from the evidence. It is not a score.
 | Innovation/Idea | "The AI decides, the engine measures"; identity by commit author and pipeline user; red-first | |
 | Presentation | Script written | No video |
 
-## Level of autonomy: 12 of 14 links ran at least once (86 %); the feature path ran seven times with no click after the issue, the repair path once
+## Level of autonomy: 12 of 14 links ran at least once (86 %); the feature path ran nine times with no click after the issue, the repair path once
 
 The 13 links are the rows of the table in [`evidence.md`](evidence.md#hands-off-loop-link-by-link).
 
@@ -61,7 +61,7 @@ The 13 links are the rows of the table in [`evidence.md`](evidence.md#hands-off-
 |---|---|---|
 | Assisted | Yes | A person starts every flow and merges |
 | Supervised | Yes, with the issue-to-merge-request and deploy parts | A person starts the flow, marks the draft ready and approves; the gates, the deploy and the monitor ran on their own |
-| Hands-off | **Mostly, with three gaps**: the feature path (issue, Duo merge request, gates, undraft, merge, release, deploy, monitor) ran seven times with no click; the repair path (failure, issue opened by `request_fix`, Duo merge request, merge by the guard) ran once end to end (issue #19 to !47). Not run: the automatic review, the summary comment on the issue, and a repair that needed more than one attempt. The identity of the undraft and the merge is a person's token | A level is claimed only with evidence per link |
+| Hands-off | **Mostly, with three gaps**: the feature path (issue, Duo merge request, gates, undraft, merge, release, deploy, monitor) ran nine times with no click; the repair path (failure, issue opened by `request_fix`, Duo merge request, merge by the guard) ran once end to end (issue #19 to !47). Not run: the automatic review, the summary comment on the issue, and a repair that needed more than one attempt. The identity of the undraft and the merge is a person's token | A level is claimed only with evidence per link |
 
 The decision between Hands-off and Supervised is made on 2026-10-26 14:00 from the evidence table.
 
@@ -69,7 +69,7 @@ The decision between Hands-off and Supervised is made on 2026-10-26 14:00 from t
 
 | Prize | Amount | Coverage | Basis |
 |---|---|---|---|
-| Path B Best Hands-off Agent | $5,000 | Demonstrated for the feature and repair paths | Seven merges by the guard; one repair end to end; see the gaps above |
+| Path B Best Hands-off Agent | $5,000 | Demonstrated for the feature and repair paths | Nine merges by the guard; one repair end to end; see the gaps above |
 | Path B Best Supervised Agent | $4,000 | Claimable | See the level table |
 | Path B Best Assisted Agent | $4,000 | Claimable | Fits, but only one level is submitted |
 | Most Stages Covered (Path B) | $5,000 | **9 of 9 stages have a running job** (100 %); 2 of 9 with a Duo flow that ran (create: Developer Flow; verify: Fix CI/CD, once) | Pipeline of `main`; Duo evidence is in `evidence.md` |
