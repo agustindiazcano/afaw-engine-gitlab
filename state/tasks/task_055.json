@@ -1,0 +1,12 @@
+{
+  "id": "task_055",
+  "title": "Cover the entry points of scripts/check_docs.py and scripts/build_state.py",
+  "role": "architect",
+  "type": "chore",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "chore/task-055-cover-check-docs-build-state",
+  "priority": 3,
+  "difficulty": 1,
+  "blocked_by": []
+}

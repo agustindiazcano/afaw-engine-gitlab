@@ -1,0 +1,13 @@
+{
+  "id": "task_056",
+  "title": "Raise the coverage of scripts/afaw_state/source.py and scripts/check_task_files.py",
+  "role": "architect",
+  "type": "chore",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "duo/chore/11-coverage-source-check-task-files",
+  "priority": 3,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Experiment EXP-08, issue #11. Tests only: tests/tooling/test_source.py (new) and tests/tooling/test_check_task_files.py (extended)."
+}

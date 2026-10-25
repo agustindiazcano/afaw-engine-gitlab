@@ -423,3 +423,15 @@ merge_guard:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   script:
     - python -m scripts.merge_guard --mr "$CI_MERGE_REQUEST_IID"
+
+# When a job failed and the hands-off switch is on, asks the Duo Developer Flow to repair it: a note
+# that mentions the flow on the merge request, or an issue assigned to it on a branch with no merge
+# request. Capped, one request per commit. Needs AFAW_MERGE_TOKEN (a person's token: a bot cannot
+# start a flow). See docs/autohealing.md.
+request_fix:
+  stage: monitor
+  rules:
+    - if: $AFAW_AUTO_MERGE == "true"
+      when: on_failure
+  script:
+    - python -m scripts.request_fix

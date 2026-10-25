@@ -29,6 +29,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import urllib.error
 import urllib.parse
@@ -44,6 +45,8 @@ from scripts.service_accounts import is_service_account_email
 CAP = 3
 REQUIRED_JOBS = ("red_check", "mutation_gate", "security_gate")
 GUARD_JOB = "merge_guard"
+DRAFT_REASON = "merge request is a draft"
+_DRAFT_MARKER = re.compile(r"^\s*(?:draft:|\[draft\]|\(draft\))\s*", re.IGNORECASE)
 TIMEOUT = 30
 
 
@@ -91,6 +94,11 @@ def identity_reasons(
     return reasons
 
 
+def ready_title(title: str) -> str:
+    """``title`` without a leading Draft marker; GitLab derives the draft state from it."""
+    return _DRAFT_MARKER.sub("", title, count=1)
+
+
 def merge_verdict(
     mr: Mapping[str, Any],
     pipeline: Mapping[str, Any] | None,
@@ -108,7 +116,7 @@ def merge_verdict(
     if mr["state"] != "opened":
         reasons.append("merge request is not open")
     if mr["draft"]:
-        reasons.append("merge request is a draft")
+        reasons.append(DRAFT_REASON)
     if mr["target_branch"] != default_branch:
         reasons.append(f"target branch is {mr['target_branch']}, not {default_branch}")
     if mr["has_conflicts"]:
@@ -192,6 +200,17 @@ class Api:
         )
 
 
+    def mark_ready(self, iid: int, title: str) -> None:
+        """Take the merge request out of Draft by writing ``title`` without its Draft marker."""
+        if not self._token:
+            raise FactsError("AFAW_MERGE_TOKEN is not set; cannot mark the merge request ready")
+        self._put(
+            f"{self._base}/merge_requests/{iid}",
+            {"PRIVATE-TOKEN": self._token, "Content-Type": "application/json"},
+            {"title": title},
+        )
+
+
 def _http_put(url: str, headers: Mapping[str, str], body: Mapping[str, Any]) -> Any:
     request = urllib.request.Request(
         url, data=json.dumps(body).encode(), headers=dict(headers), method="PUT"
@@ -224,6 +243,16 @@ def run(api: Api, iid: int, env: Mapping[str, str]) -> int:
         verdict = merge_verdict(
             mr, head, jobs, attempts, default_branch, frozenset(bot_ids), emails
         )
+        if (
+            env.get("AFAW_AUTO_MERGE") == "true"
+            and verdict.reasons == [DRAFT_REASON]
+            and attempts <= CAP
+        ):
+            # Only the draft state holds it back and a service account made every change: the
+            # gates have judged it, so the engine takes it out of Draft, not a person.
+            api.mark_ready(iid, ready_title(mr["title"]))
+            print(f"!{iid} was a draft and every other rule holds: made ready")
+            verdict = Verdict(True, [])
         print(f"merge: {'yes' if verdict.merge else 'no'}")
         for reason in verdict.reasons:
             print(f"  - {reason}")

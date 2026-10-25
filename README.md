@@ -4,6 +4,7 @@
 
 AFAW Engine is the entry of the AFAW (Anti-Fragile Agentic Workflow) method to the GitLab Transcend Hackathon "Life After Code" (Devpost). Agents write and repair code, deterministic tools decide whether a change is acceptable, and the human approves the merge policy instead of every merge.
 
+- Author: **Agustin Diaz-Cano** ([www.agustindiazcano.com](https://www.agustindiazcano.com/))
 - Hackathon: GitLab Transcend, "Life After Code" (Devpost: <DEVPOST_URL>)
 - Path: **B, Bring Your Own** (existing MIT project, imported to GitLab)
 - Autonomy track: **Best Hands-off Agent**
@@ -117,7 +118,7 @@ Verified in docs.gitlab.com (Oct 24, 2026): the SAST and secret-detection templa
 - **Verification gates:** red-first check (a new test must fail on the old code), mutation gate on the diff, lint, strict typing, tests, in parallel.
 - **Security gate:** GitLab SAST and secret detection, with a script that turns their reports into a blocking decision.
 - **Governance:** human-only files (`.gitlab-ci.yml`, `AGENTS.md`, `state/equivalent_mutants.json`, `deploy/`, and the mutation and gate settings in `state/config.json`), merge requests judged by the identity of their author and of the pusher, a task file and a delta per task, decision records (ADRs).
-- **Derived state:** task board, metrics, traffic lights, `LASTCONTEXT.md` and a static dashboard, rebuilt from git and the forge API and never committed. Reading the GitLab API is Done (task 010, [`docs/facts.md`](docs/facts.md)).
+- **Derived state:** task board, metrics, traffic lights, `LASTCONTEXT.md` and a dashboard with a live GitLab panel, rebuilt from git and the forge API and never committed. Reading the GitLab API is Done (task 010, [`docs/facts.md`](docs/facts.md)).
 - **Read-only service (`src/afaw_web`):** `/`, `/live/`, `/health`, `/api/state` (derived metrics verbatim), and `/api/ask`, a deterministic file search that cites paths and copies measured numbers verbatim. No language model call, GET only.
 - **Deploy:** Terraform for Cloud Run (public, minimum 0 and maximum 2 instances), Artifact Registry, Workload Identity Federation from GitLab OIDC, no JSON keys. Done: applied by a person on Oct 24, 2026.
 
@@ -189,7 +190,17 @@ The base method was committed on Sep 29 and 30, 2026. Since Oct 5, from `git log
 | Innovation | Merge approval moved from each merge to the policy, with deterministic gates and identity checks as compensating controls ([ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md)) |
 | Presentation | Demo video <DEMO_VIDEO_URL> |
 
-## Demo dashboard
+## Dashboard
+
+Both pages carry the project name and logo in the top bar, links to the views and the repository, and the author in the footer (a link to [www.agustindiazcano.com](https://www.agustindiazcano.com/), checked on 2026-10-25: it answers 200 and its title is "Agustin Diaz-Cano | Software Engineer"). The logo is a simple mark drawn for the page, not an official asset.
+
+### Live dashboard
+
+The live service serves it at `/live/`. The board, the metrics and the history are derived at build time from `main`, so they change when a new image is deployed. The **Live from GitLab** panel is different: the browser reads the public GitLab REST API every 30 seconds (no token) and shows merge requests merged and open, Duo flow sessions, pipelines passed and failed, and the latest merge requests and pipelines. Draft merge requests show as `draft`.
+
+![Live dashboard: project name and logo, progress, status tiles and the live GitLab panel.](docs/screenshots/dashboard-live.png)
+
+### Demo dashboard
 
 A dashboard built by `scripts/build_state.py` from mock data: a fictional project whose every task and number is invented ([`examples/mock_dashboard.py`](examples/mock_dashboard.py)). It shows each traffic-light rule firing: CI failing, a blocker not done, no activity for three days, nothing measured.
 

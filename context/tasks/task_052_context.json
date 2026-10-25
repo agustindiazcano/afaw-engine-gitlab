@@ -1,0 +1,11 @@
+{
+  "task_id": "task_052",
+  "files_touched": [
+    "tests/web/test_app.py"
+  ],
+  "summary": "Adds 36 tests to tests/web/test_app.py that assert exact 503 bodies (missing list and order, per view and per page), the exact shape and key order of /api/state and /api/ask, the 200 and 201 character boundaries and the 422 error types of /api/ask, the error log line on missing data, verbatim UTF-8 pages with an HTML content type, and the OpenAPI schema (no docs pages, GET routes only). Local mutmut 3.8.0 run on app.py (not the CI runner): 43 of 45 mutants killed (95.6 percent), against 28 of 45 (62.2 percent) at baseline. The two survivors both change the encoding argument of read_text in _page: UTF-8 spelled in capitals is equivalent, and encoding=None is only observable on a runner whose default encoding is not UTF-8. The CI measurement is the one that counts. No defect was found in the code under test.",
+  "next": [
+    "Read the new mutation score of app.py from the pipeline of the merge request",
+    "Human: decide whether the two surviving mutants are accepted as equivalent in state/equivalent_mutants.json"
+  ]
+}

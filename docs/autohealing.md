@@ -47,6 +47,27 @@ Three consequences, each to be confirmed by running it:
 3. There is no filter that keeps a trigger away from `main`. A failure on `main` starts the repair
    as well, and the fix arrives as a new merge request, never as a push.
 
+## Autoheal without triggers: `request_fix`
+
+The triggers need a person and have no branch filter, so the repair is asked for by a CI job. It
+rests on two facts observed on 2026-10-25: a note on a merge request that mentions the Developer
+Flow account starts a flow session (pipeline 2986992512, from a note on !29), and assigning an
+issue to the account through the API starts it too (issues #6 and #12).
+
+`scripts/request_fix.py`, the `request_fix` job (stage `monitor`, `when: on_failure`, only when
+`AFAW_AUTO_MERGE` is `true`):
+
+| Where the pipeline failed | What the job writes | Cap |
+|---|---|---|
+| A merge request pipeline | One note that mentions the flow, with the failed jobs and the end of each log | 3 requests per merge request; one per commit |
+| A branch with no merge request, or `main` | One issue assigned to the flow, labelled `afaw-autoheal`, titled `autoheal: <jobs> @ <sha8>` | 3 per branch and 6 open for the whole project |
+
+The note and the issue are written with `AFAW_MERGE_TOKEN`, which belongs to a person: a bot or
+another flow cannot start a flow. When the flow pushes a fix, its pipeline fails or passes on its
+own, and the same job asks again after a new failure until the cap. The pipeline gates and
+`merge_guard` still judge whatever the flow writes. Never run on a real failure of the project
+until this merge request is in `main`.
+
 ## Delivery or deployment: the merge is a setting, not a click
 
 Duo has no tool that merges (see the table above), but the repository does not need one: `merge_guard` runs in

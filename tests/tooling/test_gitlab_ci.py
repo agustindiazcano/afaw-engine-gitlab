@@ -241,6 +241,16 @@ def test_merge_guard_runs_last_in_merge_request_pipelines_only(ci: dict[str, Any
     assert "AFAW_MERGE_TOKEN" not in str(job)  # the token comes from a CI/CD variable, not the file
 
 
+def test_request_fix_runs_only_after_a_failure_and_with_the_switch_on(
+    ci: dict[str, Any],
+) -> None:
+    job = ci["request_fix"]
+    assert job["stage"] == "monitor"  # after every job it may have to read
+    assert _script(job).strip() == "python -m scripts.request_fix"
+    assert job["rules"] == [{"if": '$AFAW_AUTO_MERGE == "true"', "when": "on_failure"}]
+    assert "AFAW_MERGE_TOKEN" not in str(job)  # the token comes from a CI/CD variable
+
+
 def test_monitor_always_collects_facts_on_gitlab(ci: dict[str, Any]) -> None:
     script = _script(ci["monitor"])
     assert "NOTICE" not in script and "GITHUB_REPOSITORY" not in script

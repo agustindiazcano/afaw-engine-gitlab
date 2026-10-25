@@ -1,0 +1,13 @@
+{
+  "id": "task_059",
+  "title": "Dashboard: project name and logo in the nav, author footer, live GitLab panel, new screenshots",
+  "role": "architect",
+  "type": "feature",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "feat/task-059-dashboard-brand",
+  "priority": 2,
+  "difficulty": 2,
+  "blocked_by": [],
+  "notes": "The dashboard came from another project. The live panel reads the public GitLab API in the browser with no token and is never shown on the demo of invented data."
+}

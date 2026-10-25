@@ -13,6 +13,7 @@ from scripts.merge_guard import (
     REQUIRED_JOBS,
     fix_attempts,
     merge_verdict,
+    ready_title,
 )
 
 FIXTURES = Path(__file__).parent / "fixtures" / "gitlab"
@@ -27,6 +28,7 @@ def recorded_jobs() -> list[dict[str, Any]]:
 def mr(**changes: Any) -> dict[str, Any]:
     base = {
         "iid": 7,
+        "title": "feat: add the thing",
         "state": "opened",
         "draft": False,
         "target_branch": "main",
@@ -171,6 +173,7 @@ class FakeApi:
         self.jobs = jobs
         self.fail_on = fail_on
         self.merged: list[tuple[int, str]] = []
+        self.readied: list[tuple[int, str]] = []
 
     def get_mr(self, iid):
         if self.fail_on == "mr":
@@ -191,6 +194,9 @@ class FakeApi:
 
     def merge(self, iid, sha):
         self.merged.append((iid, sha))
+
+    def mark_ready(self, iid, title):
+        self.readied.append((iid, title))
 
 
 GREEN = [pipe(10, "abc", "running", "2026-10-24T12:00:00Z", user=BOT, source="merge_request_event")]
@@ -223,7 +229,7 @@ def test_only_the_exact_word_true_turns_the_merge_on(value):
 
 
 def test_a_hold_never_merges_and_lists_the_reasons(capsys):
-    api = FakeApi(mr(draft=True), GREEN, recorded_jobs())
+    api = FakeApi(mr(has_conflicts=True), GREEN, recorded_jobs())
     assert run(api, {"AFAW_AUTO_MERGE": "true"}) == 0
     assert api.merged == []
     assert "merge: no" in capsys.readouterr().out
@@ -363,3 +369,88 @@ def test_the_api_reads_the_commits_of_the_merge_request():
 
     merge_guard.Api("https://gitlab.com/api/v4", "88", None, get_json=get_json).mr_commits(7)
     assert "merge_requests/7/commits" in seen[0]
+
+
+# ------------------------------------------------------------------ leaving Draft
+
+
+@pytest.mark.parametrize(
+    ("title", "expected"),
+    [
+        ("Draft: feat: x", "feat: x"),
+        ("draft:feat: x", "feat: x"),
+        ("DRAFT: feat: x", "feat: x"),
+        ("[Draft] feat: x", "feat: x"),
+        ("(Draft) feat: x", "feat: x"),
+        ("feat: x", "feat: x"),
+        ("feat: draft: x", "feat: draft: x"),
+    ],
+)
+def test_ready_title_removes_only_the_leading_draft_marker(title, expected):
+    assert ready_title(title) == expected
+
+
+def test_a_draft_that_is_otherwise_green_is_made_ready_and_merged(capsys):
+    api = FakeApi(mr(draft=True, title="Draft: feat: add the thing"), GREEN, recorded_jobs())
+    assert run(api, {"AFAW_AUTO_MERGE": "true"}) == 0
+    assert api.readied == [(7, "feat: add the thing")]
+    assert api.merged == [(7, "abc")]
+    assert "made ready" in capsys.readouterr().out
+
+
+def test_a_draft_stays_a_draft_when_the_switch_is_off():
+    api = FakeApi(mr(draft=True, title="Draft: x"), GREEN, recorded_jobs())
+    assert run(api) == 0
+    assert api.readied == [] and api.merged == []
+
+
+def test_a_draft_with_another_reason_is_left_alone():
+    api = FakeApi(mr(draft=True, has_conflicts=True, title="Draft: x"), GREEN, recorded_jobs())
+    assert run(api, {"AFAW_AUTO_MERGE": "true"}) == 0
+    assert api.readied == [] and api.merged == []
+
+
+def test_a_draft_of_a_person_is_never_made_ready():
+    api = FakeApi(
+        mr(draft=True, title="Draft: x"),
+        GREEN,
+        recorded_jobs(),
+        commits=[{"author_email": "person@example.com"}],
+    )
+    assert run(api, {"AFAW_AUTO_MERGE": "true"}) == 0
+    assert api.readied == [] and api.merged == []
+
+
+def test_a_draft_whose_pipeline_is_red_is_left_alone():
+    jobs = recorded_jobs()
+    jobs[0] = {**jobs[0], "status": "failed"}
+    api = FakeApi(mr(draft=True, title="Draft: x"), GREEN, jobs)
+    assert run(api, {"AFAW_AUTO_MERGE": "true"}) == 0
+    assert api.readied == [] and api.merged == []
+
+
+def test_a_refused_ready_request_fails_closed(capsys):
+    class Refusing(FakeApi):
+        def mark_ready(self, iid, title):
+            raise FactsError("the merge request was not updated: HTTP 403")
+
+    api = Refusing(mr(draft=True, title="Draft: x"), GREEN, recorded_jobs())
+    assert run(api, {"AFAW_AUTO_MERGE": "true"}) == 2
+    assert api.merged == []
+
+
+def test_marking_ready_sends_only_the_new_title_and_the_token_in_a_header():
+    sent = {}
+
+    def put(url, headers, body):
+        sent.update(url=url, headers=headers, body=body)
+        return {}
+
+    api = merge_guard.Api(
+        "https://gitlab.com/api/v4", "88", "s3cret", get_json=lambda u: [], put=put
+    )
+    api.mark_ready(7, "feat: x")
+    assert sent["url"] == "https://gitlab.com/api/v4/projects/88/merge_requests/7"
+    assert sent["headers"]["PRIVATE-TOKEN"] == "s3cret"
+    assert sent["body"] == {"title": "feat: x"}
+    assert "s3cret" not in sent["url"]

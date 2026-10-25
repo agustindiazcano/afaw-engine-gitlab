@@ -1,0 +1,8 @@
+{
+  "task_id": "task_058",
+  "files_touched": [],
+  "summary": "Wrote docs/submission/handoff-cd-test.md from issue 12 to test whether merge_guard takes the merge request out of Draft and merges it with no person. Documentation only; no code changed.",
+  "next": [
+    "Record the outcome of the merge_guard run in docs/submission/evidence.md"
+  ]
+}
