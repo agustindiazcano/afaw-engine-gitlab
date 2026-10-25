@@ -1,0 +1,11 @@
+{
+  "task_id": "task_088",
+  "files_touched": [
+    "tests/tooling/test_stats_pages.py"
+  ],
+  "summary": "Three more planted defects were repaired by the Developer Flow with the exact inverse line and no test touched: the humans-only lookup inverted in human_only_files, the energy without the PUE in sci_estimate and the median of an even count in benchmark_report (the last two are tools Duo had written), 6.4 to 6.8 minutes from the push to the merge request. That makes six of six planted defects plus one real one. The experiments page and docs/experiments.md also record the nested chain: repair branches that fail task_files opened issues #32 to #34, the cap of six open issues held, and the guard merged one of those repairs (!65), which added only task files; task_087 is cancelled.",
+  "next": [
+    "Rewrite the Devpost and Path B texts and the README status to the final state",
+    "Read the credits at the end and add the row"
+  ]
+}
