@@ -180,3 +180,22 @@ def test_a_service_account_commit_on_unprotected_files_is_fine(
     project: Project, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     assert _run(project, monkeypatch, ["src/a.py"], {}, identities=[SA_COMMIT]) == 0
+
+
+def test_protected_patterns_are_the_script_constants_sorted() -> None:
+    expected = sorted((*hof.HUMAN_ONLY_PATHS, *hof.HUMAN_ONLY_PREFIXES))
+    assert hof.protected_patterns() == expected
+
+
+def test_list_prints_the_patterns_one_per_line_without_base(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    assert hof.main(["--list"]) == 0
+    assert capsys.readouterr().out.splitlines() == hof.protected_patterns()
+
+
+def test_without_list_and_without_base_still_fails(capsys: pytest.CaptureFixture[str]) -> None:
+    with pytest.raises(SystemExit) as raised:
+        hof.main([])
+    assert raised.value.code == 2
+    assert "--base" in capsys.readouterr().err
