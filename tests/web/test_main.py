@@ -39,7 +39,7 @@ def test_main_app_serves_the_data_directory_named_in_the_environment(
     monkeypatch.setenv("AFAW_WEB_DATA_DIR", str(data_dir))
     client = TestClient(_reload_main())
     assert client.get("/health").json() == {"status": "ok"}
-    assert "demo dashboard" in client.get("/").text
+    assert "live dashboard" in client.get("/").text
 
 
 @pytest.mark.characterization(

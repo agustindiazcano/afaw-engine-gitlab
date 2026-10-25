@@ -1,0 +1,15 @@
+{
+  "task_id": "task_079",
+  "files_touched": [
+    "scripts/afaw_state/brand.py",
+    "src/afaw_web/app.py",
+    "tests/tooling/test_dashboard_brand.py",
+    "tests/web/test_app.py",
+    "tests/web/test_main.py"
+  ],
+  "summary": "The human opened the root of the deployed service and saw the demo with invented tasks, because / served the demo and the real dashboard lived at /live/. Now / and /live/ serve the real dashboard and /demo/ serves the demo; the nav links follow. 16 tests failed on the old routes: 3 new and 13 existing ones that were updated to the new paths. The board, metrics and history are still derived when the image is built, so they are as fresh as the last deploy of main; the Live from GitLab panel reads the API in the browser every 30 seconds.",
+  "next": [
+    "Add statistics and environmental screens to the dashboard (task_080)",
+    "Read the dashboard again after the next deploy to see the new tasks and the facts"
+  ]
+}

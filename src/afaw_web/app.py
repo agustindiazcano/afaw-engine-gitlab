@@ -113,14 +113,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         }
 
     @app.get("/", response_class=HTMLResponse, response_model=None)
+    @app.get("/live/", response_class=HTMLResponse, response_model=None)
+    def live() -> HTMLResponse | JSONResponse:
+        """This repository's own dashboard; ``/live/`` is the old address of the same page."""
+        return _page(data_dir / "live" / "dashboard.html", unavailable)
+
+    @app.get("/demo/", response_class=HTMLResponse, response_model=None)
     def demo() -> HTMLResponse | JSONResponse:
         """The demo dashboard, built from invented mock data."""
         return _page(data_dir / "demo" / "index.html", unavailable)
-
-    @app.get("/live/", response_class=HTMLResponse, response_model=None)
-    def live() -> HTMLResponse | JSONResponse:
-        """This repository's own dashboard."""
-        return _page(data_dir / "live" / "dashboard.html", unavailable)
 
     @app.get("/api/ask")
     def ask(q: Question) -> dict[str, Any]:

@@ -1,0 +1,13 @@
+{
+  "id": "task_079",
+  "title": "The root of the live service is the real dashboard; the demo of invented data moves to /demo/",
+  "role": "architect",
+  "type": "fix",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "fix/task-079-root-is-the-live-dashboard",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "The human opened the root of the service and saw the demo with invented data, not the project."
+}
