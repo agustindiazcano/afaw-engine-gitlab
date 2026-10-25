@@ -1,0 +1,13 @@
+{
+  "id": "task_103",
+  "title": "check_live: accept a newer deployed commit when pipelines of main overlap",
+  "role": "architect",
+  "type": "fix",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "duo/fix/46-monitor-live-newer-deploy",
+  "priority": 2,
+  "difficulty": 2,
+  "blocked_by": [],
+  "notes": "Autoheal issue 46: monitor_live failed because a later pipeline had already deployed."
+}
