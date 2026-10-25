@@ -56,6 +56,8 @@ A valid submission exists after tasks 009 and 010.
 - [ ] Context handoff rule: when an agent session reaches a context threshold it writes the prompt for the next session (what is done, what is pending, what to read first) to a file, clears, and the new session reads that file first. Design first as an ADR; the mechanism is a hook plus a `state/handoff/` file, never a secret in it
 
 ## FINAL, last of all: new white paper
+- [ ] The diagrams of the old method (docs/img, paper) describe a human who approves every pull request; the new paper uses `docs/method-handsoff.md` instead
+- [ ] Paper ledger: every result the new paper will cite is recorded with its source as it happens (benchmarks in `docs/experiments.md` and `docs/data/experiments.json`, GitLab Credits read by the human with the date, the environmental estimate with its assumptions, the stats of autonomous merge requests). A figure with no source in the ledger is not in the paper. Credits read so far: 204.26 (about 18:05 GMT-3) and 219.38 (2026-10-25, before the stage experiments)
 - [ ] Write a new white paper for AFAW Engine (hands-off automation end to end: CI/CD, testing, security, deployment, self-repair and observability) and cite the original AFAW paper (DOI 10.5281/zenodo.23050310) instead of editing it. Write it only after the experiments, the telemetry report and the evidence table are final, so every figure in it is measured. `docs/paper/afaw.pdf` stays as the original; the new one goes in its own folder, and `paper_pdf` must keep passing
 
 ## Low priority: security hardening
