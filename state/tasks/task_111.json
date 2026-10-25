@@ -1,0 +1,13 @@
+{
+  "id": "task_111",
+  "title": "Autoheal issue 51: record the repair of the task_files failure on the stacked branch of issue 50",
+  "role": "architect",
+  "type": "fix",
+  "status": "done",
+  "owner": "agent",
+  "branch": "duo/fix/51-task-files-stacked-branch",
+  "priority": 2,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Repairs issue 51. The failed branch was stacked on the branch of issue 49 and carried its task_109 file. The same characterization marker is already in !89, so no code changes here."
+}
