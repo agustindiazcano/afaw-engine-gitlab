@@ -385,6 +385,10 @@ class GitLab:
     def mr_pipelines(self, iid: int) -> list[Mapping[str, Any]]:
         return self._pages(f"merge_requests/{iid}/pipelines")
 
+    def pipeline(self, pipeline_id: int) -> Mapping[str, Any]:
+        pipeline: Mapping[str, Any] = self._get_json(self._url(f"pipelines/{pipeline_id}"))
+        return pipeline
+
     def pipelines_of_branch(self, branch: str) -> list[Mapping[str, Any]]:
         return self._pages("pipelines", ref=branch)
 
