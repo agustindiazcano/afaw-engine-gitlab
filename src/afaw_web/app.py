@@ -15,6 +15,7 @@ from fastapi import FastAPI, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import AfterValidator
+from pydantic_core import PydanticCustomError
 
 from afaw_web.search import search
 from afaw_web.settings import Settings
@@ -29,17 +30,33 @@ QUESTION_LIMIT = (
 
 
 def _check_question_length(question: str) -> str:
-    """Return the question unchanged if its trimmed length is within the limit."""
-    if not MIN_QUESTION <= len(question.strip()) <= MAX_QUESTION:
-        raise ValueError(
-            f"must have between {MIN_QUESTION} and {MAX_QUESTION} characters "
-            "after trimming whitespace"
+    """Return the question unchanged if its trimmed length is within the limit.
+
+    The error types and context match the built-in ``min_length``/``max_length`` ones.
+    """
+    size = len(question.strip())
+    if size < MIN_QUESTION:
+        raise PydanticCustomError(
+            "string_too_short",
+            "must have at least {min_length} characters after trimming whitespace",
+            {"min_length": MIN_QUESTION},
+        )
+    if size > MAX_QUESTION:
+        raise PydanticCustomError(
+            "string_too_long",
+            "must have at most {max_length} characters after trimming whitespace",
+            {"max_length": MAX_QUESTION},
         )
     return question
 
 
 Question = Annotated[
-    str, AfterValidator(_check_question_length), Query(description=QUESTION_LIMIT)
+    str,
+    AfterValidator(_check_question_length),
+    Query(
+        description=QUESTION_LIMIT,
+        json_schema_extra={"minLength": MIN_QUESTION, "maxLength": MAX_QUESTION},
+    ),
 ]
 
 
@@ -48,8 +65,9 @@ async def _invalid_request(_: Request, exc: RequestValidationError) -> JSONRespo
     detail = [
         {
             "loc": list(e["loc"]),
-            "msg": f"{e['loc'][-1]}: {str(e['msg']).removeprefix('Value error, ')}",
+            "msg": f"{e['loc'][-1]}: {e['msg']}",
             "type": e["type"],
+            **({"ctx": e["ctx"]} if "ctx" in e else {}),
         }
         for e in exc.errors()
     ]
