@@ -51,8 +51,12 @@ The verdict is the same in both modes: green pipeline including `red_check`, `mu
 commit authors that are all service accounts. Only the last step differs.
 
 The token is the cost of continuous deployment: `AFAW_MERGE_TOKEN` must be allowed to merge, so
-it should be a project access token with the Developer role and the `api` scope, masked and
-protected so that only pipelines on protected refs read it. The human decides whether to create it.
+it should be a project access token with the Developer role and the `api` scope, masked. It cannot
+be protected: a protected variable is not passed to merge request pipelines of unprotected
+branches, so any pipeline of the project can read it ([`merge-guard.md`](merge-guard.md)). Two
+more conditions: ADR 0007 must be `accepted` by the human, and the merge request must be made by
+a Duo flow, because `merge_guard` never merges a person's merge request. The human decides whether
+to create the token.
 
 ## The smallest design
 
