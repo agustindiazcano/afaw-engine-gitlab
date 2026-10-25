@@ -1,0 +1,11 @@
+{
+  "task_id": "task_099",
+  "files_touched": [
+    "scripts/release_notes.py",
+    "tests/tooling/test_release_notes.py"
+  ],
+  "summary": "Added scripts/release_notes.py: a pure render(merge_requests, tag) that returns Markdown (a heading with the tag, one '- !IID title (author)' bullet per merge request sorted by IID, a final count line) and a main(argv) that reads a JSON file given with --merge-requests and prints the notes. No network call; titles are kept verbatim. Not wired into the pipeline. Eight tests cover the empty list, ordering, Markdown characters, the CLI and its error path; red_check confirmed they fail on the old code.",
+  "next": [
+    "Decide whether a release job should fetch the merged merge requests and call release_notes"
+  ]
+}

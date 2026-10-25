@@ -1,0 +1,13 @@
+{
+  "id": "task_099",
+  "title": "release_notes: build the description of a release from merged merge requests",
+  "role": "architect",
+  "type": "feature",
+  "status": "in_progress",
+  "owner": "agent",
+  "branch": "feat/task-099-release-notes",
+  "priority": 3,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Release-stage experiment. Not wired into the pipeline."
+}
