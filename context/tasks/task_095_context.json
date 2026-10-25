@@ -1,0 +1,9 @@
+{
+  "task_id": "task_095",
+  "files_touched": [],
+  "summary": "Wrote the plan for four requested gaps (state reconciliation, budget guardrails, prompt caching, telemetry report), each checked against what exists. Built later: telemetry_report.py, a freeze marker in request_fix, a branch_overlap job. Prompt caching is not measurable in GitLab Duo.",
+  "next": [
+    "Last of all: a new white paper for AFAW Engine that cites the original (see PENDING.md)",
+    "Build scripts/telemetry_report.py after the Duo experiments"
+  ]
+}
