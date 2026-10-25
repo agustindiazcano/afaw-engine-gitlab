@@ -159,8 +159,11 @@ def test_paper_build_compiles_the_pdf_so_nobody_needs_latex_locally(ci: dict[str
     assert script.count("xelatex") >= 2  # twice: the second run resolves the references
     assert "fonts-liberation" in script  # the paper is set in Liberation Sans
     assert "docs/paper/afaw.pdf" in job["artifacts"]["paths"]
-    changes = " ".join(str(c) for r in job["rules"] for c in r.get("changes", []))
-    assert "AGENTS.md" in changes and "docs/paper/afaw.tex" in changes and "docs/img" in changes
+    watched = [r["changes"] for r in job["rules"] if "changes" in r]
+    paths = " ".join(str(p) for c in watched for p in c["paths"])
+    assert "AGENTS.md" in paths and "docs/paper/afaw.tex" in paths and "docs/img" in paths
+    # against main, not the previous push: a later push that does not touch the sources still builds
+    assert all(c["compare_to"] == "refs/heads/main" for c in watched)
 
 
 def test_terraform_is_formatted_and_validated_in_configure(ci: dict[str, Any]) -> None:
