@@ -1,13 +1,8 @@
 {
   "task_id": "task_092",
   "files_touched": [
-    "src/notes_app/Dockerfile",
-    "src/notes_app/__init__.py",
-    "src/notes_app/app.py",
-    "src/notes_app/main.py",
-    "src/notes_app/requirements.txt",
-    "tests/notes/__init__.py",
-    "tests/notes/test_app.py"
+    "tests/tooling/test_gitlab_ci.py",
+    "tests/tooling/test_terraform_guardrails.py"
   ],
   "summary": "Added the Terraform service afaw-demo-app (public invoker, deployer run.developer, same limits as the dashboard) and ignore_changes on env for both services so a plan does not wipe the variables CI sets. Added package_demo_app, publish_demo_image and deploy_demo_app to .gitlab-ci.yml; the last fails unless the live service reports the commit and exports DEMO_APP_URL. The tests job also runs tests/notes. Documented in docs/demo-app.md, README and PENDING.md (orchestrator, context handoff, bug benchmarks planned).",
   "next": [
