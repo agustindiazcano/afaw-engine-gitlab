@@ -15,9 +15,27 @@ to, asks GitLab to merge.
 |---|---|---|
 | Cap of fix attempts | A fix attempt is a commit pushed by a Duo flow service account (ids in the group variable `AFAW_BOT_USER_IDS`) after the first failed pipeline of the merge request. Two pipelines of one commit count once. More than 3 attempts break the cap | The job fails (exit 1), so the pipeline is red and the merge request cannot pass |
 | Merge rule | The merge request is open, not a draft, targets the default branch, has no conflicts and no unresolved blocking discussion; the latest pipeline is for the head commit; every other job of that pipeline has the status `success`; `red_check`, `mutation_gate` and `security_gate` are present | `merge: no` with every reason listed; nothing is merged |
+| Who made the change | The head pipeline was started by a user whose id is in `AFAW_BOT_USER_IDS`, and every commit of the merge request is authored by a service account address (`service_account_...@noreply.gitlab.com`). The merge request author is not looked at: with a Duo flow it is the person who triggered the flow (composite identity), and the committer is that person too. With no id configured nothing is merged automatically | `merge: no` with the reason; a person's merge request is never merged by the guard |
 | Cannot decide | An API error, an unreadable response, a missing variable | Exit 2; nothing is merged (fails closed) |
 
 A failed job that is allowed to fail, a skipped job and a manual job do not count as green.
+
+### Who made the change
+
+Read on 2026-10-25 from merge requests !16, !17 and !18 (Developer Flow): MR author id 43344247 (a
+person), commit author `Duo Developer <service_account_group_..._...@noreply.gitlab.com>`, committer
+the same person, pipeline user `duo-developer-gitlab-ai-hackathon` (id 33073386). The Fix CI/CD
+Pipeline Flow account is id 33073387. Both ids belong in `AFAW_BOT_USER_IDS`.
+
+The pipeline user is the authoritative signal. The author address is forgeable, so it only adds
+conditions: `human_only_files` fails when a commit authored by a service account changes a human-only
+file (whoever started the pipeline, so a person re-running a flow's pipeline does not clear it), and
+`merge_guard` requires the address on every commit in addition to the pipeline user. A person who
+forges the address still fails the pipeline-user condition.
+
+Run against the real merge requests with `AFAW_AUTO_MERGE` unset: !16 was held only for being a
+draft; the same run with no ids was also held for the missing ids; !14, a person's merge request, was
+held because its pipeline and its commits were not a service account's.
 
 ### What the cap does not do
 
