@@ -1,0 +1,9 @@
+{
+  "task_id": "task_118",
+  "files_touched": [
+    "src/notes_app/static/index.html",
+    "tests/notes/test_page.py"
+  ],
+  "summary": "Repaired the three defects planted by task_116 that failed e2e_live: the summary counted d.length+1 notes, the Clear all handler was empty (now sends DELETE /api/notes, reloads, and also works with Enter and Space), and the hint used the card background colour (now var(--muted)). Added three page tests that failed on the old page; the 14 e2e tests pass locally against the fixed app.",
+  "next": []
+}
