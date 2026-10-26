@@ -1,0 +1,13 @@
+{
+  "id": "task_150",
+  "title": "repair_check: do not fail the job when the merge request names no issue",
+  "role": "architect",
+  "type": "fix",
+  "status": "done",
+  "owner": "agent",
+  "branch": "fix/task-150-repair-check-pipefail",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "grep exits 1 with no match and GitLab runs jobs with pipefail, so the job failed on Duo merge requests without Closes #N; request_fix then asked Duo to repair a defect that is not in its code (sessions 10030034 and 10030043). Touches .gitlab-ci.yml: opened with the human's token."
+}
