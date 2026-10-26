@@ -1,0 +1,13 @@
+{
+  "task_id": "task_128",
+  "files_touched": [
+    ".claude/hooks/session_start.py",
+    "scripts/handoff.py",
+    "tests/tooling/test_handoff.py",
+    "tests/tooling/test_hooks.py"
+  ],
+  "summary": "scripts/handoff.py builds state/handoff/HANDOFF.md from git, the public GitLab API and PENDING.md plus a free-text note, and refuses text that matches a token pattern before writing. The session-start hook prints the file and warns when origin/main moved since the commit it records.",
+  "next": [
+    "A person wires the script into a CI job or the end of a session if wanted."
+  ]
+}
