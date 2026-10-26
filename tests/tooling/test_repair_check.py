@@ -120,7 +120,9 @@ def test_nothing_to_verify_is_not_ok():
 
 def fake_get_json(jobs: list[dict[str, Any]], description: str, pipelines=None):
     seen: list[str] = []
-    pipelines = [{"id": 10, "created_at": "2026-10-26T01:00:00Z"}] if pipelines is None else pipelines
+    pipelines = (
+        [{"id": 10, "created_at": "2026-10-26T01:00:00Z"}] if pipelines is None else pipelines
+    )
 
     def get_json(url: str) -> Any:
         seen.append(url)
