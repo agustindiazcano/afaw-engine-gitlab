@@ -1,0 +1,8 @@
+{
+  "task_id": "task_123",
+  "files_touched": [],
+  "summary": "The top of the README now names the whole stack, what the loop does and what has been measured, so a reader sees it in three short paragraphs.",
+  "next": [
+    "Same wording in the Devpost text"
+  ]
+}

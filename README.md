@@ -4,6 +4,12 @@
 
 AFAW Engine is the entry of the AFAW (Anti-Fragile Agentic Workflow) method to the GitLab Transcend Hackathon "Life After Code" (Devpost). Agents write and repair code, deterministic tools decide whether a change is acceptable, and the human approves the merge policy instead of every merge.
 
+**Built with:** Python 3.12 · FastAPI · GitLab CI/CD (9-stage pipeline) · GitLab Duo Agent Platform (Developer Flow, Fix CI/CD Flow, custom agent) · Terraform · Google Cloud Run · Workload Identity Federation · Docker · Playwright (end-to-end) · pytest · mypy `--strict` · ruff · mutmut (AST mutation testing) · Semgrep SAST · secret detection · Mermaid.
+
+**What it does:** a failing check opens an issue, a Duo agent fixes it, a deterministic guard merges when every gate is green, Google Cloud Run redeploys, and a live browser test verifies the result. Around that loop: red-first TDD check, mutation testing, SAST, chaos experiments and a carbon (SCI) measurement of every flow.
+
+**Measured so far:** 9 of 9 DevSecOps stages have a merge request written by a Duo agent. A planted bug was caught by a live test, fixed by Duo and redeployed in 23 min 44 s from issue to verified app, for 6.62 GitLab Credits ([details](docs/experiments.md#bug-benchmark-on-the-demo-app-from-a-failing-live-check-to-a-repaired-redeployed-app)). Limits are stated in [Why use it](#why-use-it).
+
 - Author: **Agustin Diaz-Cano** ([www.agustindiazcano.com](https://www.agustindiazcano.com/))
 - Hackathon: GitLab Transcend, "Life After Code" ([Devpost](https://gitlab-transcend.devpost.com/))
 - Path: **B, Bring Your Own** (existing MIT project, imported to GitLab)
