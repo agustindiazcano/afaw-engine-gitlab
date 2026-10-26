@@ -1,0 +1,16 @@
+{
+  "task_id": "task_119",
+  "files_touched": [
+    "scripts/afaw_state/eco.py",
+    "scripts/build_state.py",
+    "scripts/sci_report.py",
+    "tests/tooling/test_eco_indicator.py",
+    "tests/tooling/test_sci_report.py"
+  ],
+  "summary": "scripts/sci_report.py measures the job seconds of the pipelines of each merged merge request and of the main pipeline of its merge commit, and gives a range of gCO2eq (Cloud Carbon Footprint power, Google Cloud grid of the two hosted-runner regions, SCI without M). The energy of the Duo model is not measured.",
+  "next": [
+    "Run it on the merged merge requests and record the result in docs/experiments.md",
+    "Dashboard indicator from the JSON",
+    "README section"
+  ]
+}
