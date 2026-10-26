@@ -256,3 +256,10 @@ def test_the_page_says_what_the_evidence_does_not_prove(
     assert any("token" in text for text in limits)
     for text in limits:
         assert escape(text) in experiments
+
+
+def test_the_guard_merge_tile_and_the_autonomy_panel_give_the_same_number(
+    experiments: str, data: dict[str, Any]
+) -> None:
+    count = data["handoff"]["autonomy"]["guard_merged"]
+    assert f"<b>{count}</b><span>Merges by merge_guard" in experiments
