@@ -94,3 +94,23 @@ def test_the_page_has_a_summary_line_a_clear_control_and_a_hint(html: str) -> No
     assert 'id="stats"' in html
     assert re.search(r'id="clear"[^>]*role="button"', html)
     assert 'class="hint"' in html
+
+
+def test_the_summary_shows_the_number_of_notes_without_an_offset(html: str) -> None:
+    assert "(d.length+1)" not in html
+    assert re.search(r"\$\('stats'\)\.textContent=d\.length\+' notes'", html)
+
+
+def test_the_clear_control_deletes_the_notes_on_the_server(html: str) -> None:
+    bound = re.search(r"\$\('clear'\)\.addEventListener\('click',(\w+|\(\)=>\{\})\)", html)
+    assert bound is not None
+    assert bound.group(1) != "()=>{}"
+    assert re.search(r"fetch\('/api/notes',\{method:'DELETE'\}\)", html)
+
+
+def test_the_hint_text_colour_differs_from_the_card_background(html: str) -> None:
+    hint = re.search(r"\.hint\{[^}]*\}", html)
+    assert hint is not None
+    colour = re.search(r"(?<![-\w])color:([^;}]+)", hint.group(0))
+    assert colour is not None
+    assert colour.group(1).strip() != "var(--surface)"
