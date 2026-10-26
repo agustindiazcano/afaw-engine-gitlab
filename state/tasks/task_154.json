@@ -1,0 +1,13 @@
+{
+  "id": "task_154",
+  "title": "Demo app: mark a note as done, in the API and on the page",
+  "role": "architect",
+  "type": "feature",
+  "status": "pending",
+  "owner": "agent",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "branch": "sync/task-154-demo-tasks",
+  "notes": "Acceptance. API: PATCH /api/notes/{note_id} with a JSON body {\"done\": true|false} returns 200 and the updated note, 404 with a detail message for an unknown id, 422 when done is not a boolean; every note returned by GET /api/notes and POST /api/notes has a boolean done field that starts false; DELETE /api/notes still empties the store. Page (src/notes_app/static/index.html): each note shows a done control that is NOT a <button> element (use <span role=\"button\" tabindex=\"0\" aria-label=\"Mark note as done\">) and a done note is shown with a line-through. Tests first: unit tests in tests/notes/ and a Playwright test in e2e/test_notes_app.py that adds two notes, marks one done and sees only that one struck through. Keep the selectors #t #f #n #v, a single <button> element and the brand colour #0b5fff. The existing browser tests and e2e/test_notes_live.py must keep passing. Do not touch .gitlab-ci.yml."
+}
