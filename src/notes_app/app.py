@@ -40,6 +40,7 @@ def create_app() -> FastAPI:
     """Build the app with its own empty in-memory store."""
     app = FastAPI(title="AFAW demo notes")
     notes: list[dict[str, int | str]] = []
+    next_id = 1
     lock = threading.Lock()
     page_html = STATIC_PAGE.read_text(encoding="utf-8")
 
@@ -62,16 +63,29 @@ def create_app() -> FastAPI:
 
     @app.post("/api/notes", status_code=201)
     def add_note(body: NoteIn) -> dict[str, int | str]:
+        nonlocal next_id
         with lock:
             if len(notes) >= MAX_NOTES:
                 raise HTTPException(status_code=409, detail="The store is full")
-            note: dict[str, int | str] = {"id": len(notes) + 1, "text": body.text}
+            note: dict[str, int | str] = {"id": next_id, "text": body.text}
+            next_id += 1
             notes.append(note)
             return note
 
     @app.delete("/api/notes", status_code=204)
     def clear_notes() -> None:
+        nonlocal next_id
         with lock:
             notes.clear()
+            next_id = 1
+
+    @app.delete("/api/notes/{note_id}", status_code=204)
+    def delete_note(note_id: int) -> None:
+        with lock:
+            for index, note in enumerate(notes):
+                if note["id"] == note_id:
+                    del notes[index]
+                    return
+        raise HTTPException(status_code=404, detail="Note not found")
 
     return app
