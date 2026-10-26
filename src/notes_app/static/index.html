@@ -39,9 +39,12 @@ font-size:.75rem}
 .error{margin:var(--space-12) 0 0;padding:var(--space-8) var(--space-12);color:var(--error);
 background:var(--error-bg);border-radius:var(--space-8);font-size:.875rem}
 ul{list-style:none;margin:var(--space-24) 0 0;padding:0;display:grid;gap:var(--space-8)}
-li{padding:var(--space-12) var(--space-16);background:var(--note-bg);
+li{display:flex;align-items:center;justify-content:space-between;gap:var(--space-12);
+padding:var(--space-12) var(--space-16);background:var(--note-bg);
 border:1px solid var(--border);border-radius:var(--space-8);overflow-wrap:anywhere;
 animation:fade .25s ease-out}
+.del{flex:none;color:var(--primary);cursor:pointer;text-decoration:underline;
+font-size:.875rem}
 @keyframes fade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion: reduce){li{animation:none}}
 #empty{margin:var(--space-24) 0 0;padding:var(--space-16);text-align:center;color:var(--muted);
@@ -51,6 +54,7 @@ border:1px dashed var(--border);border-radius:var(--space-8)}
 color:var(--muted);font-size:.875rem}
 .hint{margin:var(--space-8) 0 0;font-size:.875rem;color:var(--muted)}
 footer{margin-top:var(--space-24);color:var(--muted);font-size:.75rem;overflow-wrap:anywhere}
+footer a{color:var(--focus)}
 [hidden]{display:none!important}
 </style></head>
 <body><main>
@@ -83,9 +87,19 @@ btn.disabled=input.value.trim()===''}
 function fail(m){err.textContent=m;err.hidden=false}
 async function load(){const r=await fetch('/api/notes');const d=await r.json();
 const ul=$('n');ul.replaceChildren();
-for(const x of d){const li=document.createElement('li');li.textContent=x.text;ul.append(li)}
+for(const x of d){const li=document.createElement('li');
+const t=document.createElement('span');t.textContent=x.text;
+const del=document.createElement('span');del.className='del';del.textContent='Delete';
+del.setAttribute('role','button');del.tabIndex=0;del.setAttribute('aria-label','Delete note');
+const go=()=>removeNote(x.id);
+del.addEventListener('click',go);
+del.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}});
+li.append(t,del);ul.append(li)}
 $('empty').hidden=d.length>0;
-$('stats').textContent=d.length+' notes'}
+const s=await (await fetch('/api/stats')).json();
+$('stats').textContent=s.count===0?'0 notes':s.count+' notes, longest '+s.longest+' characters'}
+async function removeNote(id){try{const r=await fetch('/api/notes/'+id,{method:'DELETE'});
+if(!r.ok&&r.status!==404)throw 0;await load()}catch(_){fail('Could not delete the note. Try again.')}}
 async function clearAll(){try{const r=await fetch('/api/notes',{method:'DELETE'});
 if(!r.ok)throw 0;await load()}catch(_){fail('Could not clear the notes. Try again.')}}
 $('clear').addEventListener('click',clearAll);
@@ -100,7 +114,11 @@ if(!r.ok){fail(r.status===409?'The store is full.':'Could not save the note. Try
 sync();return}
 input.value='';sync();await load()}
 catch(_){fail('Could not save the note. Check your connection and try again.');sync()}});
+const COMMIT_URL='https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/commit/';
 fetch('/api/version').then(r=>r.json()).then(v=>{
-$('v').textContent='Release '+v.release_tag+', commit '+v.commit_sha}).catch(()=>{});
+$('v').textContent='Release '+v.release_tag+', commit ';
+if(v.commit_sha!=='unknown'){const a=document.createElement('a');
+a.href=COMMIT_URL+v.commit_sha;a.rel='noopener';a.textContent=v.commit_sha;$('v').append(a)}
+else $('v').append(v.commit_sha)}).catch(()=>{});
 load().catch(()=>fail('Could not load the notes.'));
 </script></body></html>

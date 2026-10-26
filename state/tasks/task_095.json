@@ -3,7 +3,7 @@
   "title": "Plan for the telemetry report, budget guardrails and state reconciliation",
   "role": "architect",
   "type": "chore",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "docs/task-095-telemetry-plan",
   "priority": 3,

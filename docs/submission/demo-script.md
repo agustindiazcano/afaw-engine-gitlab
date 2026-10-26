@@ -1,32 +1,48 @@
 # Demo script (under 3 minutes)
 
-Rule for the recording: show only what ran. Every segment below names the page or command and the
-text that must appear on screen. If a segment's condition is not met when you record, cut the
-segment; do not narrate around it. Total target: 2 minutes 50 seconds.
+Rule for the recording: show only what ran. Each segment names the page or command and the text
+that must appear on screen. If a segment's condition is not met when you record, cut the segment;
+do not narrate around it. Target: 2 minutes 50 seconds.
 
-Prepare before recording: a terminal in the repository root, `build/facts.json` deleted, a browser
-signed out of GitLab (the project is public, so everything below is visible without a login).
+The loop takes about 10 to 24 minutes in real time (measured: [`../experiments.md`](../experiments.md)).
+Record the whole run in one take with the GitLab clock visible, then cut the waits and speed up the
+rest. Put "sped up, 24 min real" on screen over any cut or sped-up part. Say the real time out loud.
+
+## Prepare (before recording)
+
+| Step | Command or page | Check |
+|---|---|---|
+| 1 | Open in separate tabs: the project pipelines, the issues list, the merge requests list, the live demo app https://afaw-demo-app-ljm5hefnsq-uc.a.run.app, the dashboard https://afaw-handsoff-ljm5hefnsq-uc.a.run.app/live/ and `/experiments/` | Signed out of GitLab is fine: the project is public |
+| 2 | `GITLAB_TOKEN=... python -m scripts.demo on --issues 0` turns the switch on (`AFAW_AUTO_MERGE=true`) without opening the sample issues | The command prints that the variables exist |
+| 3 | `python -m scripts.build_state --ref gitlab/main` then `python -m scripts.orchestrator` | It prints the task it would pick and why |
+| 4 | After recording: `GITLAB_TOKEN=... python -m scripts.demo off` | The switch is off and open demo issues are closed |
+
+## Script
 
 | Time | Show | Say (one sentence) |
 |---|---|---|
-| 0:00 to 0:15 | The README top: https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase | "Agents write code; deterministic tools decide if it is acceptable. Every number comes from a tool, never from an agent." |
-| 0:15 to 0:50 | **Build > Pipelines**, open the green merge request pipeline https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985416324 and scroll the stage columns | "One pipeline, nine stages, a real job in each: plan, create, verify, secure, govern, package, configure, release, monitor." |
-| 0:50 to 1:15 | In that pipeline open the `red_check` job log. The last lines read `OK: N added tests failed on the old code.` | "A new test must fail on the old code. A test that passes on both proves nothing, so the pipeline rejects it." |
-| 1:15 to 1:40 | Open https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985441455 (pipeline on `main`). `check_configuration` and `publish_image` are red; `deploy_cloud_run`, `monitor` and `monitor_live` are skipped | "A job that cannot measure what it needs fails loudly. This one is red because the Google Cloud variables were not set yet." Cut this segment if `main` is already green; keep the pipeline link in the description instead |
-| 1:40 to 2:10 | Terminal: `CI_API_V4_URL=https://gitlab.com/api/v4 CI_PROJECT_ID=88052530 python -m scripts.collect_facts --ref origin/main --out build/facts.json` then `python -c "import json; print(json.dumps(json.load(open('build/facts.json'))['task_011'], indent=1))"`. Fields on screen: `merged_at`, `ci_status`, `ci.pipelines`, `ci.jobs`, `ci.job_minutes`, `ci.retries` | "Timestamps, pipelines, job minutes and retries are read from the GitLab API for every merge request. Nothing is declared by an agent." |
-| 2:10 to 2:30 | Terminal: `CI_API_V4_URL=https://gitlab.com/api/v4 CI_PROJECT_ID=88052530 CI_DEFAULT_BRANCH=main python -m scripts.merge_guard --mr 6`. On screen: `merge: no`, `- merge request is not open`, `automatic fix attempts: 0 (cap 3)`. Only after task 012 is merged | "The merge rule and the cap of three automatic fix attempts are code, not a prompt. It merges only when every gate is green, and only when a person turns it on." |
-| 2:30 to 2:50 | If deployed: the Cloud Run URL, `/health` returns `{"status":"ok"}`, then `/api/state`. If not deployed: terminal `PYTHONPATH=src AFAW_WEB_DATA_DIR=build/web-data python -m uvicorn afaw_web.main:app --port 8080` (setup in the README) and `http://localhost:8080/health` | "A read-only service shows the derived project state. It runs on Cloud Run." Say "runs locally" if it is not deployed |
+| 0:00 to 0:15 | README top: stack line, what it does, what is measured | "AI agents write and repair code; ordinary programs decide whether it is acceptable and merge it." |
+| 0:15 to 0:25 | Dashboard `/live/`, the carbon line at the top | "Every flow is measured: 0.45 to 4.53 grams of CO2 per merged change, with the assumptions stated." |
+| 0:25 to 0:45 | Terminal: `GITLAB_TOKEN=... python -m scripts.orchestrator --create --project 88052530`. On screen: the selected task, `"issue": "created"` | "A program picks the next task from the project board and files the issue for a GitLab Duo agent. No model chooses." |
+| 0:45 to 1:05 | The new issue, assigned to the Duo account; then the merge request list: the Draft merge request Duo opens (about 2 minutes later) | "Duo opens a merge request by itself." |
+| 1:05 to 1:30 | The merge request pipeline: stages, `red_check` log line `OK: N added tests failed on the old code`, `mutation_gate` | "A new test must fail on the old code; the tests are mutated to prove they check something." |
+| 1:30 to 1:50 | The merge request after the guard acts: "marked as ready", "enabled an automatic merge", merged. Then the pipeline of `main`: release, `deploy_demo_app`, `e2e_live` | "When every gate is green a program merges it, Cloud Run redeploys, and a browser test checks the live site." |
+| 1:50 to 2:10 | The live demo app showing the change; `/api/version` with the new commit | "The running app reports the commit that was just merged." |
+| 2:10 to 2:30 | Issue #58 and its pipeline: the weak-test branch, `mutation_gate` red, the issue opened 6 min 43 s after the push | "Tests that assert nothing are caught, and the agent is asked to write real ones." |
+| 2:30 to 2:50 | `/experiments/`, section "Hands-off loop": nine stages with their Duo merge requests, the repair chain times, and "What this does not prove" | "Nine of nine stages have a merge request written by Duo. The merge uses a person's token, and the code review flow has not run." |
 
 ## Segments that depend on something that has not run
 
 | Segment | Condition to include it | If the condition is false |
 |---|---|---|
-| A Duo flow producing a merge request or fixing a pipeline | A real session exists: a merge request or commits authored by a flow service account, visible in the project | Do not show or mention a flow as working. Say once: "Duo flows are configured in the repository; the first session is still to run." The hackathon requires using Duo, so run at least one session before submitting |
-| The live Cloud Run URL | Met on Oct 24, 2026: `terraform apply` done, the `GCP_*` variables set, a green `deploy_cloud_run` and `monitor_live` on `main` (pipeline 2985631519). Check `/health` again right before recording | Use the local run above |
-| The merge guard line | Task 012 merged to `main` | Cut it |
+| Orchestrator creates the issue | `scripts.orchestrator --create` merged and a task is eligible | Use the issue created by `scripts.demo on --issues 1` and say so |
+| Repair of a failing live check | Use the recorded chain instead of a new run: issue #54, merge request !101, times in `experiments.md` | Cut the segment; do not stage a fault that did not happen |
+| C2 weak-test segment | Issue #58 and its pipeline exist | Cut it |
+| Live app and `/experiments/` pages | `/health` answers 200 right before recording | Use the local run in the README |
 
 ## Check before you publish
 
-- Every number you say is on screen and was produced in the recording.
+- Every number you say is on screen or on a linked page and was read from GitLab.
+- Do not say 100 percent autonomous or no human involvement. Say what the limits section says.
 - No third-party trademark or copyrighted music (hackathon rule).
-- The video is on YouTube and under 3 minutes.
+- The video is on YouTube, public, and under 3 minutes.

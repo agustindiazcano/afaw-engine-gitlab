@@ -3,7 +3,7 @@
   "title": "request_fix: a failed pipeline asks the Duo Developer Flow to repair it",
   "role": "architect",
   "type": "feature",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "feat/task-060-request-fix",
   "priority": 1,

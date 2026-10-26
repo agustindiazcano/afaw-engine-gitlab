@@ -3,7 +3,7 @@
   "title": "Make src/afaw_web a critical path of the mutation gate with a minimum of 60",
   "role": "architect",
   "type": "chore",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "chore/task-048-mutation-critical-path",
   "priority": 2,

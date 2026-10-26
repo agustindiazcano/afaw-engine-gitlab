@@ -3,7 +3,7 @@
   "title": "Record in the evidence table the continuous deployment run, the repair by Duo and the new coverage",
   "role": "architect",
   "type": "chore",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "docs/task-061-evidence-cd",
   "priority": 1,

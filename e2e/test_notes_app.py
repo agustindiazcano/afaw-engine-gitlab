@@ -10,6 +10,9 @@ from e2e.conftest import RESULTS
 
 BRAND = "rgb(11, 95, 255)"
 WHITE = "rgb(255, 255, 255)"
+COMMIT_URL = (
+    "https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/commit/"
+)
 
 
 def test_a_note_added_in_the_page_appears_in_the_list(page: Page, notes_url: str) -> None:
@@ -31,6 +34,19 @@ def test_a_blank_note_cannot_be_added(page: Page, notes_url: str) -> None:
 def test_the_page_shows_the_release_and_the_commit(page: Page, notes_url: str) -> None:
     page.goto(notes_url)
     expect(page.locator("#v")).to_contain_text("commit")
+
+
+def test_the_commit_in_the_footer_links_to_its_gitlab_page(page: Page, notes_url: str) -> None:
+    sha = page.request.get(f"{notes_url}/api/version").json()["commit_sha"]
+    page.goto(notes_url)
+    expect(page.locator("#v")).to_contain_text("commit")
+    link = page.locator("#v a")
+    if sha == "unknown":
+        expect(link).to_have_count(0)
+        return
+    expect(link).to_have_attribute("href", f"{COMMIT_URL}{sha}")
+    expect(link).to_have_attribute("rel", "noopener")
+    expect(link).not_to_have_attribute("target", "_blank")
 
 
 def test_the_add_button_has_the_brand_colours(page: Page, notes_url: str) -> None:
@@ -104,3 +120,47 @@ def test_a_failed_save_shows_an_alert_and_keeps_the_text(page: Page, notes_url: 
     page.click("button")
     expect(page.get_by_role("alert")).to_be_visible()
     expect(page.locator("#t")).to_have_value("keep me")
+
+
+def test_a_deleted_note_disappears_and_the_other_remains(page: Page, notes_url: str) -> None:
+    keep = f"keep {uuid.uuid4().hex[:8]}"
+    drop = f"drop {uuid.uuid4().hex[:8]}"
+    page.goto(notes_url)
+    for text in (keep, drop):
+        page.fill("#t", text)
+        page.click("button")
+        expect(page.locator("#n li", has_text=text)).to_be_visible()
+    page.locator("#n li", has_text=drop).locator(".del").click()
+    expect(page.locator("#n li", has_text=drop)).to_have_count(0)
+    expect(page.locator("#n li", has_text=keep)).to_be_visible()
+
+
+def test_the_stats_endpoint_follows_an_add_and_a_delete(page: Page, notes_url: str) -> None:
+    text = f"stats {uuid.uuid4().hex[:8]}"
+    before = page.request.get(f"{notes_url}/api/stats").json()
+    page.goto(notes_url)
+    page.fill("#t", text)
+    page.click("button")
+    expect(page.locator("#n li", has_text=text)).to_be_visible()
+    after = page.request.get(f"{notes_url}/api/stats").json()
+    assert after["count"] == before["count"] + 1
+    assert after["longest"] >= len(text)
+    page.locator("#n li", has_text=text).locator(".del").click()
+    expect(page.locator("#n li", has_text=text)).to_have_count(0)
+    assert page.request.get(f"{notes_url}/api/stats").json()["count"] == before["count"]
+
+
+def test_the_summary_line_shows_the_count_and_the_longest_note(page: Page, notes_url: str) -> None:
+    page.goto(notes_url)
+    page.request.delete(f"{notes_url}/api/notes")
+    page.reload()
+    expect(page.locator("#stats")).to_have_text("0 notes")
+    for text in ("a" * 5, "b" * 12):
+        page.fill("#t", text)
+        page.click("button")
+        expect(page.locator("#n li", has_text=text)).to_be_visible()
+    expect(page.locator("#stats")).to_have_text("2 notes, longest 12 characters")
+    page.locator("#n li", has_text="b" * 12).locator(".del").click()
+    expect(page.locator("#stats")).to_have_text("1 notes, longest 5 characters")
+    page.click("#clear")
+    expect(page.locator("#stats")).to_have_text("0 notes")

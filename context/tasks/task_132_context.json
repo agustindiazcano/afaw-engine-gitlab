@@ -1,0 +1,9 @@
+{
+  "task_id": "task_132",
+  "files_touched": [],
+  "summary": "docs/submission/demo-script.md describes the recording of the real loop: orchestrator files the issue, Duo opens the merge request, the gates and the guard act, the app is redeployed and tested live, plus the weak-test case and the measured results page.",
+  "next": [
+    "Record the video (a person)",
+    "Run python -m scripts.demo off afterwards"
+  ]
+}

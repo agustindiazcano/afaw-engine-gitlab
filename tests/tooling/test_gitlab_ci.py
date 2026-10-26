@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import os
+import shutil
+import subprocess
 from typing import Any
 
 import pytest
@@ -353,3 +356,53 @@ def test_deploy_jobs_share_one_lock(ci: dict[str, Any]) -> None:
     names = ("publish_image", "deploy_cloud_run", "publish_demo_image", "deploy_demo_app")
     groups = {ci[name].get("resource_group") for name in names}
     assert groups == {"deploy"}
+
+
+def test_telemetry_report_runs_on_main_and_never_blocks(ci: dict[str, Any]) -> None:
+    job = ci["telemetry_report"]
+    assert job["stage"] == "monitor"
+    assert job["rules"] == [{"if": "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"}]
+    assert job["allow_failure"] is True  # observability never blocks the pipeline
+    assert "python -m scripts.telemetry_report" in _script(job)
+    assert "build/AFAW_TELEMETRY.md" in str(job["artifacts"]["paths"])
+    assert "AFAW_MERGE_TOKEN" not in str(job)
+
+
+def test_repair_check_reports_on_the_merge_requests_of_the_flow_only(ci: dict[str, Any]) -> None:
+    job = ci["repair_check"]
+    # Not in the monitor stage: merge_guard waits for that stage and must not see this job pending.
+    assert job["stage"] == "govern"
+    rule = job["rules"][0]["if"]
+    assert "merge_request_event" in rule and r"/^duo\//" in rule
+    script = _script(job)
+    assert "python -m scripts.repair_check" in script
+    assert '--mr "$CI_MERGE_REQUEST_IID"' in script
+    # The issue number comes from the merge request description. A space before "#" would start a
+    # YAML comment and cut the line, so the pattern must survive the parser whole.
+    assert "grep -oE 'Closes[[:space:]]#[0-9]+'" in script
+    assert "|| echo" in script  # it reports; a job that did not run here is not a failure
+    assert not job.get("allow_failure")
+    assert "AFAW_MERGE_TOKEN" not in str(job)
+
+
+@pytest.mark.skipif(shutil.which("bash") is None, reason="needs bash")
+@pytest.mark.parametrize(
+    ("description", "expected"),
+    [("Fix the lint job\n\nCloses #62\n", "62"), ("No issue is named here", "")],
+)
+def test_repair_check_finds_the_issue_under_the_shell_gitlab_uses(
+    ci: dict[str, Any], description: str, expected: str
+) -> None:
+    # GitLab runs job scripts with errexit and pipefail: grep exits 1 when nothing matches, and that
+    # must not turn into a red job.
+    line = ci["repair_check"]["script"][0] + '\necho "issue=[$ISSUE]"'
+    result = subprocess.run(  # noqa: S603
+        [str(shutil.which("bash")), "-e", "-o", "pipefail", "-c", line],
+        env={"CI_MERGE_REQUEST_DESCRIPTION": description, "PATH": os.environ["PATH"]},
+        capture_output=True,
+        text=True,
+        timeout=20,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert f"issue=[{expected}]" in result.stdout

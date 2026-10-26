@@ -3,7 +3,7 @@
   "title": "Deploy the demo notes app: Terraform service and pipeline jobs",
   "role": "architect",
   "type": "feature",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "feat/task-092-demo-app-deploy",
   "priority": 1,

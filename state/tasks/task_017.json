@@ -3,7 +3,7 @@
   "title": "Task file check accepts mirror pull requests from sync branches",
   "role": "architect",
   "type": "fix",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "fix/task-017-sync-branch-check",
   "priority": 2,

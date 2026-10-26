@@ -1,0 +1,13 @@
+{
+  "id": "task_138",
+  "title": "README and submission documents aligned with the measured state of 2026-10-26",
+  "role": "architect",
+  "type": "chore",
+  "status": "done",
+  "owner": "agent",
+  "branch": "docs/task-138-readme-audit",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Documents only. Lines written on 24 October that said the guard, the Code Review Flow or the summary comment never ran are corrected."
+}

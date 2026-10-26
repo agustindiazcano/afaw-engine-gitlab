@@ -3,7 +3,7 @@
   "title": "Record the results of the experiments: repair, hard builds, mutation score, load, merges by the guard",
   "role": "architect",
   "type": "chore",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "docs/task-073-experiment-results",
   "priority": 1,

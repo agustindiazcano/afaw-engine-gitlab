@@ -1,6 +1,6 @@
 {
-  "as_of": "2026-10-25",
-  "note": "Every figure was read from the GitLab API, a CI job or a command on the date above; see docs/experiments.md for how.",
+  "as_of": "2026-10-26",
+  "note": "Every figure was read from the GitLab API, a CI job or a command on 2026-10-25 or 2026-10-26; the credits and the autonomy counts carry their own reading date. See docs/experiments.md for how.",
   "coverage": {
     "unit": "percent of lines and branches",
     "source": "python -m pytest --cov=src --cov=scripts --cov-branch, on main before and after the five test merge requests",
@@ -170,9 +170,9 @@
     "real_defects_found": 1
   },
   "credits": {
-    "used": 315.77,
+    "used": 363.45,
     "budget": 500,
-    "read_by": "the human, from the GitLab Credits dashboard, on 2026-10-26 about 01:30 UTC, right after the bug benchmark finished"
+    "read_by": "the human, from the GitLab Credits dashboard, on 2026-10-26 about 03:50 UTC, right after the end to end rehearsal"
   },
   "environment": {
     "source": "CI job seconds from docs/submission/mutation-tools-measurement.md; coefficients and grid data from docs/adr/0009-measure-sustainability-with-sci.md",
@@ -248,18 +248,46 @@
       "expected": "The chain of issues stops at the cap of 6 open autoheal issues",
       "observed": "Issues #32 to #34 were opened for task_files failures of the repair branches; the cap of 6 open issues held; the guard merged one of those repairs (!65), which added only task files, and the operator cancelled its task",
       "held": true
+    },
+    {
+      "id": "C2",
+      "fault": "A test that calls new code in a mutation-critical file and asserts nothing",
+      "expected": "mutation_gate fails and the flow writes real assertions without touching the code",
+      "observed": "mutation_gate failed; request_fix opened issue #58 6 min 43 s after the push; Duo opened !114 two minutes later with 9 value-checked cases and a zero-whole guard test, no change to the code; the branch carries the planted probe, so the merge request was closed unmerged",
+      "held": true
+    },
+    {
+      "id": "C5",
+      "fault": "AFAW_BOT_USER_IDS is empty",
+      "expected": "The guard cannot tell a service account from a person and does not merge",
+      "observed": "On the open Duo merge request !122 the verdict lists the reason \"AFAW_BOT_USER_IDS is empty: a service account cannot be told from a person\"; with the two ids set that reason is gone. Read only, the switch was off",
+      "held": true
+    },
+    {
+      "id": "C6",
+      "fault": "A person's merge request",
+      "expected": "The guard never merges it: merge no, reason identity",
+      "observed": "On !121 the verdict was merge: no with two identity reasons (the head pipeline was started by a person and a commit is authored by a person); exit code 0, nothing merged",
+      "held": true
+    },
+    {
+      "id": "C7",
+      "fault": "A job is cancelled in the middle of its run",
+      "expected": "The pipeline does not turn green by itself; a retry recovers it",
+      "observed": "web_data of the pipeline of !123 was cancelled at 03:59:48 UTC and retried at 03:59:55; the retried job succeeded, the pipeline ended in success at 04:08:52 and the merge request merged",
+      "held": true
     }
   ],
   "handoff": {
     "as_of": "2026-10-26",
     "autonomy": {
-      "merge_requests": 83,
-      "merged": 66,
-      "agent_only": 29,
-      "agent_only_merged": 22,
-      "guard_merged": 16,
-      "median_minutes": 24.6,
-      "read_on": "2026-10-25"
+      "merge_requests": 132,
+      "merged": 106,
+      "agent_only": 47,
+      "agent_only_merged": 36,
+      "guard_merged": 30,
+      "median_minutes": 10.5,
+      "read_on": "2026-10-26, after the long chain"
     },
     "stages": [
       {
@@ -356,9 +384,111 @@
     ],
     "limits": [
       "The undraft and the merge use a person's access token, so GitLab shows that person's name.",
-      "The Code Review Flow and the summary comment on the issue never ran.",
+      "The Code Review Flow and the summary comment on the issue each ran, started by a person (an assignment as reviewer, a mention). No event starts either by itself.",
       "No repair has needed more than one attempt yet.",
       "The bugs and the trigger of the benchmark were ours: it measures the loop, not how often Duo meets such bugs."
-    ]
+    ],
+    "rehearsal": {
+      "title": "End to end rehearsal: the orchestrator files the issue, Duo changes the app, the guard merges, the app is redeployed and tested live",
+      "date": "2026-10-26",
+      "links": [
+        {
+          "link": "Orchestrator files issue #61 (task_136, delete one note)",
+          "utc": "03:20:39",
+          "since": "n/a"
+        },
+        {
+          "link": "Duo opens merge request !122",
+          "utc": "03:23:54",
+          "since": "3 min 15 s"
+        },
+        {
+          "link": "merge_guard takes it out of Draft",
+          "utc": "03:34:06",
+          "since": "10 min 12 s"
+        },
+        {
+          "link": "merge_guard merges it",
+          "utc": "03:34:35",
+          "since": "29 s"
+        },
+        {
+          "link": "Issue #61 closes",
+          "utc": "03:34:57",
+          "since": "22 s"
+        },
+        {
+          "link": "deploy_cloud_run",
+          "utc": "03:42:32",
+          "since": "7 min 57 s"
+        },
+        {
+          "link": "monitor_live",
+          "utc": "03:43:04",
+          "since": "32 s"
+        },
+        {
+          "link": "deploy_demo_app",
+          "utc": "03:44:52",
+          "since": "1 min 48 s"
+        },
+        {
+          "link": "e2e_live passes",
+          "utc": "03:45:58",
+          "since": "1 min 06 s"
+        }
+      ],
+      "issue_to_verified": "25 min 19 s",
+      "credits_before": 356.59,
+      "credits_used": 6.86,
+      "pipelines": 3,
+      "job_seconds": 3693.4,
+      "energy_wh_low": 1.6,
+      "energy_wh_high": 9.62,
+      "gco2eq_low": 0.55,
+      "gco2eq_high": 5.57,
+      "changed": "8 files in 3 commits, all authored by Duo Developer: the API, the page, unit tests, a browser test, docs/demo-app.md and the task files"
+    },
+    "long_chain": {
+      "title": "Long chain: three dependent tasks, each filed by the orchestrator after the previous one was merged and verified live",
+      "date": "2026-10-26",
+      "tasks": [
+        {
+          "task": "task_142",
+          "what": "GET /api/stats",
+          "issue": 64,
+          "mr": 129,
+          "issue_to_mr": "1 min 46 s",
+          "mr_to_merge": "10 min 39 s",
+          "issue_to_verified": "24 min 15 s"
+        },
+        {
+          "task": "task_143",
+          "what": "stats in the summary line of the page",
+          "issue": 65,
+          "mr": 131,
+          "issue_to_mr": "2 min 03 s",
+          "mr_to_merge": "10 min 26 s",
+          "issue_to_verified": "24 min 18 s"
+        },
+        {
+          "task": "task_144",
+          "what": "footer links the commit to its GitLab page",
+          "issue": 66,
+          "mr": 132,
+          "issue_to_mr": "1 min 49 s",
+          "mr_to_merge": "11 min 23 s",
+          "issue_to_verified": "28 min 05 s"
+        }
+      ],
+      "total": "1 h 18 min 23 s",
+      "gap_between_tasks": "57 s and 47 s from the live check to the next issue",
+      "job_seconds": 12265,
+      "energy_wh_low": 5.32,
+      "energy_wh_high": 31.93,
+      "gco2eq_low": 1.83,
+      "gco2eq_high": 18.49,
+      "credits_note": "Credits of the chain: see the readings in experiments.md"
+    }
   }
 }

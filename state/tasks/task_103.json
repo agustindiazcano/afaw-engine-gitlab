@@ -3,7 +3,7 @@
   "title": "Professional, responsive UI for the demo notes app",
   "role": "architect",
   "type": "feature",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "duo/feature/44-notes-app-ui",
   "priority": 2,

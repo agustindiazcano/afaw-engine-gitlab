@@ -3,7 +3,7 @@
   "title": "check_ci_config: summary line with the number of variables set",
   "role": "architect",
   "type": "feature",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "feat/task-100-ci-config-variables-summary",
   "priority": 3,

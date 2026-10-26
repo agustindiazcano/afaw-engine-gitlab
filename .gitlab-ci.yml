@@ -544,6 +544,33 @@ merge_guard:
   script:
     - python -m scripts.merge_guard --mr "$CI_MERGE_REQUEST_IID"
 
+# Writes one block per self-healing event (issue, repair merge request, merge, pipeline) from the
+# GitLab API. Observability never blocks the pipeline, so a failure here is allowed.
+telemetry_report:
+  stage: monitor
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  allow_failure: true
+  script:
+    - mkdir -p build
+    - python -m scripts.telemetry_report --project "$CI_PROJECT_ID" --out build/AFAW_TELEMETRY.md
+  artifacts:
+    paths: [build/AFAW_TELEMETRY.md]
+    expire_in: 1 week
+
+# On a merge request of the Duo flow that says "Closes #N", compares the jobs the autoheal issue
+# listed with the jobs of this pipeline and prints which are fixed, still failing or missing. It
+# reports and never fails the pipeline: a job that only runs on main (for example e2e_live) is
+# missing here by design. It sits in govern, not monitor, so merge_guard does not wait on it.
+repair_check:
+  stage: govern
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ /^duo\//
+  script:
+    - ISSUE=$(printf '%s' "$CI_MERGE_REQUEST_DESCRIPTION" | { grep -oE 'Closes[[:space:]]#[0-9]+' || true; } | head -1 | tr -dc '0-9')
+    - if [ -z "$ISSUE" ]; then echo "no issue referenced; nothing to check"; exit 0; fi
+    - python -m scripts.repair_check --project "$CI_PROJECT_ID" --issue "$ISSUE" --mr "$CI_MERGE_REQUEST_IID" || echo "repair_check - not every listed job is fixed in this pipeline"
+
 # When a job failed and the hands-off switch is on, asks the Duo Developer Flow to repair it: a note
 # that mentions the flow on the merge request, or an issue assigned to it on a branch with no merge
 # request. Capped, one request per commit. Needs AFAW_MERGE_TOKEN (a person's token: a bot cannot

@@ -3,7 +3,7 @@
   "title": "Record the verified evidence of the deploy and the first Duo session",
   "role": "architect",
   "type": "chore",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "docs/task-024-evidence",
   "priority": 1,

@@ -1,0 +1,13 @@
+{
+  "id": "task_137",
+  "title": "Queue the demo task for the orchestrator and close task_020",
+  "role": "architect",
+  "type": "chore",
+  "status": "done",
+  "owner": "agent",
+  "branch": "sync/task-137-demo-queue",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "task_136 is the next task the orchestrator picks; task_015 moves to priority 5; task_020 is done."
+}

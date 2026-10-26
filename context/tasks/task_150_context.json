@@ -1,0 +1,10 @@
+{
+  "task_id": "task_150",
+  "files_touched": [
+    "tests/tooling/test_gitlab_ci.py"
+  ],
+  "summary": "The line that reads the issue number from the merge request description now tolerates no match. A test runs the line under errexit and pipefail with and without a Closes number. The defect was ours: the text-only tests of task_134 could not see it.",
+  "next": [
+    "Count the extra Duo sessions in the credits of the long chain"
+  ]
+}

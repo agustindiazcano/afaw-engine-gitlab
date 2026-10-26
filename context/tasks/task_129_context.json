@@ -1,0 +1,11 @@
+{
+  "task_id": "task_129",
+  "files_touched": [
+    "scripts/orchestrator.py",
+    "tests/tooling/test_orchestrator.py"
+  ],
+  "summary": "scripts/orchestrator.py --create --project ID files the issue for the selected task with a fixed template, assigned to the Developer Flow, labelled afaw-orchestrator, without filing the same task twice. It fails closed (exit 2) without a token. No credits are spent by the selection.",
+  "next": [
+    "Use it to launch the live demo of the loop"
+  ]
+}

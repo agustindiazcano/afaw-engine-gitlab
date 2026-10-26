@@ -3,7 +3,7 @@
   "title": "Index, stack and infrastructure document, stages and Duo table, hackathon footer",
   "role": "architect",
   "type": "chore",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "docs/task-093-stack-index",
   "priority": 2,

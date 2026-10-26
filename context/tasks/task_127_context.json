@@ -1,0 +1,12 @@
+{
+  "task_id": "task_127",
+  "files_touched": [
+    "scripts/telemetry_report.py",
+    "tests/tooling/test_telemetry_report.py"
+  ],
+  "summary": "Added scripts/telemetry_report.py. It reads the public GitLab API and writes build/AFAW_TELEMETRY.md (ignored by git, never committed): one block per issue labelled afaw-autoheal, with timestamp, branch and failed jobs taken from the issue text, the repair merge request description quoted verbatim in a code fence longer than any backtick run inside it, the files that merge request changed, merge time, minutes from issue creation to merge and the status of the pipeline of the merge commit. The repair merge request is found through closed_by, related_merge_requests, a Closes #N line or closes_issues. A field with no source says not available. build_block and render are pure; 17 tests in tests/tooling/test_telemetry_report.py use recorded dict fixtures with no network. A run against the public project wrote 30 blocks.",
+  "next": [
+    "A person wires a CI job that runs python -m scripts.telemetry_report and publishes the file (the .gitlab-ci.yml change is human-only)",
+    "Add the telemetry section to the /experiments/ page (step 1 of docs/plan-telemetry-and-budget.md)"
+  ]
+}

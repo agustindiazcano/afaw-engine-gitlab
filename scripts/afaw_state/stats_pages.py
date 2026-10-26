@@ -176,11 +176,45 @@ def _handoff(h: Mapping[str, Any]) -> str:
         [[c["link"], c["utc"], c["since"]] for c in h["chain"]],
         "Repair chain: a failing live check to a repaired, redeployed app",
     )
+    r = h["rehearsal"]
+    rehearsal = _table(
+        ["Link", "Time (UTC)", "Since the previous link"],
+        [[c["link"], c["utc"], c["since"]] for c in r["links"]],
+        r["title"],
+    ) + (
+        f'<p class="meta">Issue to verified app: {escape(r["issue_to_verified"])}. '
+        f"{r['credits_used']} GitLab Credits (from {r['credits_before']}). "
+        f"{r['pipelines']} pipelines, {r['job_seconds']:.0f} job seconds, "
+        f"{r['energy_wh_low']} to {r['energy_wh_high']} Wh, {r['gco2eq_low']} to "
+        f"{r['gco2eq_high']} gCO2eq (SCI without M, Duo model energy not measured). "
+        f"{escape(r['changed'])}.</p>"
+    )
+    c = h["long_chain"]
+    long_chain = _table(
+        ["Task", "Issue", "Merge request", "Issue to MR", "MR to merge", "Issue to verified app"],
+        [
+            [
+                f"{t['task']}: {t['what']}",
+                f"#{t['issue']}",
+                f"!{t['mr']}",
+                t["issue_to_mr"],
+                t["mr_to_merge"],
+                t["issue_to_verified"],
+            ]
+            for t in c["tasks"]
+        ],
+        c["title"],
+    ) + (
+        f'<p class="meta">Three tasks in {escape(c["total"])}; {escape(c["gap_between_tasks"])}. '
+        f"{c['job_seconds']} job seconds, {c['energy_wh_low']} to {c['energy_wh_high']} Wh, "
+        f"{c['gco2eq_low']} to {c['gco2eq_high']} gCO2eq (SCI without M, Duo model energy not "
+        f"measured). {escape(c['credits_note'])}.</p>"
+    )
     limits = "".join(f"<li>{escape(text)}</li>" for text in h["limits"])
     return (
         f"<h2>Hands-off loop</h2>"
         f'<p class="meta">Counts read from the GitLab API on {escape(a["read_on"])}.</p>'
-        f'<div class="tiles">{tiles}</div>{stages}{chain}'
+        f'<div class="tiles">{tiles}</div>{stages}{chain}{rehearsal}{long_chain}'
         f"<h3>What this does not prove</h3><ul>{limits}</ul>"
     )
 
@@ -195,8 +229,13 @@ def experiments_page(data: Mapping[str, Any]) -> str:
     tiles = (
         _tile(f"{passed} of {total}", "Hidden acceptance tests passed")
         + _tile(f"{repairs['repaired']} of {repairs['planted']}", "Planted defects repaired")
-        + _tile(str(len(data["guard_merges"])), "Merges made by merge_guard")
-        + _tile(f"{credits['used']} of {credits['budget']}", "GitLab Credits used, read by hand")
+        + _tile(
+            str(data["handoff"]["autonomy"]["guard_merged"]),
+            "Merges by merge_guard (agent-only, automatic merge recorded)",
+        )
+        + _tile(
+            f"{credits['used']:.2f} of {credits['budget']}", "GitLab Credits used, read by hand"
+        )
     )
     cov, mut, mins = data["coverage"], data["mutation"], data["minutes"]
     charts = (
@@ -228,7 +267,7 @@ def experiments_page(data: Mapping[str, Any]) -> str:
     merges = _table(
         ["Merge request", "Merged (UTC)"],
         [[f"!{m['mr']}", m["merged_utc"]] for m in data["guard_merges"]],
-        "Merge requests merged by merge_guard with no click",
+        "The first nine merges by merge_guard, with their times",
     )
     hard = _table(
         ["Tool", "Merge request", "Hidden tests", "Tests Duo wrote", "Coverage by them (%)"],

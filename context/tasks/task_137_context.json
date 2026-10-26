@@ -1,0 +1,8 @@
+{
+  "task_id": "task_137",
+  "files_touched": [],
+  "summary": "task_136 (delete one note in the demo app) is pending with priority 1 and difficulty 1, so scripts.orchestrator selects it. task_015 (the A/B experiment of ADR 0009) moves to priority 5. task_020 (enable the Duo flows and run a first session) is done.",
+  "next": [
+    "Run scripts.orchestrator --create for the rehearsal of the demo"
+  ]
+}

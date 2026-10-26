@@ -3,7 +3,7 @@
   "title": "Raise the coverage of scripts/red_check.py from 50 percent (EXP-08)",
   "role": "architect",
   "type": "chore",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "chore/task-054-red-check-coverage",
   "priority": 3,

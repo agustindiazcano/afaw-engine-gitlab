@@ -1,0 +1,13 @@
+{
+  "id": "task_134",
+  "title": "Wire telemetry_report and repair_check in the pipeline and document the Duo agents, flows and triggers",
+  "role": "architect",
+  "type": "feature",
+  "status": "done",
+  "owner": "agent",
+  "branch": "feat/task-134-wire-jobs",
+  "priority": 1,
+  "difficulty": 2,
+  "blocked_by": [],
+  "notes": "Touches .gitlab-ci.yml (human-only): opened with the human's token and merged by a person."
+}

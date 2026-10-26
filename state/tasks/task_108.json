@@ -3,7 +3,7 @@
   "title": "autonomy_stats: count the merge requests made and merged by agents from the GitLab API",
   "role": "architect",
   "type": "feature",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "feat/task-108-autonomy-stats",
   "priority": 1,

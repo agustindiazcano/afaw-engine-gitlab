@@ -3,7 +3,7 @@
   "title": "Cost log and the SCI ADR for the whole project",
   "role": "architect",
   "type": "feature",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "docs/task-030-cost-sustainability",
   "priority": 2,

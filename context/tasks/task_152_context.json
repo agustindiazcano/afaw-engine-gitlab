@@ -1,0 +1,13 @@
+{
+  "task_id": "task_152",
+  "files_touched": [
+    "scripts/afaw_state/stats_pages.py",
+    "tests/tooling/test_stats_pages.py"
+  ],
+  "summary": "The experiments page renders the long chain; experiments.md, evidence.md, the data file, the README, the Devpost text, the white paper, PENDING.md and docs/stack.md carry the final counts of 2026-10-26 (132 merge requests, 47 made only by agents, 36 merged, 30 with a recorded automatic merge). The pipeline has 36 jobs.",
+  "next": [
+    "Add the credits of the long chain when the human reads them",
+    "Replace the video placeholder",
+    "Synchronize with GitHub"
+  ]
+}

@@ -3,7 +3,7 @@
   "title": "Record the merged merge requests and the first coverage measurement",
   "role": "architect",
   "type": "chore",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "chore/task-049-evidence-coverage",
   "priority": 2,

@@ -1,0 +1,13 @@
+{
+  "id": "task_136",
+  "title": "Demo app: delete a single note, in the API and on the page",
+  "role": "architect",
+  "type": "feature",
+  "status": "done",
+  "owner": "agent",
+  "branch": "feat/task-136-delete-a-note",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Acceptance. API: DELETE /api/notes/{note_id} returns 204 and removes only that note, 404 with a detail message for an unknown id; ids stay unique after a delete (a new note never reuses the id of a note that still exists); DELETE /api/notes (clear all) still empties the store and restarts the ids. Page (src/notes_app/static/index.html): each note shows a delete control that is NOT a <button> element (use <span role=\"button\" tabindex=\"0\" aria-label=\"Delete note\">) because the browser tests use a single <button>; keep the selectors #t #f #n #v and the brand colour #0b5fff. Tests first: unit tests in tests/notes/ and a Playwright test in e2e/test_notes_app.py that adds two notes, deletes one and sees the other remain. The 11 existing browser tests and e2e/test_notes_live.py must keep passing. Do not touch .gitlab-ci.yml."
+}

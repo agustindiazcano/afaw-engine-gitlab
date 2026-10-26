@@ -3,7 +3,7 @@
   "title": "check_task_files: say how many task files were checked",
   "role": "architect",
   "type": "feature",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "duo/feature/37-task-files-checked-count",
   "priority": 3,

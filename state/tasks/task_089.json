@@ -3,7 +3,7 @@
   "title": "Correct the count of merges made by merge_guard to nine",
   "role": "architect",
   "type": "chore",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "docs/task-089-nine-guard-merges",
   "priority": 1,

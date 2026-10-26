@@ -3,7 +3,7 @@
   "title": "Align the AGENTS.md directives with the hands-off policy of ADR 0007",
   "role": "architect",
   "type": "chore",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "chore/task-050-hands-off-directives",
   "priority": 1,
