@@ -89,7 +89,11 @@ web_data:
   script:
     # The project is public, so the facts need no token; without them the dashboard shows no data.
     - python -m scripts.collect_facts --ref HEAD --out build/facts.json
-    - python -m scripts.build_state --ref HEAD --out build/web-data/live --facts build/facts.json
+    # Carbon of the flows (ADR 0009): observability never blocks the pipeline, so a failure only
+    # leaves the indicator off the dashboard.
+    - python -m scripts.sci_report --project "$CI_PROJECT_ID" --recent 30 --json build/sci.json --markdown build/sci.md || echo "sci_report failed; the dashboard shows no carbon indicator"
+    - SCI_ARG=""; if [ -f build/sci.json ]; then SCI_ARG="--sci build/sci.json"; fi
+    - python -m scripts.build_state --ref HEAD --out build/web-data/live --facts build/facts.json $SCI_ARG
     - python -m examples.mock_dashboard build/web-data/demo
     - mkdir -p build/web-data/docs
     - cp -r docs/adr docs/gotchas build/web-data/docs/
