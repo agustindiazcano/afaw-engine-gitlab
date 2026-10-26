@@ -14,7 +14,7 @@ from typing import Annotated
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
-from pydantic import BaseModel, ConfigDict, StringConstraints
+from pydantic import BaseModel, ConfigDict, StrictBool, StringConstraints
 
 MAX_TEXT = 200
 MAX_NOTES = 100
@@ -31,6 +31,16 @@ class NoteIn(BaseModel):
     ]
 
 
+class NotePatch(BaseModel):
+    """A change to a note: the done flag, a real boolean, no other field."""
+
+    model_config = ConfigDict(extra="forbid")
+    done: StrictBool
+
+
+Note = dict[str, int | str | bool]
+
+
 def _env(name: str) -> str:
     """Return an environment variable, or "unknown" when it is unset or empty."""
     return os.environ.get(name) or "unknown"
@@ -39,7 +49,7 @@ def _env(name: str) -> str:
 def create_app() -> FastAPI:
     """Build the app with its own empty in-memory store."""
     app = FastAPI(title="AFAW demo notes")
-    notes: list[dict[str, int | str]] = []
+    notes: list[Note] = []
     next_id = 1
     lock = threading.Lock()
     page_html = STATIC_PAGE.read_text(encoding="utf-8")
@@ -57,7 +67,7 @@ def create_app() -> FastAPI:
         return {"release_tag": _env("AFAW_RELEASE_TAG"), "commit_sha": _env("AFAW_COMMIT_SHA")}
 
     @app.get("/api/notes")
-    def list_notes() -> list[dict[str, int | str]]:
+    def list_notes() -> list[Note]:
         with lock:
             return list(reversed(notes))
 
@@ -70,15 +80,24 @@ def create_app() -> FastAPI:
             }
 
     @app.post("/api/notes", status_code=201)
-    def add_note(body: NoteIn) -> dict[str, int | str]:
+    def add_note(body: NoteIn) -> Note:
         nonlocal next_id
         with lock:
             if len(notes) >= MAX_NOTES:
                 raise HTTPException(status_code=409, detail="The store is full")
-            note: dict[str, int | str] = {"id": next_id, "text": body.text}
+            note: Note = {"id": next_id, "text": body.text, "done": False}
             next_id += 1
             notes.append(note)
             return note
+
+    @app.patch("/api/notes/{note_id}")
+    def update_note(note_id: int, body: NotePatch) -> Note:
+        with lock:
+            for note in notes:
+                if note["id"] == note_id:
+                    note["done"] = body.done
+                    return dict(note)
+        raise HTTPException(status_code=404, detail="Note not found")
 
     @app.delete("/api/notes", status_code=204)
     def clear_notes() -> None:

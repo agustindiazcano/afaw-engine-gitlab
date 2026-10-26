@@ -164,3 +164,20 @@ def test_the_summary_line_shows_the_count_and_the_longest_note(page: Page, notes
     expect(page.locator("#stats")).to_have_text("1 notes, longest 5 characters")
     page.click("#clear")
     expect(page.locator("#stats")).to_have_text("0 notes")
+
+
+def test_marking_one_of_two_notes_done_strikes_through_only_that_one(
+    page: Page, notes_url: str
+) -> None:
+    done = f"done {uuid.uuid4().hex[:8]}"
+    todo = f"todo {uuid.uuid4().hex[:8]}"
+    page.goto(notes_url)
+    for text in (done, todo):
+        page.fill("#t", text)
+        page.click("button")
+        expect(page.locator("#n li", has_text=text)).to_be_visible()
+    page.locator("#n li", has_text=done).locator(".done").click()
+    done_text = page.locator("#n li", has_text=done).locator("span").first
+    todo_text = page.locator("#n li", has_text=todo).locator("span").first
+    expect(done_text).to_have_css("text-decoration-line", "line-through")
+    expect(todo_text).not_to_have_css("text-decoration-line", "line-through")

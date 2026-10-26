@@ -1,8 +1,13 @@
 {
   "task_id": "task_154",
-  "files_touched": [],
-  "summary": "Queued for the demo takes: the task file only; no code yet.",
+  "files_touched": [
+    "src/notes_app/app.py",
+    "src/notes_app/static/index.html",
+    "tests/notes/test_app.py",
+    "tests/notes/test_page.py"
+  ],
+  "summary": "A note can be marked done: PATCH /api/notes/{note_id} with {\"done\": bool} returns the updated note (404 for an unknown id, 422 for a non-boolean or extra field); every note has a boolean done that starts false; DELETE /api/notes still empties the store. The page shows a Done/Undo span (not a button) per note and a done note is struck through.",
   "next": [
-    "Orchestrator files the issue and Duo writes the change"
+    "Run the end to end tests against the live app after the deploy"
   ]
 }
