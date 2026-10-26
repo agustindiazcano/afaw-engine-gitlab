@@ -1,4 +1,4 @@
-"""The ecological indicator at the top of the dashboard: measured range, assumptions, no invention."""
+"""The ecological indicator at the top of the dashboard: measured range and assumptions."""
 
 from __future__ import annotations
 
@@ -42,7 +42,7 @@ def test_without_flows_it_says_nothing_was_measured() -> None:
 
 def test_the_indicator_goes_right_after_the_title() -> None:
     out = inject(PAGE, SCI)
-    assert out.index("<h1>") < out.index('class="eco"') < out.index('class="meta"')
+    assert out.index("<h1>") < out.index('class="banner eco"') < out.index('class="meta"')
 
 
 def test_a_page_without_a_title_is_left_alone() -> None:
@@ -61,4 +61,4 @@ def test_build_state_adds_the_indicator_when_given_the_sci_file(
     sci.write_text(json.dumps(SCI), encoding="utf-8")
     out = tmp_path / "out"
     assert build_state.main(["--ref", "HEAD", "--out", str(out), "--sci", str(sci)]) == 0
-    assert 'class="eco"' in (out / "dashboard.html").read_text(encoding="utf-8")
+    assert 'class="banner eco"' in (out / "dashboard.html").read_text(encoding="utf-8")
