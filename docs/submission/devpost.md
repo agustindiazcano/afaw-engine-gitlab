@@ -53,7 +53,7 @@ GitLab Duo Agent Platform pieces in the project (the list with service accounts 
 | Piece | What ran |
 |---|---|
 | Developer Flow | Dozens of sessions from issues; three tools written in parallel reached a merge request in 2 to 4 minutes |
-| Fix CI/CD Pipeline Flow | Once by hand; a trigger on failed pipelines exists <Update with the probe result> |
+| Fix CI/CD Pipeline Flow | Once by hand, then by a trigger on failed pipelines: it opened a repair 1 min 43 s after a planted failure, in parallel with the Developer Flow, so the trigger is kept off outside a demonstration |
 | Code Review Flow | Three rounds on one merge request, ending in an approval |
 | Custom flow "AFAW loop reporter" | Once: a summary note on a merge request and its issue in 1 min 23 s |
 | Custom agents "AFAW auditor" and "AFAW planner" | Created; not run |
@@ -92,7 +92,8 @@ https://afaw-demo-app-ljm5hefnsq-uc.a.run.app.
 | Merge requests / made only by agents / merged / with a recorded automatic merge | 104 / 36 / 29 / 23 (2026-10-26); median 10.7 minutes from open to merge |
 | Hidden acceptance tests on three tools Duo built | 39 of 39 passed |
 | Planted defects repaired with no test touched | 6 of 6, plus 1 real defect Duo found |
-| Chaos | C1, C2, C3, C5, C6 and a security case held |
+| Chaos | C1, C2, C3, C5, C6, C7 and a security case held |
+| Long chain | Three dependent tasks filed one after another by the orchestrator: each reached a verified live app in 24 to 28 minutes, 1 h 18 min 23 s in total, no repair request |
 | Mutation score, `app.py` / `search.py` | 62.2 to 95.6 / 78.0 to 84.7 percent |
 | Carbon of one development flow | 0.45 to 4.53 gCO2eq over 30 merge requests, stated assumptions |
 | GitLab Credits used | 363.45 of 500 (read by hand); GitLab exposes no token counts |
@@ -114,7 +115,7 @@ Nothing here is a claim of savings in speed or money.
 
 - The merge and the end of Draft use the token of a person. A service account token needs an Owner.
 - A repair that needs more than one attempt has not happened.
-- Chaos faults C4 (covered by unit tests, not run live) and C7 to C9; the comparison against reading
+- Chaos faults C4 (covered by unit tests, not run live), C8 and C9; the comparison against reading
   the code is not measured, so the sustainability result is a measured cost, not a saving.
 - The custom agents AFAW auditor and AFAW planner were created and not run.
 

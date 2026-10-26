@@ -134,6 +134,7 @@ seconds after assignment; all were merged by the guard.
 | A real defect Duo found in `scripts/mutation_engine.py` | Found from the issue `request_fix` opened; fixed in !47, merged by the guard |
 | Three bugs no pre-merge test sees, found by a live browser test | Issue 35 seconds after the failing check; Duo's merge request 3 min 16 s later; merged 9 min 36 s after that; green live check 23 min 44 s after the issue; one Duo session, 6.62 credits |
 | A test with no assertions on a mutation-critical file (chaos C2) | `mutation_gate` failed; Duo wrote 9 value-checked cases and changed no code |
+| A planted lint failure with the trigger on failed pipelines on (probe) | The Fix CI/CD Pipeline Flow opened a repair 1 min 43 s after the failure, in parallel with the Developer Flow started by `request_fix`; both removed the same import, so the cost doubled and the trigger was turned off |
 
 ### 4.3 The whole loop, once
 
@@ -148,6 +149,23 @@ seconds after assignment; all were merged by the guard.
 
 Duo changed 8 files in 3 commits, all authored by the Developer Flow account. Cost: 356.59 to 363.45
 credits, so 6.86.
+
+### 4.3b A chain of dependent tasks
+
+Three tasks were queued with `blocked_by`, each depending on the previous one. A driver script ran
+the loop with no action by a person between tasks: it asked the orchestrator for the next task,
+filed the issue, waited for the merge and for the live check, and asked again.
+
+| Task | Issue to merge request | Merge request to merge | Issue to verified live app |
+|---|---|---|---|
+| `GET /api/stats` (#64, !129) | 1 min 46 s | 10 min 39 s | 24 min 15 s |
+| Stats in the summary line (#65, !131) | 2 min 03 s | 10 min 26 s | 24 min 18 s |
+| Footer links the commit (#66, !132) | 1 min 49 s | 11 min 23 s | 28 min 05 s |
+
+The three tasks took 1 h 18 min 23 s. The orchestrator filed each next issue 57 s and 47 s after
+the live check of the previous task. All commits are authored by the Developer Flow account, and no
+merge request needed a repair request. Carbon of the three flows: 12,265 job seconds and 1.83 to
+18.49 gCO2eq.
 
 ### 4.4 Three tools in parallel
 
@@ -178,7 +196,7 @@ person, because the guard uses that person's token.
 | C3 | Two contradictory tests | Yes: no test was weakened |
 | C5 | The list of bot ids is empty | Yes: the guard names it as a reason and does not merge |
 | C6 | A person's merge request | Yes: merge no, with two identity reasons |
-| C7 | A job cancelled mid-run | Yes: a retry recovered the pipeline |
+| C7 | A job cancelled mid-run | Yes: a retry recovered the pipeline, which ended in success |
 | S1 | `shell=True` and `eval` in new code | Yes: removed, behaviour kept |
 | N1 | A repair fails a check of its own | Yes: the cap of six open issues stopped the chain |
 | B1 | The guard held its own merge requests | No, then fixed: it counted a skipped job as a failure |
@@ -201,6 +219,7 @@ GitLab exposes no token counts, so the unit is the GitLab Credit, read by hand f
 | Parallel batch: four sessions, the chain that chaos C2 started, and a review request | 23.63 |
 | Fix CI/CD trigger probe | 5.36 |
 | End to end rehearsal | 6.86 |
+| Long chain of three tasks (368.81 at the start; the reading taken while it ran includes two sessions that a defect of ours caused) | see `experiments.md` for the reading after the chain |
 
 The carbon of a flow is estimated with the Software Carbon Intensity method (ISO/IEC 21031:2024) from
 measured job seconds, the Cloud Carbon Footprint power range for a 2 vCPU runner (0.71 to 4.26 W per
@@ -222,6 +241,10 @@ a saving against an agent that reads the code or runs the whole suite locally.
 - The control that protects the rule files (`human_only_files`) lives in the pipeline file it
   protects, so the same merge request can edit it away. It is a weak control.
 - The trigger on failed pipelines and `request_fix` repair the same failure twice, doubling the cost.
+- Our own job caused extra sessions: `repair_check` failed on merge requests that named no issue,
+  because `grep` returns an error under `pipefail`, and `request_fix` asked Duo to repair it twice.
+  The tests written for the job read its text and could not see it; a test that runs the line under
+  the same shell options found it.
 
 ## 6. Reproducing
 
