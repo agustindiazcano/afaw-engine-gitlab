@@ -1,0 +1,14 @@
+{
+  "task_id": "task_116",
+  "files_touched": [
+    "src/notes_app/app.py",
+    "src/notes_app/static/index.html",
+    "tests/notes/test_app.py",
+    "tests/notes/test_page.py"
+  ],
+  "summary": "DELETE /api/notes with tests and a summary strip on the page. The page was written with three planted defects (count one too high, clear handler empty, hint colour equal to the background) to measure how the loop finds and repairs a bug that passes every pre-merge test.",
+  "next": [
+    "task_117: live end to end checks that fail on the three defects",
+    "Record time per link and credits in docs/experiments.md"
+  ]
+}

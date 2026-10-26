@@ -88,3 +88,9 @@ def test_the_page_loads_nothing_from_outside(html: str) -> None:
     assert not re.search(r"(src|href)=\"https?://", html)
     assert "@import" not in html
     assert "<img" not in html
+
+
+def test_the_page_has_a_summary_line_a_clear_control_and_a_hint(html: str) -> None:
+    assert 'id="stats"' in html
+    assert re.search(r'id="clear"[^>]*role="button"', html)
+    assert 'class="hint"' in html
