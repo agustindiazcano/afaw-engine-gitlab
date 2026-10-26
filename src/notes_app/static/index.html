@@ -43,7 +43,9 @@ li{display:flex;align-items:center;justify-content:space-between;gap:var(--space
 padding:var(--space-12) var(--space-16);background:var(--note-bg);
 border:1px solid var(--border);border-radius:var(--space-8);overflow-wrap:anywhere;
 animation:fade .25s ease-out}
-.del{flex:none;color:var(--primary);cursor:pointer;text-decoration:underline;
+.actions{display:flex;flex:none;gap:var(--space-12)}
+.is-done{text-decoration:line-through;color:var(--muted)}
+.done,.del{flex:none;color:var(--primary);cursor:pointer;text-decoration:underline;
 font-size:.875rem}
 @keyframes fade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion: reduce){li{animation:none}}
@@ -89,15 +91,26 @@ async function load(){const r=await fetch('/api/notes');const d=await r.json();
 const ul=$('n');ul.replaceChildren();
 for(const x of d){const li=document.createElement('li');
 const t=document.createElement('span');t.textContent=x.text;
+if(x.done)t.className='is-done';
+const dn=document.createElement('span');dn.className='done';dn.textContent=x.done?'Undo':'Done';
+dn.setAttribute('role','button');dn.tabIndex=0;
+dn.setAttribute('aria-label',x.done?'Mark note not done':'Mark note done');
+const flip=()=>setDone(x.id,!x.done);
+dn.addEventListener('click',flip);
+dn.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flip()}});
 const del=document.createElement('span');del.className='del';del.textContent='Delete';
 del.setAttribute('role','button');del.tabIndex=0;del.setAttribute('aria-label','Delete note');
 const go=()=>removeNote(x.id);
 del.addEventListener('click',go);
 del.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}});
-li.append(t,del);ul.append(li)}
+const ac=document.createElement('span');ac.className='actions';ac.append(dn,del);
+li.append(t,ac);ul.append(li)}
 $('empty').hidden=d.length>0;
 const s=await (await fetch('/api/stats')).json();
 $('stats').textContent=s.count===0?'0 notes':s.count+' notes, longest '+s.longest+' characters'}
+async function setDone(id,done){try{const r=await fetch('/api/notes/'+id,{method:'PATCH',
+headers:{'content-type':'application/json'},body:JSON.stringify({done:done})});
+if(!r.ok&&r.status!==404)throw 0;await load()}catch(_){fail('Could not update the note. Try again.')}}
 async function removeNote(id){try{const r=await fetch('/api/notes/'+id,{method:'DELETE'});
 if(!r.ok&&r.status!==404)throw 0;await load()}catch(_){fail('Could not delete the note. Try again.')}}
 async function clearAll(){try{const r=await fetch('/api/notes',{method:'DELETE'});
