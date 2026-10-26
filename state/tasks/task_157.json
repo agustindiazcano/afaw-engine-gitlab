@@ -2,7 +2,7 @@
   "id": "task_157",
   "title": "Retry a GitLab API response that is cut in the middle (IncompleteRead) in the state facts reader",
   "role": "architect",
-  "type": "bugfix",
+  "type": "fix",
   "status": "done",
   "owner": "agent",
   "priority": 1,
