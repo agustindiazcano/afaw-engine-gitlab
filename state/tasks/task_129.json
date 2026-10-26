@@ -1,0 +1,13 @@
+{
+  "id": "task_129",
+  "title": "Orchestrator --create: file the issue for the selected task from a fixed template",
+  "role": "architect",
+  "type": "feature",
+  "status": "done",
+  "owner": "agent",
+  "branch": "feat/task-129-orchestrator-create",
+  "priority": 1,
+  "difficulty": 2,
+  "blocked_by": [],
+  "notes": "Completes ADR 0010: selection and filing are code; no model writes the issue."
+}
