@@ -159,3 +159,16 @@ def test_the_commit_link_opens_in_the_same_tab_with_noopener(html: str) -> None:
 
 def test_the_commit_text_stays_plain_when_the_version_is_unknown(html: str) -> None:
     assert re.search(r"v\.commit_sha(\s*)!==(\s*)'unknown'", html)
+
+
+def test_each_note_has_a_done_control_that_is_not_a_button(html: str) -> None:
+    assert "method:'PATCH'" in html
+    assert re.search(r"className='done'", html)
+    assert re.search(r"JSON\.stringify\(\{done:", html)
+    assert html.count("<button") == 1
+    assert "createElement('button')" not in html
+
+
+def test_a_done_note_is_shown_with_a_line_through(html: str) -> None:
+    assert re.search(r"\.(is-done|done-text)\{[^}]*text-decoration:line-through", html)
+    assert "x.done" in html

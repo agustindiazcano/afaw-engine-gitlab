@@ -44,7 +44,7 @@ def test_a_note_is_created_and_listed_newest_first(client: TestClient) -> None:
     first = client.post("/api/notes", json={"text": "first"})
     second = client.post("/api/notes", json={"text": "second"})
     assert first.status_code == 201
-    assert first.json() == {"id": 1, "text": "first"}
+    assert first.json() == {"id": 1, "text": "first", "done": False}
     assert second.json()["id"] == 2
     assert [n["text"] for n in client.get("/api/notes").json()] == ["second", "first"]
 
@@ -209,3 +209,65 @@ def test_each_app_has_its_own_stats() -> None:
     a, b = TestClient(create_app()), TestClient(create_app())
     a.post("/api/notes", json={"text": "only in a"})
     assert b.get("/api/stats").json() == {"count": 0, "longest": 0}
+
+
+def test_every_note_starts_not_done_when_created_and_listed(client: TestClient) -> None:
+    created = client.post("/api/notes", json={"text": "one"}).json()
+    assert created["done"] is False
+    assert [n["done"] for n in client.get("/api/notes").json()] == [False]
+
+
+def test_patch_marks_a_note_done_and_returns_it(client: TestClient) -> None:
+    client.post("/api/notes", json={"text": "one"})
+    response = client.patch("/api/notes/1", json={"done": True})
+    assert response.status_code == 200
+    assert response.json() == {"id": 1, "text": "one", "done": True}
+    assert client.get("/api/notes").json()[0]["done"] is True
+
+
+def test_patch_can_mark_a_done_note_not_done_again(client: TestClient) -> None:
+    client.post("/api/notes", json={"text": "one"})
+    client.patch("/api/notes/1", json={"done": True})
+    response = client.patch("/api/notes/1", json={"done": False})
+    assert response.status_code == 200
+    assert response.json()["done"] is False
+
+
+def test_patch_changes_only_the_named_note(client: TestClient) -> None:
+    client.post("/api/notes", json={"text": "one"})
+    client.post("/api/notes", json={"text": "two"})
+    client.patch("/api/notes/2", json={"done": True})
+    assert {n["text"]: n["done"] for n in client.get("/api/notes").json()} == {
+        "one": False,
+        "two": True,
+    }
+
+
+def test_patch_an_unknown_note_is_404_with_a_detail(client: TestClient) -> None:
+    client.post("/api/notes", json={"text": "one"})
+    response = client.patch("/api/notes/99", json={"done": True})
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Note not found"}
+
+
+@pytest.mark.parametrize("body", [{"done": "yes"}, {"done": 1}, {"done": None}, {}, {"text": "x"}])
+def test_patch_rejects_a_done_that_is_not_a_boolean(
+    client: TestClient, body: dict[str, object]
+) -> None:
+    client.post("/api/notes", json={"text": "one"})
+    assert client.patch("/api/notes/1", json=body).status_code == 422
+    assert client.get("/api/notes").json()[0]["done"] is False
+
+
+def test_patch_rejects_extra_fields(client: TestClient) -> None:
+    client.post("/api/notes", json={"text": "one"})
+    response = client.patch("/api/notes/1", json={"done": True, "text": "changed"})
+    assert response.status_code == 422
+    assert client.get("/api/notes").json()[0] == {"id": 1, "text": "one", "done": False}
+
+
+def test_delete_all_still_empties_the_store_with_done_notes(client: TestClient) -> None:
+    client.post("/api/notes", json={"text": "one"})
+    client.patch("/api/notes/1", json={"done": True})
+    assert client.delete("/api/notes").status_code == 204
+    assert client.get("/api/notes").json() == []
