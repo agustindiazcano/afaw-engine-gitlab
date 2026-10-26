@@ -1,0 +1,13 @@
+{
+  "id": "task_140",
+  "title": "Record the end to end rehearsal, chaos C5 and C6, and credits 363.45",
+  "role": "architect",
+  "type": "feature",
+  "status": "done",
+  "owner": "agent",
+  "branch": "feat/task-140-rehearsal",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "The experiments page renders the rehearsal from docs/data/experiments.json."
+}
