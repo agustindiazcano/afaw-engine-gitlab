@@ -1,4 +1,4 @@
-"""SCI of one flow (a merge request and the main pipeline of its merge): measured seconds, stated range."""
+"""SCI of one flow (a merge request and the main pipeline of its merge), from measured seconds."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from scripts.sci_report import flow_seconds, render, sci_range, flow_pipelines
+from scripts.sci_report import flow_pipelines, flow_seconds, render, sci_range
 
 
 def _job(seconds: float | None, name: str = "j") -> dict[str, Any]:
