@@ -263,3 +263,14 @@ def test_the_guard_merge_tile_and_the_autonomy_panel_give_the_same_number(
 ) -> None:
     count = data["handoff"]["autonomy"]["guard_merged"]
     assert f"<b>{count}</b><span>Merges by merge_guard" in experiments
+
+
+def test_the_end_to_end_rehearsal_is_listed_link_by_link(
+    experiments: str, data: dict[str, Any]
+) -> None:
+    rehearsal = data["handoff"]["rehearsal"]
+    assert len(rehearsal["links"]) >= 8
+    for link in rehearsal["links"]:
+        assert escape(link["link"]) in experiments and link["utc"] in experiments
+    assert str(rehearsal["credits_used"]) in experiments
+    assert "gCO2eq" in experiments
