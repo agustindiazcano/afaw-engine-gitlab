@@ -269,6 +269,13 @@
       "expected": "The guard never merges it: merge no, reason identity",
       "observed": "On !121 the verdict was merge: no with two identity reasons (the head pipeline was started by a person and a commit is authored by a person); exit code 0, nothing merged",
       "held": true
+    },
+    {
+      "id": "C7",
+      "fault": "A job is cancelled in the middle of its run",
+      "expected": "The pipeline does not turn green by itself; a retry recovers it",
+      "observed": "web_data of the pipeline of !123 was cancelled at 03:59:48 UTC and retried at 03:59:55; the retried job succeeded, the pipeline ended in success at 04:08:52 and the merge request merged",
+      "held": true
     }
   ],
   "handoff": {
