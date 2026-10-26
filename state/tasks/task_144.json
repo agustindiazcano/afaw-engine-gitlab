@@ -1,0 +1,14 @@
+{
+  "id": "task_144",
+  "title": "Demo app page: the footer links the running commit to its GitLab page",
+  "role": "architect",
+  "type": "feature",
+  "status": "pending",
+  "owner": "agent",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [
+    "task_143"
+  ],
+  "notes": "Acceptance. In the footer #v the commit hash is a link to https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/commit/<full commit sha> (opens in the same tab, rel noopener); when /api/version returns unknown the text stays plain. A Playwright test checks the href against /api/version. Tests first: unit tests in tests/notes/ and, for the page, a Playwright test in e2e/test_notes_app.py. Keep the selectors #t #f #n #v, a single <button> element and the brand colour #0b5fff. The existing browser tests and e2e/test_notes_live.py must keep passing. Do not touch .gitlab-ci.yml."
+}

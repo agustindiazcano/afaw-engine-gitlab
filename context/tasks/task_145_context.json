@@ -1,0 +1,8 @@
+{
+  "task_id": "task_145",
+  "files_touched": [],
+  "summary": "Three pending demo tasks with blocked_by in a row: a stats endpoint, the page line that shows it, and a footer link to the commit.",
+  "next": [
+    "Run the chain: scripts.orchestrator --create after each merge and deploy"
+  ]
+}
