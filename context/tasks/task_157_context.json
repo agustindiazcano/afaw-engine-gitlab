@@ -1,0 +1,11 @@
+{
+  "task_id": "task_157",
+  "files_touched": [
+    "scripts/afaw_state/facts.py",
+    "tests/tooling/test_facts_gitlab.py"
+  ],
+  "summary": "http_get_json retries an http.client.HTTPException such as IncompleteRead, with the same backoff as network errors. Test first: a response cut in the middle is retried.",
+  "next": [
+    "Check that web_data no longer fails on a cut response"
+  ]
+}
