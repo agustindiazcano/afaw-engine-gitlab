@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import os
+import shutil
+import subprocess
 from typing import Any
 
 import pytest
@@ -380,3 +383,26 @@ def test_repair_check_reports_on_the_merge_requests_of_the_flow_only(ci: dict[st
     assert "|| echo" in script  # it reports; a job that did not run here is not a failure
     assert not job.get("allow_failure")
     assert "AFAW_MERGE_TOKEN" not in str(job)
+
+
+@pytest.mark.skipif(shutil.which("bash") is None, reason="needs bash")
+@pytest.mark.parametrize(
+    ("description", "expected"),
+    [("Fix the lint job\n\nCloses #62\n", "62"), ("No issue is named here", "")],
+)
+def test_repair_check_finds_the_issue_under_the_shell_gitlab_uses(
+    ci: dict[str, Any], description: str, expected: str
+) -> None:
+    # GitLab runs job scripts with errexit and pipefail: grep exits 1 when nothing matches, and that
+    # must not turn into a red job.
+    line = ci["repair_check"]["script"][0] + '\necho "issue=[$ISSUE]"'
+    result = subprocess.run(  # noqa: S603
+        [str(shutil.which("bash")), "-e", "-o", "pipefail", "-c", line],
+        env={"CI_MERGE_REQUEST_DESCRIPTION": description, "PATH": os.environ["PATH"]},
+        capture_output=True,
+        text=True,
+        timeout=20,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert f"issue=[{expected}]" in result.stdout
