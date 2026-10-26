@@ -87,8 +87,8 @@ and the link is in the [evidence](docs/submission/evidence.md) or the
 | Running more tests than needed wastes energy | The assistant runs only its own test; the pipeline runs the rest once | **Not measured as a saving.** We measure the cost of a change: see [Sustainability](#sustainability) |
 
 What it does not prove: the undraft and the merge are done with a person's access token, so
-GitLab shows that person's name. The Code Review Flow and the summary comment on the issue never
-ran. A repair that needed more than one attempt has not happened yet.
+GitLab shows that person's name. The summary comment on the issue never ran. The Code Review Flow ran once,
+started by a person assigning `@GitLabDuo` as reviewer. A repair that needed more than one attempt has not happened yet.
 
 ## What this variant changes (Hands-off)
 
@@ -118,7 +118,7 @@ flowchart LR
     E -- green --> O[Observe<br/>dashboard, experiments,<br/>environment]
 ```
 
-Not in the diagram because it has not run: a review by the Code Review Flow and a summary comment on the issue.
+Not in the diagram: the review by the Code Review Flow, which ran once on a merge request that a person assigned to it, and a summary comment on the issue, which has not run.
 
 ## Hackathon requirements and status
 
@@ -203,7 +203,7 @@ Code, not agents, does the rest of the loop: `scripts/orchestrator.py` picks the
 | Custom agent and custom flow | Sources merged in `duo/`; they are created in the GitLab UI by a person ([`docs/duo.md`](docs/duo.md)). The agent **AFAW merge agent** exists in the AI Catalog (id 1019706, version 1.1.0, seven read-and-note tools, no merge tool because Duo has none); the triage flow (`duo/triage-flow.yaml`) is not created yet |
 | Developer Flow opens a merge request from an issue | Ran: !16, !17, !18 and later ones ([evidence](docs/submission/evidence.md)). Assigning an issue through the API starts it with no click (issues #6 and #12). Its merge requests are Draft |
 | A failed pipeline is repaired | Ran: the `request_fix` job opens an issue for the Developer Flow account; Duo repaired planted defects and one real defect, merged by the guard ([`experiments.md`](docs/experiments.md)). The Fix CI/CD Pipeline Flow itself ran once, by hand, and only commented |
-| Code Review Flow comments on a merge request | Planned. No such session exists; it does not run on Draft merge requests |
+| Code Review Flow comments on a merge request | Done once: assigning `@GitLabDuo` as reviewer of !118 started a session in 4 seconds and it left three comments in 1 min 51 s ([review session 10028468](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/automate/agent-sessions/10028468)); it does not run on Draft merge requests |
 | Cap of 3 automatic fix attempts per merge request | Merged (task 012, `merge_guard`); held in the chaos case C3; no real repair needed a second attempt |
 | Draft cleared and merge requested when every gate is green | Ran nine times by `merge_guard` with `AFAW_AUTO_MERGE=true`, using the token of a person (`AFAW_MERGE_TOKEN`), so GitLab shows that person's name on the notes. It merges nothing unless a person turns it on ([`docs/autohealing.md`](docs/autohealing.md)) |
 | Release, deploy to Cloud Run and live monitor | Done, including after an automatic merge (pipeline 2986982832); `monitor_live` proves the commit |

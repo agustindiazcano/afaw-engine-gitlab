@@ -1,0 +1,13 @@
+{
+  "id": "task_135",
+  "title": "Record the parallel Duo batch, chaos C2 and the credits reading of 341.60",
+  "role": "architect",
+  "type": "chore",
+  "status": "done",
+  "owner": "agent",
+  "branch": "docs/task-135-batch-results",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Data file, experiments page and its test change together."
+}

@@ -199,7 +199,9 @@ def experiments_page(data: Mapping[str, Any]) -> str:
             str(data["handoff"]["autonomy"]["guard_merged"]),
             "Merges by merge_guard (agent-only, automatic merge recorded)",
         )
-        + _tile(f"{credits['used']} of {credits['budget']}", "GitLab Credits used, read by hand")
+        + _tile(
+            f"{credits['used']:.2f} of {credits['budget']}", "GitLab Credits used, read by hand"
+        )
     )
     cov, mut, mins = data["coverage"], data["mutation"], data["minutes"]
     charts = (
