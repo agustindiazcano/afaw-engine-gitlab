@@ -256,10 +256,12 @@ On the CI runner with mutmut 3.8.0, the whole suite including the tests Duo wrot
 | C3 | A branch whose two tests contradict each other | The flow stops and no test is weakened | One session, no merge request: Duo explained that a green pipeline would need a test deleted, skipped or loosened, which the rules forbid (issue #26) | Yes |
 | S1 | `shell=True` and `eval` in new code (EXP-13) | `security_gate` fails; the flow removes both and keeps the behaviour | `request_fix` opened issue #27 from `security_gate`; Duo used `shlex.split` and `ast.literal_eval` in !56, tests kept, pipeline passed; the merge request was closed unmerged because the branch carries the planted probe | Yes |
 | C2 | A test that calls new code in a mutation-critical file and asserts nothing | `mutation_gate` fails and the flow writes real assertions without touching the code | `mutation_gate` failed; `request_fix` opened [#58](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/work_items/58) 6 min 43 s after the push; Duo opened [!114](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/114) two minutes later with 9 value-checked cases and a zero-whole guard test, no change to the code; the branch carries the planted probe, so the merge request was closed unmerged | Yes |
+| C5 | `AFAW_BOT_USER_IDS` is empty | The guard cannot tell a service account from a person and does not merge | Read only on the open Duo merge request [!122](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/122): the verdict lists "AFAW_BOT_USER_IDS is empty: a service account cannot be told from a person"; with the two ids set that reason is gone. The switch was off | Yes |
+| C6 | A person's merge request | The guard never merges it: merge no, reason identity | On [!121](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/121) the verdict was merge: no with two identity reasons (the head pipeline was started by a person, a commit is authored by a person); exit code 0, nothing merged | Yes |
 | N1 | A repair merge request fails a check of its own (task files of a planted branch) | The chain of issues stops at the cap of 6 open autoheal issues | Issues #32 to #34 were opened for `task_files` failures of the repair branches; the cap held; the guard merged one of those repairs (!65), which added only task files, and the operator cancelled its task | Yes |
 | B1 | Merge requests of the flow held by the guard itself | Merged when every gate is green | The guard counted the skipped `request_fix` job as a failure and held !40 and !43 (found by the experiment, fixed in task_070) | No, then fixed |
 
-Not run yet: C4 to C9. The credits used
+Not run live: C4 (the guard acts only when every other job is green, so an invalid token cannot be provoked on a real merge request; `tests/tooling/test_merge_guard.py` covers the refusals), C7 to C9. The credits used
 by C1, C2, C3 and S1 are inside the totals of the next table, not separate.
 
 ### Credits
@@ -362,7 +364,7 @@ per-session figure).
 What this does not show: the defects were planted by us, so it measures the loop, not how often
 Duo meets such defects on its own; the trigger needs a person; one run, not a distribution.
 Credit readings of 2026-10-25/26 (hours not recorded unless stated): 204.26 (about 18:05 GMT-3),
-219.38, 253.40 (about 20:15 GMT-3), 299.70, 309.15, 315.77 (about 22:30 GMT-3), 317.97 (hour not recorded; read before the batch whose first issue was created at 02:09:56 UTC on 2026-10-26) and 341.60 (about 02:30 UTC on 2026-10-26, after the batch).
+219.38, 253.40 (about 20:15 GMT-3), 299.70, 309.15, 315.77 (about 22:30 GMT-3), 317.97 (hour not recorded; read before the batch whose first issue was created at 02:09:56 UTC on 2026-10-26) and 341.60 (about 02:30 UTC on 2026-10-26, after the batch), 353.82 and 356.59 (hours not recorded; after the loop reporter and the review rounds of !118) and 363.45 (about 03:50 UTC, after the end to end rehearsal).
 
 ## Parallel batch of Duo sessions (2026-10-26)
 
@@ -394,3 +396,37 @@ again. The author closed #59, #60, !114, !116 and !117 at about 02:30 UTC to sto
 Credits: the 23.63 of the window cover the four sessions above, the sessions of the chain (#59 and
 #60) and the review requested on [!115](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/115); GitLab shows no figure per
 session, so none is attributed to a single experiment.
+
+## End to end rehearsal (2026-10-26)
+
+One run of the whole loop with no step typed by a person after the first command: the orchestrator
+picks the next task from the project board and files its issue, Duo changes the demo app, the
+gates judge the merge request, `merge_guard` takes it out of Draft and merges it, the pipeline of
+`main` deploys, and a browser test checks the live app. The first command was run by the author
+with the author's token, and the guard uses that token to take the merge request out of Draft and
+to request the merge.
+
+| Link | Time (UTC) | Since the previous link | Evidence |
+|---|---|---|---|
+| `scripts.orchestrator --create` files issue #61 for `task_136` (delete one note) | 03:20:39 | n/a | [#61](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/work_items/61) |
+| Duo opens the merge request | 03:23:54 | 3 min 15 s | [!122](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/122) |
+| `merge_guard` takes it out of Draft | 03:34:06 | 10 min 12 s | notes of !122 |
+| `merge_guard` merges it | 03:34:35 | 29 s | !122 |
+| Issue #61 closes | 03:34:57 | 22 s | #61 |
+| `deploy_cloud_run` | 03:42:32 | 7 min 57 s | [pipeline 2987775043](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2987775043) |
+| `monitor_live` | 03:43:04 | 32 s | same pipeline |
+| `deploy_demo_app` | 03:44:52 | 1 min 48 s | same pipeline |
+| `e2e_live` passes | 03:45:58 | 1 min 06 s | same pipeline |
+
+Issue to verified live app: 25 min 19 s. Duo changed 8 files in 3 commits, all authored by
+`Duo Developer`: the API (`DELETE /api/notes/{id}`), the page, unit tests, a browser test,
+`docs/demo-app.md` and the task files. On the live app a delete of an unknown id returns 404 and a
+delete of an existing note returns 204 (checked by hand after the run).
+
+Cost and carbon of this flow (`python -m scripts.sci_report`, !122 and the `main` pipeline of its
+merge): 3 pipelines, 3,693 job seconds, 1.6 to 9.6 Wh, 0.55 to 5.57 gCO2eq. It is SCI without M and
+without the energy of the model behind Duo. Credits read by the human: 356.59 before and 363.45
+after, so **6.86 credits**; the window held no other Duo session.
+
+What this does not show: one run, one kind of task (a small feature with a written specification),
+and a main pipeline that also deployed an unrelated documentation merge (!121) 9 minutes earlier.

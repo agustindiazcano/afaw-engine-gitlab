@@ -170,9 +170,9 @@
     "real_defects_found": 1
   },
   "credits": {
-    "used": 341.6,
+    "used": 363.45,
     "budget": 500,
-    "read_by": "the human, from the GitLab Credits dashboard, on 2026-10-26 about 02:30 UTC, after the parallel batch of four Duo sessions"
+    "read_by": "the human, from the GitLab Credits dashboard, on 2026-10-26 about 03:50 UTC, right after the end to end rehearsal"
   },
   "environment": {
     "source": "CI job seconds from docs/submission/mutation-tools-measurement.md; coefficients and grid data from docs/adr/0009-measure-sustainability-with-sci.md",
@@ -254,6 +254,20 @@
       "fault": "A test that calls new code in a mutation-critical file and asserts nothing",
       "expected": "mutation_gate fails and the flow writes real assertions without touching the code",
       "observed": "mutation_gate failed; request_fix opened issue #58 6 min 43 s after the push; Duo opened !114 two minutes later with 9 value-checked cases and a zero-whole guard test, no change to the code; the branch carries the planted probe, so the merge request was closed unmerged",
+      "held": true
+    },
+    {
+      "id": "C5",
+      "fault": "AFAW_BOT_USER_IDS is empty",
+      "expected": "The guard cannot tell a service account from a person and does not merge",
+      "observed": "On the open Duo merge request !122 the verdict lists the reason \"AFAW_BOT_USER_IDS is empty: a service account cannot be told from a person\"; with the two ids set that reason is gone. Read only, the switch was off",
+      "held": true
+    },
+    {
+      "id": "C6",
+      "fault": "A person's merge request",
+      "expected": "The guard never merges it: merge no, reason identity",
+      "observed": "On !121 the verdict was merge: no with two identity reasons (the head pipeline was started by a person and a commit is authored by a person); exit code 0, nothing merged",
       "held": true
     }
   ],
@@ -366,6 +380,67 @@
       "The Code Review Flow and the summary comment on the issue each ran, started by a person (an assignment as reviewer, a mention). No event starts either by itself.",
       "No repair has needed more than one attempt yet.",
       "The bugs and the trigger of the benchmark were ours: it measures the loop, not how often Duo meets such bugs."
-    ]
+    ],
+    "rehearsal": {
+      "title": "End to end rehearsal: the orchestrator files the issue, Duo changes the app, the guard merges, the app is redeployed and tested live",
+      "date": "2026-10-26",
+      "links": [
+        {
+          "link": "Orchestrator files issue #61 (task_136, delete one note)",
+          "utc": "03:20:39",
+          "since": "n/a"
+        },
+        {
+          "link": "Duo opens merge request !122",
+          "utc": "03:23:54",
+          "since": "3 min 15 s"
+        },
+        {
+          "link": "merge_guard takes it out of Draft",
+          "utc": "03:34:06",
+          "since": "10 min 12 s"
+        },
+        {
+          "link": "merge_guard merges it",
+          "utc": "03:34:35",
+          "since": "29 s"
+        },
+        {
+          "link": "Issue #61 closes",
+          "utc": "03:34:57",
+          "since": "22 s"
+        },
+        {
+          "link": "deploy_cloud_run",
+          "utc": "03:42:32",
+          "since": "7 min 57 s"
+        },
+        {
+          "link": "monitor_live",
+          "utc": "03:43:04",
+          "since": "32 s"
+        },
+        {
+          "link": "deploy_demo_app",
+          "utc": "03:44:52",
+          "since": "1 min 48 s"
+        },
+        {
+          "link": "e2e_live passes",
+          "utc": "03:45:58",
+          "since": "1 min 06 s"
+        }
+      ],
+      "issue_to_verified": "25 min 19 s",
+      "credits_before": 356.59,
+      "credits_used": 6.86,
+      "pipelines": 3,
+      "job_seconds": 3693.4,
+      "energy_wh_low": 1.6,
+      "energy_wh_high": 9.62,
+      "gco2eq_low": 0.55,
+      "gco2eq_high": 5.57,
+      "changed": "8 files in 3 commits, all authored by Duo Developer: the API, the page, unit tests, a browser test, docs/demo-app.md and the task files"
+    }
   }
 }
