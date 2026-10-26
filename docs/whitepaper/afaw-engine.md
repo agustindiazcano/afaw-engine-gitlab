@@ -182,8 +182,8 @@ state was "requested changes", the API refused the merge: the review acts as a g
 
 ### 4.6 Autonomy
 
-Read on 2026-10-26: 104 merge requests; 36 made only by agents (every commit by a service account);
-29 of those merged; 23 merged with a recorded automatic merge; median 10.7 minutes from open to merge
+Read on 2026-10-26, after the long chain: 132 merge requests; 47 made only by agents (every commit by a service account);
+36 of those merged; 30 merged with a recorded automatic merge; median 10.5 minutes from open to merge
 for the agent-only merged ones. The note "enabled an automatic merge" appears under the name of a
 person, because the guard uses that person's token.
 

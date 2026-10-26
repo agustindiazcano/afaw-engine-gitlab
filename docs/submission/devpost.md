@@ -65,7 +65,7 @@ GitLab Duo Agent Platform pieces in the project (the list with service accounts 
 | Orchestrator files an issue and assigns it to Duo | Issue #61, in the rehearsal below |
 | Duo opens a merge request | 3 min 15 s after the issue in the rehearsal |
 | Gates judge it | `red_check`, `mutation_gate`, `security_gate`, `e2e_local` and the rest |
-| Draft cleared and merge requested by `merge_guard` | 23 merge requests made only by agents, with the token of a person (`AFAW_MERGE_TOKEN`), so GitLab shows that person's name on the notes |
+| Draft cleared and merge requested by `merge_guard` | 30 merge requests made only by agents, with the token of a person (`AFAW_MERGE_TOKEN`), so GitLab shows that person's name on the notes |
 | Release, deploy to Cloud Run, live check | Ran after the automatic merge; `e2e_live` passed |
 | A failed live check becomes an issue and Duo repairs it | Three planted bugs found by a browser test and fixed by one Duo session: 23 min 44 s from issue to verified app |
 
@@ -89,7 +89,7 @@ https://afaw-demo-app-ljm5hefnsq-uc.a.run.app.
 
 | Measure | Result |
 |---|---|
-| Merge requests / made only by agents / merged / with a recorded automatic merge | 104 / 36 / 29 / 23 (2026-10-26); median 10.7 minutes from open to merge |
+| Merge requests / made only by agents / merged / with a recorded automatic merge | 132 / 47 / 36 / 30 (2026-10-26); median 10.5 minutes from open to merge |
 | Hidden acceptance tests on three tools Duo built | 39 of 39 passed |
 | Planted defects repaired with no test touched | 6 of 6, plus 1 real defect Duo found |
 | Chaos | C1, C2, C3, C5, C6, C7 and a security case held |

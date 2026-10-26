@@ -293,13 +293,13 @@ authored by a service account; *guard merged* means agent only, merged, with the
 token, so it proves that no one clicked, not that no person's token was involved. Run it again
 before submitting; the numbers move as merge requests land.
 
-| Measure | Value on 2026-10-26 | Value on 2026-10-25 |
-|---|---|---|
-| Merge requests / merged / closed / open | 104 / 83 / 20 / 1 | 83 / 66 / 15 / 2 |
-| Made only by agents | 36 | 29 |
-| Of those, merged | 29 | 22 |
-| Of those, merged with a recorded automatic merge | 23 | 16 |
-| Median minutes from open to merge, agent-only merged | 10.7 | 24.6 |
+| Measure | 2026-10-26, after the long chain | 2026-10-26, before it | 2026-10-25 |
+|---|---|---|---|
+| Merge requests / merged / closed / open | 132 / 106 / 26 / 0 | 104 / 83 / 20 / 1 | 83 / 66 / 15 / 2 |
+| Made only by agents | 47 | 36 | 29 |
+| Of those, merged | 36 | 29 | 22 |
+| Of those, merged with a recorded automatic merge | 30 | 23 | 16 |
+| Median minutes from open to merge, agent-only merged | 10.5 | 10.7 | 24.6 |
 
 The median fell because the stage experiments and the repairs were small merge requests that the
 guard merged within about ten minutes.

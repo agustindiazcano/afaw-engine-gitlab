@@ -281,13 +281,13 @@
   "handoff": {
     "as_of": "2026-10-26",
     "autonomy": {
-      "merge_requests": 104,
-      "merged": 83,
-      "agent_only": 36,
-      "agent_only_merged": 29,
-      "guard_merged": 23,
-      "median_minutes": 10.7,
-      "read_on": "2026-10-26"
+      "merge_requests": 132,
+      "merged": 106,
+      "agent_only": 47,
+      "agent_only_merged": 36,
+      "guard_merged": 30,
+      "median_minutes": 10.5,
+      "read_on": "2026-10-26, after the long chain"
     },
     "stages": [
       {

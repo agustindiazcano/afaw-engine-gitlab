@@ -1,0 +1,13 @@
+{
+  "id": "task_152",
+  "title": "Final documents: long chain, autonomy counts, white paper, Devpost text, README and PENDING.md at the measured state of 2026-10-26",
+  "role": "architect",
+  "type": "feature",
+  "status": "done",
+  "owner": "agent",
+  "branch": "sync/task-152-final-docs",
+  "priority": 1,
+  "difficulty": 2,
+  "blocked_by": [],
+  "notes": "Carries the task files of the Devpost text (task_141) and the white paper (task_149), written on their own branches, so the branch uses the sync/ prefix."
+}
