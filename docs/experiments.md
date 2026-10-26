@@ -362,7 +362,7 @@ per-session figure).
 What this does not show: the defects were planted by us, so it measures the loop, not how often
 Duo meets such defects on its own; the trigger needs a person; one run, not a distribution.
 Credit readings of 2026-10-25/26 (hours not recorded unless stated): 204.26 (about 18:05 GMT-3),
-219.38, 253.40 (about 20:15 GMT-3), 299.70, 309.15, 315.77 (about 22:30 GMT-3), 317.97 and 341.60 (2026-10-26, about 23:30 GMT-3 on the 25th).
+219.38, 253.40 (about 20:15 GMT-3), 299.70, 309.15, 315.77 (about 22:30 GMT-3), 317.97 (hour not recorded; read before the batch whose first issue was created at 02:09:56 UTC on 2026-10-26) and 341.60 (about 02:30 UTC on 2026-10-26, after the batch).
 
 ## Parallel batch of Duo sessions (2026-10-26)
 
