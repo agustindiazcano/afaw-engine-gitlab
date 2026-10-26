@@ -1,0 +1,12 @@
+{
+  "id": "task_156",
+  "title": "README lists the link of the demo app that the agents change",
+  "role": "architect",
+  "type": "feature",
+  "status": "done",
+  "owner": "agent",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "branch": "docs/task-156-demo-app-link"
+}

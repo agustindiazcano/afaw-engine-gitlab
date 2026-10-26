@@ -17,7 +17,8 @@ AFAW Engine is the entry of the AFAW (Anti-Fragile Agentic Workflow) method to t
 - Also targeted: **Most Stages Covered**, **Google Cloud bonus** (Cloud Run)
 - Optional, only if measured: **Most Environmentally Impactful** (see [Sustainability](#sustainability))
 - Demo video: <DEMO_VIDEO_URL>
-- Live service (Google Cloud Run): https://afaw-handsoff-ljm5hefnsq-uc.a.run.app
+- Live dashboard (Google Cloud Run): https://afaw-handsoff-ljm5hefnsq-uc.a.run.app
+- Demo app that the Duo agents change (Google Cloud Run): https://afaw-demo-app-ljm5hefnsq-uc.a.run.app
 - Source of truth: https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase (a mirror is kept at https://github.com/agustindiazcano/afaw-engine-gitlab)
 - Original project (MIT, upstream): https://github.com/agustindiazcano/afaw-anti-fragile-agentic-workflow
 - License: [MIT](LICENSE)
