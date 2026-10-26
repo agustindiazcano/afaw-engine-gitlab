@@ -1,0 +1,8 @@
+{
+  "task_id": "task_155",
+  "files_touched": [],
+  "summary": "Queued for the demo takes: the task file only; no code yet.",
+  "next": [
+    "Orchestrator files the issue and Duo writes the change"
+  ]
+}
