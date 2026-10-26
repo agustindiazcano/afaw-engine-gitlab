@@ -1,0 +1,13 @@
+{
+  "id": "task_121",
+  "title": "Record the bug benchmark: time per link and credits",
+  "role": "architect",
+  "type": "chore",
+  "status": "done",
+  "owner": "agent",
+  "branch": "docs/task-121-bug-benchmark",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Documents and the credits figure of the experiments page with its test."
+}

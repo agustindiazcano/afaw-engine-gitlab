@@ -329,3 +329,33 @@ failures on the author's own branches. See
 
 What this does not show: the credits spent by the burst were not read separately; the readings are
 204.26 (about 18:05 GMT-3) and 219.38 (after the burst was launched, hour not recorded).
+
+## Bug benchmark on the demo app: from a failing live check to a repaired, redeployed app
+
+Three defects that no pre-merge test sees were shipped on purpose by the author in
+[!99](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/99) (`DELETE /api/notes` and a summary strip): the count is one too high,
+the "Clear all" control does nothing, and the hint text has the same colour as the card. The 11
+existing browser tests passed with the defects in place (run locally). The live checks that catch
+them, `e2e/test_notes_live.py`, were merged in [!100](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/100); they run only in
+`e2e_live`, after the deploy. The merge of !100 is the trigger and both merge requests were
+opened and merged by a person; everything after it ran with no one acting.
+
+| Link | Time (UTC, 2026-10-26) | Since the previous link | Evidence |
+|---|---|---|---|
+| !100 merged (trigger) | 00:47:14 | n/a | [!100](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/100) |
+| `e2e_live` fails on `main` (3 tests) | 01:00:02 | 12 min 48 s (pipeline with deploy) | [pipeline 2987489604](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2987489604) |
+| `request_fix` opens issue #54 for Duo | 01:00:37 | 35 s | [#54](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/work_items/54) |
+| Duo opens its merge request | 01:03:53 | 3 min 16 s | [!101](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/101) |
+| `merge_guard` merges it | 01:13:29 | 9 min 36 s | !101 |
+| Deploy of the repaired app | 01:23:10 | 9 min 41 s | [pipeline 2987541553](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2987541553) |
+| `e2e_live` passes | 01:24:21 | 1 min 11 s | same pipeline |
+
+Issue to repaired and verified app: 23 min 44 s. One Duo session fixed all three defects in one
+merge request. Credits: 309.15 before, 315.77 after, so **6.62 credits** for the whole run
+(readings by the human; the window held no other Duo session launched by us, but GitLab shows no
+per-session figure).
+
+What this does not show: the defects were planted by us, so it measures the loop, not how often
+Duo meets such defects on its own; the trigger needs a person; one run, not a distribution.
+Credit readings of 2026-10-25/26 (hours not recorded unless stated): 204.26 (about 18:05 GMT-3),
+219.38, 253.40 (about 20:15 GMT-3), 299.70, 309.15, 315.77 (about 22:30 GMT-3).
