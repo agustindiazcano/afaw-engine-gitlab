@@ -87,19 +87,19 @@ and the link is in the [evidence](docs/submission/evidence.md) or the
 | Running more tests than needed wastes energy | The assistant runs only its own test; the pipeline runs the rest once | **Not measured as a saving.** We measure the cost of a change: see [Sustainability](#sustainability) |
 
 What it does not prove: the undraft and the merge are done with a person's access token, so
-GitLab shows that person's name. The summary comment on the issue never ran. The Code Review Flow ran once,
-started by a person assigning `@GitLabDuo` as reviewer. A repair that needed more than one attempt has not happened yet.
+GitLab shows that person's name. The summary comment on the issue and the review by the Code Review Flow each ran, started by a person
+(a mention and an assignment as reviewer). No event starts either of them by itself. A repair that needed more than one attempt has not happened yet.
 
 ## What this variant changes (Hands-off)
 
 | | AFAW (upstream) | AFAW Engine (this repository) | Status |
 |---|---|---|---|
-| Merge | A human approves every pull request | The human approves the **policy**; the deterministic engine approves **each merge** ([ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md)) | Policy documented; the automatic merge rule is merged (task 012, `merge_guard`) and has never run on a real merge request. Every merge so far was a person's |
+| Merge | A human approves every pull request | The human approves the **policy**; the deterministic engine approves **each merge** ([ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md)) | Policy documented; the automatic merge rule is merged (task 012, `merge_guard`) and has run on real merge requests: 23 merge requests made only by agents were merged with a recorded automatic merge (read on 2026-10-26, [`docs/experiments.md`](docs/experiments.md)). The undraft and the merge use a person's token; merge requests written by people are merged by people |
 | Measuring | The AI decides, the engine measures | Unchanged | Done |
 | Forge | GitHub | GitLab (REST API v4); the GitHub path is kept | Done for facts: they are read from the GitLab API ([`docs/facts.md`](docs/facts.md), task 010) |
 | Agents | Coding agents that open pull requests | GitLab Duo flows, configured to run under a group service account instead of a personal token ([`docs/duo.md`](docs/duo.md)) | Configuration merged; the Developer Flow ran four times and opened !16, !17 and !18; the Fix CI/CD Pipeline Flow ran once by hand ([evidence](docs/submission/evidence.md)) |
 | Guardrails | Human reviews each diff | Human-only files (a weak control, see [limits](#guardrails-and-known-limits)) and a red-first check that a new test fails on the old code | Done |
-| | | Cap of 3 automatic fix attempts per merge request, merge only when the full pipeline is green | Code and tests merged (task 012); never run on a real merge request |
+| | | Cap of 3 automatic fix attempts per merge request, merge only when the full pipeline is green | Code and tests merged (task 012); it ran on real merge requests (see Hands-off status) and no merge request has needed a second automatic fix attempt |
 
 Diagrams of the loop, the self-repair, the merge decision, the control layers and the observability: [`docs/method-handsoff.md`](docs/method-handsoff.md). The loop is the target design; the status of each link is in [Hands-off status](#hands-off-status):
 
@@ -124,7 +124,7 @@ Not in the diagram: the review by the Code Review Flow, which ran once on a merg
 
 | Requirement | Status | Evidence |
 |---|---|---|
-| Uses GitLab Duo Agent Platform (agents, flows, MCP clients) | Done for the Developer Flow, in progress for the rest | The Developer Flow, started by assigning an issue through the API, opened merge requests that `merge_guard` merged; the Fix CI/CD Pipeline Flow ran once, by hand, and only commented; the Code Review Flow never ran ([evidence](docs/submission/evidence.md)) |
+| Uses GitLab Duo Agent Platform (agents, flows, MCP clients) | Done for the Developer Flow, the Code Review Flow and the loop reporter; in progress for the rest | The Developer Flow, started by assigning an issue through the API, opened merge requests that `merge_guard` merged; the Fix CI/CD Pipeline Flow ran once, by hand, and only commented (its trigger exists and has not fired yet); the Code Review Flow ran on !118 in three rounds and approved; the custom flow AFAW loop reporter ran once; the custom agents AFAW auditor and AFAW planner exist and have not run ([evidence](docs/submission/evidence.md)) |
 | Public GitLab project with all source, assets and instructions | Done | https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase (visibility public) |
 | MIT License visible in the repository | Done | [`LICENSE`](LICENSE); the project API reports the license key `mit` |
 | Visible CI/CD pipeline history showing the automation | Done | Pipelines of the project, including failed ones, and the repairs that followed them; the failures on `main` are explained in [limits](#guardrails-and-known-limits) |
@@ -134,7 +134,7 @@ Not in the diagram: the review by the Code Review Flow, which ran once on a merg
 | Path B: deployed project URL, kept live until about Nov 16 | Done | https://afaw-handsoff-ljm5hefnsq-uc.a.run.app (`/health` answered `ok` on Oct 24, 2026) |
 | Path B: URL of the original MIT project | Done | Link at the top |
 | Google Cloud bonus: deployment code in the repository and public URL | Done | `deploy/terraform` ([`cloud_run.tf`](deploy/terraform/cloud_run.tf)), [`docs/google-cloud.md`](docs/google-cloud.md) |
-| Most Environmentally Impactful (opt-in, SCI) | Planned, conditional | [Sustainability](#sustainability) |
+| Most Environmentally Impactful (opt-in, SCI) | Measured, partial; the human decides the opt-in on 2026-10-26 14:00 | [Sustainability](#sustainability) |
 
 ## The nine stages
 
@@ -200,21 +200,23 @@ Code, not agents, does the rest of the loop: `scripts/orchestrator.py` picks the
 | Nine-stage pipeline with a real job in each stage | Done |
 | Security gate that blocks (reads both scanner reports) | Done |
 | GitLab Release created on `main` | Done (v0.9, v0.15 and v0.20) |
-| Custom agent and custom flow | Sources merged in `duo/`; they are created in the GitLab UI by a person ([`docs/duo.md`](docs/duo.md)). The agent **AFAW merge agent** exists in the AI Catalog (id 1019706, version 1.1.0, seven read-and-note tools, no merge tool because Duo has none); the triage flow (`duo/triage-flow.yaml`) is not created yet |
+| Custom agents and custom flow | Created in the GitLab UI by a person on 2026-10-26 from the sources in `duo/`: the agents AFAW auditor and AFAW planner (not run yet) and the flow AFAW loop reporter (ran once). The agent **AFAW merge agent** exists in the AI Catalog (id 1019706, version 1.1.0, seven read-and-note tools, no merge tool because Duo has none); the triage flow (`duo/triage-flow.yaml`) is not created. Table: [Duo agents, flows and triggers](#duo-agents-flows-and-triggers) |
 | Developer Flow opens a merge request from an issue | Ran: !16, !17, !18 and later ones ([evidence](docs/submission/evidence.md)). Assigning an issue through the API starts it with no click (issues #6 and #12). Its merge requests are Draft |
-| A failed pipeline is repaired | Ran: the `request_fix` job opens an issue for the Developer Flow account; Duo repaired planted defects and one real defect, merged by the guard ([`experiments.md`](docs/experiments.md)). The Fix CI/CD Pipeline Flow itself ran once, by hand, and only commented |
-| Code Review Flow comments on a merge request | Done once: assigning `@GitLabDuo` as reviewer of !118 started a session in 4 seconds and it left three comments in 1 min 51 s ([review session 10028468](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/automate/agent-sessions/10028468)); it does not run on Draft merge requests |
+| A failed pipeline is repaired | Ran: the `request_fix` job opens an issue for the Developer Flow account; Duo repaired planted defects and one real defect, merged by the guard ([`experiments.md`](docs/experiments.md)). The Fix CI/CD Pipeline Flow itself ran once, by hand, and only commented; a trigger on failed pipelines exists and has not fired yet |
+| Code Review Flow comments on a merge request | Done once: assigning `@GitLabDuo` as reviewer of !118 started a session in 4 seconds and it left three comments in 1 min 51 s; after two fixing rounds a third session approved it at 03:07:45 UTC ([review session 10028468](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/automate/agent-sessions/10028468)); it does not run on Draft merge requests |
 | Cap of 3 automatic fix attempts per merge request | Merged (task 012, `merge_guard`); held in the chaos case C3; no real repair needed a second attempt |
-| Draft cleared and merge requested when every gate is green | Ran nine times by `merge_guard` with `AFAW_AUTO_MERGE=true`, using the token of a person (`AFAW_MERGE_TOKEN`), so GitLab shows that person's name on the notes. It merges nothing unless a person turns it on ([`docs/autohealing.md`](docs/autohealing.md)) |
+| Draft cleared and merge requested when every gate is green | Ran on 23 merge requests made only by agents (read on 2026-10-26) by `merge_guard` with `AFAW_AUTO_MERGE=true`, using the token of a person (`AFAW_MERGE_TOKEN`), so GitLab shows that person's name on the notes. It merges nothing unless a person turns it on ([`docs/autohealing.md`](docs/autohealing.md)) |
 | Release, deploy to Cloud Run and live monitor | Done, including after an automatic merge (pipeline 2986982832); `monitor_live` proves the commit |
-| Summary comment on the original issue | Planned. No documented event after a merge can start a flow; a deterministic CI job with a project access token could post it ([`docs/duo.md`](docs/duo.md)) |
+| Summary comment on the original issue | Ran once: a person mentioned the AFAW loop reporter on !110 and it posted a note on the merge request and one on issue #55 in 1 min 23 s (sessions 10028680 and 10028682; the trigger was duplicated and one copy was removed). No event after a merge starts it by itself, so a person mentions it ([`docs/duo.md`](docs/duo.md)) |
+| Orchestrator picks the next task and files its issue | Merged (!109, `scripts/orchestrator.py --create`, ADR 0010); the first run on the project is the end to end rehearsal |
+| Repair check and telemetry report | Merged (!110, !112, written by Duo; wired in the pipeline by !119); first runs to be observed on `main` |
 
 ## Demo app
 
 `src/notes_app` is a small notes app deployed on its own Cloud Run service. The dashboard shows the
 project; this app is the product the agents change through issues, so a reader can open it and see
 what an agent did. Details, limits and pipeline jobs: [`docs/demo-app.md`](docs/demo-app.md). Status:
-code merged or in review (task 091); the service is created by a person with Terraform (task 092).
+live on Cloud Run; Duo changed it through issues (the UI redesign #44, the summary strip) and the browser tests watch it.
 
 ## Features
 
@@ -281,9 +283,9 @@ The base method was committed on Sep 29 and 30, 2026. Since Oct 5, from `git log
 | Oct 24 | Read-only service and Terraform for Cloud Run (task 013) | MR !5, release v0.15; deployed and checked in [this pipeline](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2985631519) | Done |
 | Oct 24 | Duo configuration, custom agent and flow sources (task 011) | MR !6, release v0.20 | Merged; the flows must be enabled by a person |
 | Oct 24 | GitLab fact collection (task 010) | MR !7, release v0.23 | Done |
-| Oct 24 | Merge guardrails and automatic merge rule (task 012) | MR !10 | Merged; never run on a real merge request |
+| Oct 24 | Merge guardrails and automatic merge rule (task 012) | MR !10 | Merged; ran on real merge requests since 2026-10-25 (see Hands-off status) |
 | Oct 24 | Demo script and Devpost text (task 014) | MR !8 | Merged; the video is not recorded |
-| pending | SCI experiment (task 015) | | Planned, conditional |
+| Oct 25 to 26 | SCI range per merged merge request, indicator on the dashboard (task 119) | MR !102 | Done, partial: without M and without the energy of the Duo model; the comparison against reading the code is not measured |
 
 ## Judging criteria
 
@@ -378,7 +380,7 @@ GitLab does not copy branch protection, CI/CD variables or Duo settings when a p
 1. One terminal per agent; answer its `ROLE:`. The session-start hook injects the generated `LASTCONTEXT.md` and `PENDING.md`.
 2. The agent creates its branch, works with TDD running only its own test, and pushes; the pipeline verifies the rest.
 3. At the end it writes `summary` and `next`, fills `files_touched` with `python -m scripts.check_task_delta --base origin/main --write task_NNN`, records any decision as an ADR, and asks before opening the merge request. Use the name of your GitLab remote in place of `origin` if it differs.
-4. A person opens and merges the merge request. The automatic merge rule exists (task 012) but is off until `AFAW_AUTO_MERGE=true`, so today every merge is a person's.
+4. A person opens and merges the merge request. The automatic merge rule exists (task 012) but is off until `AFAW_AUTO_MERGE=true`, with the switch on, the guard merges the merge requests made by the Duo flow; a person merges the rest.
 5. Ask for status at any time, or open the dashboard.
 
 ## Project structure
