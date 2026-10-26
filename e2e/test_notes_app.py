@@ -117,3 +117,18 @@ def test_a_deleted_note_disappears_and_the_other_remains(page: Page, notes_url: 
     page.locator("#n li", has_text=drop).locator(".del").click()
     expect(page.locator("#n li", has_text=drop)).to_have_count(0)
     expect(page.locator("#n li", has_text=keep)).to_be_visible()
+
+
+def test_the_stats_endpoint_follows_an_add_and_a_delete(page: Page, notes_url: str) -> None:
+    text = f"stats {uuid.uuid4().hex[:8]}"
+    before = page.request.get(f"{notes_url}/api/stats").json()
+    page.goto(notes_url)
+    page.fill("#t", text)
+    page.click("button")
+    expect(page.locator("#n li", has_text=text)).to_be_visible()
+    after = page.request.get(f"{notes_url}/api/stats").json()
+    assert after["count"] == before["count"] + 1
+    assert after["longest"] >= len(text)
+    page.locator("#n li", has_text=text).locator(".del").click()
+    expect(page.locator("#n li", has_text=text)).to_have_count(0)
+    assert page.request.get(f"{notes_url}/api/stats").json()["count"] == before["count"]
