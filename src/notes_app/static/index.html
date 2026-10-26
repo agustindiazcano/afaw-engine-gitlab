@@ -94,7 +94,7 @@ const t=document.createElement('span');t.textContent=x.text;
 if(x.done)t.className='is-done';
 const dn=document.createElement('span');dn.className='done';dn.textContent=x.done?'Undo':'Done';
 dn.setAttribute('role','button');dn.tabIndex=0;
-dn.setAttribute('aria-label',x.done?'Mark note not done':'Mark note done');
+dn.setAttribute('aria-label',x.done?'Mark note as not done':'Mark note as done');
 const flip=()=>setDone(x.id,!x.done);
 dn.addEventListener('click',flip);
 dn.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flip()}});
