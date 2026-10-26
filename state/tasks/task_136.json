@@ -3,7 +3,7 @@
   "title": "Demo app: delete a single note, in the API and on the page",
   "role": "architect",
   "type": "feature",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "feat/task-136-delete-a-note",
   "priority": 1,

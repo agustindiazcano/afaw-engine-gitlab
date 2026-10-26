@@ -9,7 +9,7 @@ the commit it runs.
 |---|---|
 | Source | `src/notes_app/` (`app.py`, `main.py`, `Dockerfile`, `requirements.txt`) |
 | Tests | `tests/notes/` (run in the `tests` job; mutation is not mandatory for it) |
-| Endpoints | `GET /` (page), `GET /health`, `GET /api/version`, `GET /api/notes`, `POST /api/notes` |
+| Endpoints | `GET /` (page), `GET /health`, `GET /api/version`, `GET /api/notes`, `POST /api/notes`, `DELETE /api/notes` (clear all), `DELETE /api/notes/{note_id}` (one note) |
 | Limits | Text of 1 to 200 characters after trimming; at most 100 notes; extra fields rejected with 422 |
 | Storage | In memory, per instance. The service scales to zero, so notes are lost; the page says so |
 | Infrastructure | `deploy/terraform/cloud_run.tf` (`google_cloud_run_v2_service.demo`), same limits as the dashboard service |
