@@ -17,6 +17,7 @@ import argparse
 import json
 import sys
 from collections.abc import Mapping, Sequence
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
 
@@ -30,6 +31,7 @@ MIN_WATTS = 0.71
 MAX_WATTS = 4.26
 GRID_LOW = 343  # us-east5, g CO2eq per kWh, Google Cloud region data 2025
 GRID_HIGH = 579  # us-east1
+WORKERS = 8  # parallel API reads; the order of the rows is kept
 
 
 def flow_seconds(jobs: Sequence[Mapping[str, Any]]) -> float:
@@ -118,10 +120,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     api = Api(args.project)
     try:
         merged = api.get(f"/merge_requests?state=merged&per_page={args.recent}&order_by=updated_at")
-        rows = []
-        for mr in merged:
-            pipelines, seconds = measure(api, int(mr["iid"]))
-            rows.append((f"!{mr['iid']}", pipelines, seconds))
+        iids = [int(mr["iid"]) for mr in merged]
+        with ThreadPoolExecutor(max_workers=WORKERS) as pool:
+            measured = list(pool.map(lambda iid: measure(api, iid), iids))
+        rows = [(f"!{iid}", n, sec) for iid, (n, sec) in zip(iids, measured, strict=True)]
     except FactsError as exc:
         print(f"sci_report: {exc}", file=sys.stderr)
         return 2
