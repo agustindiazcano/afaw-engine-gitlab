@@ -176,11 +176,24 @@ def _handoff(h: Mapping[str, Any]) -> str:
         [[c["link"], c["utc"], c["since"]] for c in h["chain"]],
         "Repair chain: a failing live check to a repaired, redeployed app",
     )
+    r = h["rehearsal"]
+    rehearsal = _table(
+        ["Link", "Time (UTC)", "Since the previous link"],
+        [[c["link"], c["utc"], c["since"]] for c in r["links"]],
+        r["title"],
+    ) + (
+        f'<p class="meta">Issue to verified app: {escape(r["issue_to_verified"])}. '
+        f"{r['credits_used']} GitLab Credits (from {r['credits_before']}). "
+        f"{r['pipelines']} pipelines, {r['job_seconds']:.0f} job seconds, "
+        f"{r['energy_wh_low']} to {r['energy_wh_high']} Wh, {r['gco2eq_low']} to "
+        f"{r['gco2eq_high']} gCO2eq (SCI without M, Duo model energy not measured). "
+        f"{escape(r['changed'])}.</p>"
+    )
     limits = "".join(f"<li>{escape(text)}</li>" for text in h["limits"])
     return (
         f"<h2>Hands-off loop</h2>"
         f'<p class="meta">Counts read from the GitLab API on {escape(a["read_on"])}.</p>'
-        f'<div class="tiles">{tiles}</div>{stages}{chain}'
+        f'<div class="tiles">{tiles}</div>{stages}{chain}{rehearsal}'
         f"<h3>What this does not prove</h3><ul>{limits}</ul>"
     )
 

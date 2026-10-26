@@ -109,7 +109,7 @@ def test_the_experiments_page_has_the_project_name_nav_and_author_footer(experim
 def test_the_experiments_page_shows_the_headline_numbers(experiments: str) -> None:
     assert "39 of 39" in experiments  # hidden acceptance tests passed
     assert "6 of 6" in experiments  # planted defects repaired
-    assert "341.60 of 500" in experiments  # credits, read by the human
+    assert "363.45 of 500" in experiments  # credits, read by the human
 
 
 def test_the_experiments_page_has_the_three_charts_and_the_merge_table(experiments: str) -> None:
