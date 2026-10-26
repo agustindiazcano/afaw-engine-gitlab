@@ -567,7 +567,7 @@ repair_check:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ /^duo\//
   script:
-    - ISSUE=$(printf '%s' "$CI_MERGE_REQUEST_DESCRIPTION" | grep -oE 'Closes[[:space:]]#[0-9]+' | head -1 | tr -dc '0-9')
+    - ISSUE=$(printf '%s' "$CI_MERGE_REQUEST_DESCRIPTION" | { grep -oE 'Closes[[:space:]]#[0-9]+' || true; } | head -1 | tr -dc '0-9')
     - if [ -z "$ISSUE" ]; then echo "no issue referenced; nothing to check"; exit 0; fi
     - python -m scripts.repair_check --project "$CI_PROJECT_ID" --issue "$ISSUE" --mr "$CI_MERGE_REQUEST_IID" || echo "repair_check - not every listed job is fixed in this pipeline"
 
