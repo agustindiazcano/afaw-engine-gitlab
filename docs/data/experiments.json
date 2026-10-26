@@ -170,9 +170,9 @@
     "real_defects_found": 1
   },
   "credits": {
-    "used": 315.77,
+    "used": 341.6,
     "budget": 500,
-    "read_by": "the human, from the GitLab Credits dashboard, on 2026-10-26 about 01:30 UTC, right after the bug benchmark finished"
+    "read_by": "the human, from the GitLab Credits dashboard, on 2026-10-26 about 02:30 UTC, after the parallel batch of four Duo sessions"
   },
   "environment": {
     "source": "CI job seconds from docs/submission/mutation-tools-measurement.md; coefficients and grid data from docs/adr/0009-measure-sustainability-with-sci.md",
@@ -247,6 +247,13 @@
       "fault": "A repair merge request fails a check of its own (task files of a planted branch)",
       "expected": "The chain of issues stops at the cap of 6 open autoheal issues",
       "observed": "Issues #32 to #34 were opened for task_files failures of the repair branches; the cap of 6 open issues held; the guard merged one of those repairs (!65), which added only task files, and the operator cancelled its task",
+      "held": true
+    },
+    {
+      "id": "C2",
+      "fault": "A test that calls new code in a mutation-critical file and asserts nothing",
+      "expected": "mutation_gate fails and the flow writes real assertions without touching the code",
+      "observed": "mutation_gate failed; request_fix opened issue #58 6 min 43 s after the push; Duo opened !114 two minutes later with 9 value-checked cases and a zero-whole guard test, no change to the code; the branch carries the planted probe, so the merge request was closed unmerged",
       "held": true
     }
   ],

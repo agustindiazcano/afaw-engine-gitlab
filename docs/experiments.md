@@ -362,3 +362,34 @@ What this does not show: the defects were planted by us, so it measures the loop
 Duo meets such defects on its own; the trigger needs a person; one run, not a distribution.
 Credit readings of 2026-10-25/26 (hours not recorded unless stated): 204.26 (about 18:05 GMT-3),
 219.38, 253.40 (about 20:15 GMT-3), 299.70, 309.15, 315.77 (about 22:30 GMT-3).
+
+## Parallel batch of Duo sessions (2026-10-26)
+
+Three issues written with the full specification were created through the API within 7 seconds
+(02:09:56 to 02:10:03 UTC), each with a reserved task id, and assigned to the Developer Flow. A
+fourth session came from the chaos experiment C2 below. Credits read by the human: 317.97 before and
+341.60 after, so 23.63 credits for the window.
+
+| Issue | Tool | Merge request | Issue to merge request | Merge request to merge |
+|---|---|---|---|---|
+| [#55](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/work_items/55) | `scripts/repair_check.py` | [!110](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/110) | 2 min 57 s | 9 min 01 s |
+| [#57](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/work_items/57) | `scripts/handoff.py` and the session-start hook | [!111](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/111) | 4 min 12 s | 9 min 16 s |
+| [#56](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/work_items/56) | `scripts/telemetry_report.py` | [!112](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/112) | 4 min 30 s | 9 min 21 s |
+
+All three were merged by `merge_guard` between 02:21:54 and 02:23:50 UTC. No session got a task
+id that another session held. The tools are not yet wired into `.gitlab-ci.yml` (a person edits
+that file).
+
+### C2 and the chain that followed
+
+The branch `demo/task-130-weak-tests` (a helper in `src/afaw_web/` and a test that calls it and
+asserts nothing) was pushed at 02:13:34 UTC. `mutation_gate` failed, `request_fix` opened
+[#58](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/work_items/58) at 02:20:17 UTC, and Duo opened [!114](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/114) at 02:22:23
+UTC with real assertions. The repair branch inherits the task file of the planted branch, so
+`task_files` failed on it and `request_fix` opened #59 and #60, which started two more Duo merge
+requests ([!116](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/116), [!117](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/117)). This is experiment N1
+again. The author closed #59, #60, !114, !116 and !117 at about 02:30 UTC to stop spending credits.
+
+Credits: the 23.63 of the window cover the four sessions above, the sessions of the chain (#59 and
+#60) and the review requested on [!115](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/115); GitLab shows no figure per
+session, so none is attributed to a single experiment.
