@@ -139,7 +139,7 @@ Not in the diagram: the review by the Code Review Flow, which ran once on a merg
 
 ## The nine stages
 
-`.gitlab-ci.yml` defines 29 jobs, plus the jobs of the SAST and secret-detection templates. `test` is a technical stage: the GitLab SAST and secret-detection templates require it to exist, and none of our jobs runs in it. The nine DevSecOps stages are the other nine.
+`.gitlab-ci.yml` defines 36 jobs, plus the jobs of the SAST and secret-detection templates. `test` is a technical stage: the GitLab SAST and secret-detection templates require it to exist, and none of our jobs runs in it. The nine DevSecOps stages are the other nine.
 
 | Stage | Jobs (script) | GitLab-native feature | Status | Tasks |
 |---|---|---|---|---|
@@ -292,7 +292,7 @@ The base method was committed on Sep 29 and 30, 2026. Since Oct 5, from `git log
 
 | Criterion | Where to look |
 |---|---|
-| Technological implementation | `.gitlab-ci.yml` (nine stages, 29 jobs), `scripts/security_gate.py`, `scripts/human_only_files.py`, `deploy/terraform`, Workload Identity Federation without keys |
+| Technological implementation | `.gitlab-ci.yml` (nine stages, 36 jobs), `scripts/security_gate.py`, `scripts/human_only_files.py`, `deploy/terraform`, Workload Identity Federation without keys |
 | Design (end-to-end workflow) | [The loop](#what-this-variant-changes-hands-off) and [Hands-off status](#hands-off-status), stated link by link |
 | Potential impact | Governance of agent-written code for teams that already generate code and need review, security and release to keep up |
 | Innovation | Merge approval moved from each merge to the policy, with deterministic gates and identity checks as compensating controls ([ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md)) |

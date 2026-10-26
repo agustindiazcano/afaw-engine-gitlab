@@ -38,20 +38,20 @@ resource appears.
 
 ## CI/CD (`.gitlab-ci.yml`)
 
-29 jobs in nine stages, plus the SAST and secret detection template jobs. Merge request pipelines
+36 jobs in nine stages, plus the SAST and secret detection template jobs. Merge request pipelines
 run the gates; the pipeline of `main` also releases and deploys.
 
 | Stage | Jobs |
 |---|---|
 | plan | `task_files`, `docs_check`, `duo_config` |
 | create | `task_delta`, `derived_views`, `web_data` |
-| verify | `lint`, `typecheck`, `tests`, `red_check`, `mutation_gate` |
+| verify | `lint`, `typecheck`, `tests`, `red_check`, `mutation_gate`, `e2e_local` |
 | secure | `semgrep-sast`, `secret_detection`, `security_gate` |
-| govern | `paper_pdf`, `paper_build`, `human_only_files`, `equivalent_mutants_report` |
+| govern | `paper_pdf`, `paper_build`, `human_only_files`, `equivalent_mutants_report`, `repair_check` |
 | package | `package_docker`, `package_buildah` (fallback), `package_demo_app` |
 | configure | `check_configuration`, `terraform_validate` |
-| release | `release`, `publish_image`, `deploy_cloud_run`, `publish_demo_image`, `deploy_demo_app` |
-| monitor | `monitor`, `monitor_live`, `merge_guard`, `request_fix` |
+| release | `release`, `publish_image`, `deploy_cloud_run`, `publish_demo_image`, `deploy_demo_app`, `e2e_live` |
+| monitor | `monitor`, `monitor_live`, `merge_guard`, `telemetry_report`, `request_fix` |
 
 Release path on `main`: build in the GitLab registry, copy to Artifact Registry with a short-lived
 Google token, `gcloud run deploy` with the commit in the environment, then a check that the live
