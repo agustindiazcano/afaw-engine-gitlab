@@ -1,0 +1,13 @@
+{
+  "id": "task_123",
+  "title": "README: technology stack and what it does, at the top",
+  "role": "architect",
+  "type": "chore",
+  "status": "done",
+  "owner": "agent",
+  "branch": "docs/task-123-readme-at-a-glance",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Documents only."
+}
