@@ -268,6 +268,6 @@ def test_patch_rejects_extra_fields(client: TestClient) -> None:
 
 def test_delete_all_still_empties_the_store_with_done_notes(client: TestClient) -> None:
     client.post("/api/notes", json={"text": "one"})
-    client.patch("/api/notes/1", json={"done": True})
+    assert client.patch("/api/notes/1", json={"done": True}).status_code == 200
     assert client.delete("/api/notes").status_code == 204
     assert client.get("/api/notes").json() == []
