@@ -18,7 +18,7 @@ the mutant and the file's SHA-256, and expires when the file changes. `scripts/m
 gates on K / (N − E_human) and reports the raw K / N next to it.
 
 ## Alternatives considered
-- Gate on the raw score only: honest, but a file with a real equivalent mutant can never pass
+- Gate on the raw score only: it reports what happened, but a file with a real equivalent mutant can never pass
   a high threshold, which pushes agents to write artificial tests.
 - Let the agent mark equivalences and review them later: the gate would already have passed.
 
