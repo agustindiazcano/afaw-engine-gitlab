@@ -363,7 +363,7 @@
     ],
     "limits": [
       "The undraft and the merge use a person's access token, so GitLab shows that person's name.",
-      "The summary comment on the issue never ran. The Code Review Flow ran once, started by a person assigning the reviewer.",
+      "The Code Review Flow and the summary comment on the issue each ran, started by a person (an assignment as reviewer, a mention). No event starts either by itself.",
       "No repair has needed more than one attempt yet.",
       "The bugs and the trigger of the benchmark were ours: it measures the loop, not how often Duo meets such bugs."
     ]
