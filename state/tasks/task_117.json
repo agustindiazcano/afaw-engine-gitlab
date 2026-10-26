@@ -1,0 +1,13 @@
+{
+  "id": "task_117",
+  "title": "Live end to end checks for the summary strip: count, clear all and hint contrast",
+  "role": "architect",
+  "type": "chore",
+  "status": "done",
+  "owner": "agent",
+  "branch": "feat/task-117-live-checks",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Run by e2e_live after the deploy; e2e_local runs only e2e/test_notes_app.py. The three checks fail on the page deployed by task_116, on purpose."
+}
