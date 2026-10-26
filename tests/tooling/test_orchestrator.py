@@ -140,6 +140,7 @@ def test_main_create_without_a_token_fails_closed(
     assert "token" in capsys.readouterr().err
 
 
+@pytest.mark.characterization(reason="documents that the selection alone never writes")
 def test_main_without_create_never_writes(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     view = tmp_path / "pending.json"
     view.write_text(json.dumps([_t("task_7")]), encoding="utf-8")
