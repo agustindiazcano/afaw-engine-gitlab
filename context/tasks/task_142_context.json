@@ -1,0 +1,11 @@
+{
+  "task_id": "task_142",
+  "files_touched": [
+    "src/notes_app/app.py",
+    "tests/notes/test_app.py"
+  ],
+  "summary": "GET /api/stats on the notes app returns {\"count\": N, \"longest\": L} (0 and 0 when empty), computed under the store lock so it reflects adds and deletes at once, with no query parameters. Unit tests cover empty, one, several, trimmed text and after a delete; a Playwright test covers the add and delete through the page.",
+  "next": [
+    "Task 143: show the stats on the page"
+  ]
+}
