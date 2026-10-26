@@ -162,3 +162,50 @@ def test_a_note_can_be_added_again_after_deleting_from_a_full_store(client: Test
         client.post("/api/notes", json={"text": f"n{i}"})
     assert client.delete("/api/notes/1").status_code == 204
     assert client.post("/api/notes", json={"text": "fits now"}).status_code == 201
+
+
+def test_stats_of_an_empty_store_are_zero(client: TestClient) -> None:
+    response = client.get("/api/stats")
+    assert response.status_code == 200
+    assert response.json() == {"count": 0, "longest": 0}
+
+
+def test_stats_with_one_note(client: TestClient) -> None:
+    client.post("/api/notes", json={"text": "hello"})
+    assert client.get("/api/stats").json() == {"count": 1, "longest": 5}
+
+
+def test_stats_with_several_notes_report_the_longest(client: TestClient) -> None:
+    for text in ("a", "abcdefgh", "abc"):
+        client.post("/api/notes", json={"text": text})
+    assert client.get("/api/stats").json() == {"count": 3, "longest": 8}
+
+
+def test_stats_measure_the_trimmed_text_in_characters(client: TestClient) -> None:
+    client.post("/api/notes", json={"text": "  héllo  "})
+    assert client.get("/api/stats").json() == {"count": 1, "longest": 5}
+
+
+def test_stats_follow_a_delete_of_one_note(client: TestClient) -> None:
+    client.post("/api/notes", json={"text": "short"})
+    client.post("/api/notes", json={"text": "the longest note"})
+    assert client.get("/api/stats").json() == {"count": 2, "longest": 16}
+    client.delete("/api/notes/2")
+    assert client.get("/api/stats").json() == {"count": 1, "longest": 5}
+
+
+def test_stats_are_zero_again_after_clearing_every_note(client: TestClient) -> None:
+    client.post("/api/notes", json={"text": "one"})
+    client.delete("/api/notes")
+    assert client.get("/api/stats").json() == {"count": 0, "longest": 0}
+
+
+def test_stats_take_no_query_parameters(client: TestClient) -> None:
+    client.post("/api/notes", json={"text": "abc"})
+    assert client.get("/api/stats", params={"limit": "1"}).json() == {"count": 1, "longest": 3}
+
+
+def test_each_app_has_its_own_stats() -> None:
+    a, b = TestClient(create_app()), TestClient(create_app())
+    a.post("/api/notes", json={"text": "only in a"})
+    assert b.get("/api/stats").json() == {"count": 0, "longest": 0}
