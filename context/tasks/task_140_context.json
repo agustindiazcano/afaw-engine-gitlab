@@ -1,0 +1,12 @@
+{
+  "task_id": "task_140",
+  "files_touched": [
+    "scripts/afaw_state/stats_pages.py",
+    "tests/tooling/test_stats_pages.py"
+  ],
+  "summary": "The rehearsal of the whole loop (issue #61, merge request !122, 25 min 19 s to a verified live app, 6.86 credits, 0.55 to 5.57 gCO2eq) is in experiments.md, evidence.md and the experiments page, with chaos C5 and C6.",
+  "next": [
+    "Probe the Fix CI/CD trigger",
+    "Update the README last"
+  ]
+}
