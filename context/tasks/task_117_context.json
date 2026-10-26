@@ -1,0 +1,9 @@
+{
+  "task_id": "task_117",
+  "files_touched": [],
+  "summary": "e2e/test_notes_live.py: three Playwright checks run only by e2e_live against the deployed app. They fail on the page of task_116 (count one too high, clear handler empty, hint colour equal to the background) and passed 0 of 3 locally on that page, while the 11 existing e2e tests passed. Merging it makes e2e_live fail on main, which starts request_fix and the Duo repair.",
+  "next": [
+    "Record time per link from the failure to the green e2e_live",
+    "Record the credits read before and after in docs/experiments.md"
+  ]
+}

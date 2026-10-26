@@ -5,7 +5,7 @@ so it feeds the repair loop: the failed job opens an issue for Duo through `requ
 
 | Item | Value |
 |---|---|
-| Tests | `e2e/test_notes_app.py` (demo app), `e2e/test_dashboard.py` (dashboard) |
+| Tests | `e2e/test_notes_app.py` (demo app, run before merge and live), `e2e/test_notes_live.py` (summary strip, live only), `e2e/test_dashboard.py` (dashboard) |
 | Tool | Python Playwright 1.64.1, Chromium; image `mcr.microsoft.com/playwright/python:v1.64.1-noble` (the tag was read from `mcr.microsoft.com`; the pin in `e2e/requirements.txt` must equal it, and a test checks that) |
 | Variables | `NOTES_URL`, `DASHBOARD_URL`; a test skips when its variable is unset |
 | Artifacts | `e2e-results/` with screenshots, kept one week |
