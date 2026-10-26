@@ -3,7 +3,7 @@
   "title": "Verified tool set for the custom Duo agents, the AFAW planner and the checks that enforce them",
   "role": "architect",
   "type": "feature",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "docs/task-038-duo-tool-set",
   "priority": 2,

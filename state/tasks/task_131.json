@@ -1,0 +1,13 @@
+{
+  "id": "task_131",
+  "title": "Set done on the tasks whose merge request is merged",
+  "role": "architect",
+  "type": "chore",
+  "status": "done",
+  "owner": "agent",
+  "branch": "sync/task-131-merged-status",
+  "priority": 2,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "60 task files moved from in_progress to done because the merge request of their branch is merged (GitLab API, 2026-10-26). task_011 to task_014 stay open: PENDING.md has unchecked human steps for them."
+}

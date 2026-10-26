@@ -3,7 +3,7 @@
   "title": "Continuous deployment test of the hands-off loop: write docs/submission/handoff-cd-test.md",
   "role": "architect",
   "type": "chore",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "duo/chore/12-handoff-cd-test",
   "priority": 3,

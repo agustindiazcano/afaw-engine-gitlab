@@ -3,7 +3,7 @@
   "title": "The web_data job builds the live dashboard from measured facts",
   "role": "architect",
   "type": "fix",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "fix/task-078-web-data-facts",
   "priority": 2,

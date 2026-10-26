@@ -3,7 +3,7 @@
   "title": "The root of the live service is the real dashboard; the demo of invented data moves to /demo/",
   "role": "architect",
   "type": "fix",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "fix/task-079-root-is-the-live-dashboard",
   "priority": 1,

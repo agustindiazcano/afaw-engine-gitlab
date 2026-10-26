@@ -3,7 +3,7 @@
   "title": "Experiment plan v2: real repair, hard builds with hidden tests, measured test writing",
   "role": "architect",
   "type": "chore",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "docs/task-066-experiment-plan",
   "priority": 1,

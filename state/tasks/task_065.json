@@ -3,7 +3,7 @@
   "title": "cost_summary: summarise the Duo cost log by flow",
   "role": "architect",
   "type": "feature",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "duo/feature/14-cost-summary",
   "priority": 3,

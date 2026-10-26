@@ -1,0 +1,8 @@
+{
+  "task_id": "task_131",
+  "files_touched": [],
+  "summary": "The dashboard counted 64 tasks as in progress although their merge requests were merged. 60 task files now say done, read from the GitLab API; task_011 to task_014 stay in progress because PENDING.md lists unchecked human steps for them.",
+  "next": [
+    "Check the dashboard counts after the deploy"
+  ]
+}

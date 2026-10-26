@@ -3,7 +3,7 @@
   "title": "Docker HEALTHCHECK for the demo notes app image",
   "role": "architect",
   "type": "feature",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "duo/feature/39-dockerfile-healthcheck",
   "priority": 3,

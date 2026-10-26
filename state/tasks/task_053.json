@@ -3,7 +3,7 @@
   "title": "Cover src/afaw_web/main.py and the remaining branches of search.py, settings.py and app.py",
   "role": "architect",
   "type": "chore",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "chore/task-053-web-coverage",
   "priority": 3,

@@ -3,7 +3,7 @@
   "title": "Record the chaos and security results and the credits on the experiments page",
   "role": "architect",
   "type": "feature",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "feat/task-081-chaos-and-security-results",
   "priority": 2,

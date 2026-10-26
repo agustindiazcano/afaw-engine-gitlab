@@ -3,7 +3,7 @@
   "title": "Benchmark tables from the merge request and pipeline lists",
   "role": "architect",
   "type": "feature",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "duo/feature/24-benchmark-report",
   "priority": 3,

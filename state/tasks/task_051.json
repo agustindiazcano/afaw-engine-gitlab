@@ -3,7 +3,7 @@
   "title": "Write docs/submission/handoff-happy-path.md as a happy-path test of the hands-off loop",
   "role": "architect",
   "type": "chore",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "duo/chore/6-handoff-happy-path",
   "priority": 3,

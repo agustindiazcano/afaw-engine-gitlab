@@ -3,7 +3,7 @@
   "title": "merge_guard takes a merge request of a service account out of Draft when only the draft holds it back",
   "role": "architect",
   "type": "feature",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "feat/task-057-auto-ready",
   "priority": 1,

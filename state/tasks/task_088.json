@@ -3,7 +3,7 @@
   "title": "Final results of the experiments: six defects repaired, the nested chain, and task_087 cancelled",
   "role": "architect",
   "type": "chore",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "feat/task-088-final-results",
   "priority": 1,

@@ -3,7 +3,7 @@
   "title": "release_notes: build the description of a release from merged merge requests",
   "role": "architect",
   "type": "feature",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "feat/task-099-release-notes",
   "priority": 3,
