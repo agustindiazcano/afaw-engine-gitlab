@@ -132,3 +132,19 @@ def test_the_stats_endpoint_follows_an_add_and_a_delete(page: Page, notes_url: s
     page.locator("#n li", has_text=text).locator(".del").click()
     expect(page.locator("#n li", has_text=text)).to_have_count(0)
     assert page.request.get(f"{notes_url}/api/stats").json()["count"] == before["count"]
+
+
+def test_the_summary_line_shows_the_count_and_the_longest_note(page: Page, notes_url: str) -> None:
+    page.goto(notes_url)
+    page.request.delete(f"{notes_url}/api/notes")
+    page.reload()
+    expect(page.locator("#stats")).to_have_text("0 notes")
+    for text in ("a" * 5, "b" * 12):
+        page.fill("#t", text)
+        page.click("button")
+        expect(page.locator("#n li", has_text=text)).to_be_visible()
+    expect(page.locator("#stats")).to_have_text("2 notes, longest 12 characters")
+    page.locator("#n li", has_text="b" * 12).locator(".del").click()
+    expect(page.locator("#stats")).to_have_text("1 notes, longest 5 characters")
+    page.click("#clear")
+    expect(page.locator("#stats")).to_have_text("0 notes")

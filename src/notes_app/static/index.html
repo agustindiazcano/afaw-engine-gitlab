@@ -95,7 +95,8 @@ del.addEventListener('click',go);
 del.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}});
 li.append(t,del);ul.append(li)}
 $('empty').hidden=d.length>0;
-$('stats').textContent=d.length+' notes'}
+const s=await (await fetch('/api/stats')).json();
+$('stats').textContent=s.count===0?'0 notes':s.count+' notes, longest '+s.longest+' characters'}
 async function removeNote(id){try{const r=await fetch('/api/notes/'+id,{method:'DELETE'});
 if(!r.ok&&r.status!==404)throw 0;await load()}catch(_){fail('Could not delete the note. Try again.')}}
 async function clearAll(){try{const r=await fetch('/api/notes',{method:'DELETE'});

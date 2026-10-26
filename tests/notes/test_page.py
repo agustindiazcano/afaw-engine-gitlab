@@ -96,9 +96,25 @@ def test_the_page_has_a_summary_line_a_clear_control_and_a_hint(html: str) -> No
     assert 'class="hint"' in html
 
 
-def test_the_summary_shows_the_number_of_notes_without_an_offset(html: str) -> None:
+def test_the_summary_is_read_from_the_stats_endpoint(html: str) -> None:
     assert "(d.length+1)" not in html
-    assert re.search(r"\$\('stats'\)\.textContent=d\.length\+' notes'", html)
+    assert "fetch('/api/stats')" in html
+    assert re.search(r"\$\('stats'\)\.textContent=", html)
+    assert "d.length+' notes'" not in html
+
+
+def test_the_summary_shows_the_count_and_the_longest_length(html: str) -> None:
+    assert "' notes, longest '" in html
+    assert "' characters'" in html
+    assert "'0 notes'" in html
+
+
+def test_the_summary_is_refreshed_after_every_add_and_delete(html: str) -> None:
+    # Adding, deleting and clearing all end with load(), and load() reads the stats.
+    load = re.search(r"async function load\(\)\{.*?\n(?=async function removeNote)", html, re.S)
+    assert load is not None
+    assert "fetch('/api/stats')" in load.group(0)
+    assert html.count("await load()") >= 3
 
 
 def test_the_clear_control_deletes_the_notes_on_the_server(html: str) -> None:

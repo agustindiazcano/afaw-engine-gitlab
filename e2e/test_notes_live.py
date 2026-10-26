@@ -26,7 +26,9 @@ def test_the_summary_counts_the_notes_in_the_list(page: Page, notes_url: str) ->
     page.goto(notes_url)
     _add(page, f"count {uuid.uuid4().hex[:8]}")
     shown = page.locator("#n li").count()
-    expect(page.locator("#stats")).to_have_text(f"{shown} notes")
+    expect(page.locator("#stats")).to_have_text(
+        re.compile(rf"^{shown} notes, longest \d+ characters$")
+    )
 
 
 def test_clear_all_empties_the_list(page: Page, notes_url: str) -> None:
