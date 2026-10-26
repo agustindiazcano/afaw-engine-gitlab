@@ -1,0 +1,13 @@
+{
+  "id": "task_128",
+  "title": "handoff: write the hand-over file for the next session (ADR 0011)",
+  "role": "architect",
+  "type": "feature",
+  "status": "done",
+  "owner": "agent",
+  "branch": "duo/feature/57-handoff-file",
+  "priority": 2,
+  "difficulty": 2,
+  "blocked_by": [],
+  "notes": "scripts/handoff.py and the session-start hook; the CI job is wired by a person."
+}

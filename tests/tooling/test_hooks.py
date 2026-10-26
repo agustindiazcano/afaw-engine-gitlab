@@ -153,3 +153,63 @@ def test_session_start_reports_a_failed_build_instead_of_stale_context(tmp_path:
     assert "could not build the derived views" in context
     assert "bad task file" in context
     assert "STALE" not in context
+
+
+def _git_project(project: Path) -> str:
+    """Make ``project`` a git repo whose origin/main is one empty commit; return its sha."""
+    def git(*args: str) -> str:
+        done = subprocess.run(
+            ["git", "-c", "user.name=t", "-c", "user.email=t@example.com", *args],
+            cwd=project, check=True, capture_output=True, text=True, timeout=30,
+        )
+        return done.stdout.strip()
+
+    git("init", "-b", "main")
+    git("commit", "--allow-empty", "-m", "first")
+    sha = git("rev-parse", "HEAD")
+    git("update-ref", "refs/remotes/origin/main", sha)
+    return sha
+
+
+def _handoff(project: Path, main_sha: str) -> None:
+    target = project / "state/handoff/HANDOFF.md"
+    target.parent.mkdir(parents=True)
+    target.write_text(
+        f"# Handoff\n\n## Written at\n- Commit: `{main_sha}`\n- Main: `{main_sha}`\n"
+        "\n## What is done, what is next\nFINISH THE HOOK\n",
+        encoding="utf-8",
+    )
+
+
+def _ok_runner(project: Path) -> str:
+    view = project / "build/state/context/global/LASTCONTEXT.md"
+    python = Path(sys.executable).as_posix()
+    return (
+        f"{python} -c \"import pathlib; p = pathlib.Path(r'{view.as_posix()}'); "
+        "p.parent.mkdir(parents=True, exist_ok=True); p.write_text('# Last context\\nok\\n')\""
+    )
+
+
+def test_session_start_prints_the_handoff_file(tmp_path: Path) -> None:
+    sha = _git_project(tmp_path)
+    _handoff(tmp_path, sha)
+    context = _session(tmp_path, _ok_runner(tmp_path))["context"]
+    assert "## HANDOFF.md" in context and "FINISH THE HOOK" in context
+    assert "main has moved" not in context
+
+
+@pytest.mark.characterization(
+    reason="the hook printed nothing about a handoff before the file existed; guards that"
+)
+def test_session_start_is_silent_without_a_handoff_file(tmp_path: Path) -> None:
+    _git_project(tmp_path)
+    context = _session(tmp_path, _ok_runner(tmp_path))["context"]
+    assert "HANDOFF" not in context
+
+
+def test_session_start_warns_when_main_moved_since_the_handoff(tmp_path: Path) -> None:
+    sha = _git_project(tmp_path)
+    _handoff(tmp_path, "0" * 40)
+    context = _session(tmp_path, _ok_runner(tmp_path))["context"]
+    assert "FINISH THE HOOK" in context
+    assert "main has moved" in context and sha[:8] in context

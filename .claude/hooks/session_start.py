@@ -19,12 +19,16 @@ No external dependencies; runs on any Python 3.11+.
 
 import json
 import os
+import re
 import shlex
 import subprocess
 import sys
 from pathlib import Path
 
 VIEW = Path("build/state/context/global/LASTCONTEXT.md")
+HANDOFF = Path("state/handoff/HANDOFF.md")
+GIT_TIMEOUT_SECONDS = 30
+_MAIN_LINE = re.compile(r"^- Main: `([0-9a-f]{7,40})`", re.MULTILINE)
 BUILD_TIMEOUT_SECONDS = 60
 
 
@@ -47,6 +51,43 @@ def build(project: Path) -> str | None:
     if result.returncode != 0:
         return (result.stderr or result.stdout).strip() or f"exit code {result.returncode}"
     return None
+
+
+def origin_main(project: Path) -> str | None:
+    """The commit of origin/main as last fetched, or None when git cannot say."""
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "origin/main"],
+            cwd=project,
+            capture_output=True,
+            text=True,
+            timeout=GIT_TIMEOUT_SECONDS,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    return result.stdout.strip() if result.returncode == 0 else None
+
+
+def handoff_section(project: Path) -> str | None:
+    """The handoff file for the session, with a warning when main moved since it was written."""
+    path = project / HANDOFF
+    if not path.is_file():
+        return None
+    text = path.read_text(encoding="utf-8").strip()
+    section = "## HANDOFF.md (written by the previous session)\n\n"
+    recorded = _MAIN_LINE.search(text)
+    current = origin_main(project)
+    if recorded is None:
+        section += "WARNING: the file records no main commit, so it cannot be checked.\n\n"
+    elif current is None:
+        section += "WARNING: origin/main could not be read, so the file cannot be checked.\n\n"
+    elif not current.startswith(recorded.group(1)):
+        section += (
+            f"WARNING: main has moved since this file was written: it recorded "
+            f"{recorded.group(1)[:8]}, origin/main is now {current[:8]}. Read the "
+            "newer merge requests before relying on it.\n\n"
+        )
+    return section + text
 
 
 def main() -> None:
@@ -72,6 +113,10 @@ def main() -> None:
     pending = project / "PENDING.md"
     if pending.is_file() and pending.read_text(encoding="utf-8").strip():
         sections.append("## PENDING.md\n\n" + pending.read_text(encoding="utf-8").strip())
+
+    handoff = handoff_section(project)
+    if handoff is not None:
+        sections.append(handoff)
 
     output = {
         "hookSpecificOutput": {
