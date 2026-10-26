@@ -1,0 +1,13 @@
+{
+  "id": "task_114",
+  "title": "request_fix: do not ask the flow about failures on branches named by a person",
+  "role": "architect",
+  "type": "fix",
+  "status": "done",
+  "owner": "agent",
+  "branch": "fix/task-114-request-fix-own-branches",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Issues 35, 36, 49, 50, 51 and 52 were opened for branches of the author and cost credits."
+}

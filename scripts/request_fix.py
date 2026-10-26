@@ -227,6 +227,16 @@ def _ask_with_an_issue(api: Any, ref: str, sha8: str, names: str, facts: str) ->
         print(f"opened {title!r} for {FLOW_USERNAME}")
 
 
+def is_repairable_ref(ref: str, default_branch: str) -> bool:
+    """Whether a failure on this branch is the flow's to repair.
+
+    The default branch, planted ``demo/`` branches and the flow's own ``duo/`` branches are. A
+    branch named by a person (``feat/``, ``fix/``, ``docs/``...) is the author's work in progress:
+    asking the flow about it spends credits on a failure its author is already fixing.
+    """
+    return ref == default_branch or ref.startswith(("demo/", "duo/"))
+
+
 def run(api: Any, env: Mapping[str, str]) -> int:
     """Ask the flow to repair the failed jobs of the current pipeline, once per commit."""
     try:
@@ -241,8 +251,12 @@ def run(api: Any, env: Mapping[str, str]) -> int:
         if iid:
             _ask_in_merge_request(api, int(iid), sha8, facts)
         else:
+            ref = env["CI_COMMIT_REF_NAME"]
+            if not is_repairable_ref(ref, env.get("CI_DEFAULT_BRANCH", "main")):
+                print(f"{ref} is a branch named by a person; the flow is not asked")
+                return 0
             names = ", ".join(j["name"] for j in failed)
-            _ask_with_an_issue(api, env["CI_COMMIT_REF_NAME"], sha8, names, facts)
+            _ask_with_an_issue(api, ref, sha8, names, facts)
     except (FactsError, KeyError, ValueError) as error:
         print(f"request_fix: could not ask the flow: {error}", file=sys.stderr)
         return 2

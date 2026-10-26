@@ -1,13 +1,13 @@
 {
   "id": "task_112",
-  "title": "Orchestrator: pick the next task in code from the pending view (ADR 0010) and propose the handoff ADR (0011)",
+  "title": "Evidence for the stage experiments: README Stages and Duo table, evidence and coverage files",
   "role": "architect",
-  "type": "feature",
+  "type": "chore",
   "status": "done",
   "owner": "agent",
-  "branch": "feat/task-112-orchestrator",
+  "branch": "duo/fix/52-task-id-collision-stage-evidence",
   "priority": 1,
-  "difficulty": 2,
+  "difficulty": 1,
   "blocked_by": [],
-  "notes": "ADR 0011 is proposed here; its script is task_111."
+  "notes": "Documents only."
 }

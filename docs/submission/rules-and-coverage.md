@@ -72,7 +72,7 @@ The decision between Hands-off and Supervised is made on 2026-10-26 14:00 from t
 | Path B Best Hands-off Agent | $5,000 | Demonstrated for the feature and repair paths | Nine merges by the guard; one repair end to end; see the gaps above |
 | Path B Best Supervised Agent | $4,000 | Claimable | See the level table |
 | Path B Best Assisted Agent | $4,000 | Claimable | Fits, but only one level is submitted |
-| Most Stages Covered (Path B) | $5,000 | **9 of 9 stages have a running job** (100 %); 2 of 9 with a Duo flow that ran (create: Developer Flow; verify: Fix CI/CD, once) | Pipeline of `main`; Duo evidence is in `evidence.md` |
+| Most Stages Covered (Path B) | $5,000 | **9 of 9 stages have a running job** (100 %); 9 of 9 have a Duo-authored merge request that went through the pipeline (a change to a script of that stage, not Duo running inside the stage) | Pipeline of `main`; links in the README table "Stages and Duo" and `evidence.md` |
 | Most Environmentally Impactful | $5,000 | **Not claimable**: 0 measured figures | Method and tool exist ([ADR 0009](../adr/0009-measure-sustainability-with-sci.md), `scripts/cost_log.py`), see [`experiments.md`](../experiments.md) |
 | Most Creative | $4,000 | Decided by the Innovation score | Nothing to submit separately |
 | Google Cloud bonus | up to 0.2 points | Requirements met (code and a public live link) | Final score is 1 to 5.2 |
