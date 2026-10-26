@@ -1,0 +1,13 @@
+{
+  "id": "task_132",
+  "title": "Demo script rewritten for the measured loop",
+  "role": "architect",
+  "type": "chore",
+  "status": "done",
+  "owner": "agent",
+  "branch": "docs/task-132-demo-script",
+  "priority": 2,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Documents only."
+}
