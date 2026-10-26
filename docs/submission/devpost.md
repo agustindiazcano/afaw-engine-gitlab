@@ -1,130 +1,133 @@
 # Devpost text
 
-Facts checked on 2026-10-25 against the GitLab API and `docs/submission/evidence.md`. Text in angle
-brackets is to fill when it exists. Remove a sentence rather than keep it if its condition is not
-true when you submit.
+Facts read on 2026-10-26 from the GitLab API and [`evidence.md`](evidence.md); every figure has its
+source in [`experiments.md`](../experiments.md). Text in angle brackets is filled when it exists.
+Remove a sentence rather than keep it if its condition is not true when you submit.
 
 ## Title
 
-AFAW Engine: deterministic governance for AI coding agents
+AFAW Engine: hands-off CI/CD for AI coding agents
 
 ## Tagline
 
-Agents write and repair code; deterministic GitLab CI jobs decide whether a change is acceptable and merge it.
+An agent fixes a failing check, a program decides and performs the merge, Cloud Run redeploys and a browser test verifies the live app.
 
 ## What it does
 
-AFAW Engine is a GitLab project that wraps AI coding agents in checks that cannot be argued with.
-`.gitlab-ci.yml` defines 29 jobs in nine stages, plus the jobs of the GitLab SAST and secret
-detection templates. A new test must fail on the old code (`red_check`), changed files are mutated
-and the tests must notice (`mutation_gate`), SAST and secret detection reports become a blocking
-decision (`security_gate`), and a backup job rejects changes to the files that define the rules when
-a non-human made them (`human_only_files`, a weak control that is documented as weak). The measured
-facts of every task come from the GitLab REST API v4 and are never declared by an agent. A
-read-only FastAPI service on Cloud Run publishes the derived project state, the experiments and an
-estimate of the carbon footprint of the pipeline.
+AFAW Engine is a GitLab project that closes the loop after the code is written. When a check fails,
+`request_fix` opens an issue and a GitLab Duo agent repairs it. When every gate is green,
+`merge_guard` takes the merge request of a Duo service account out of Draft and merges it. The
+pipeline of `main` releases and deploys to Google Cloud Run, and Playwright tests the live app
+(`e2e_live`). An orchestrator script picks the next task from the project board and files its issue
+with a fixed template, so no model chooses the work.
 
-The merge policy is the point of the project: the human approves the policy once, and the
-deterministic engine approves each merge. `merge_guard` merges nothing unless a person turns it on
-(`AFAW_AUTO_MERGE=true`). With it on, it takes a merge request of a service account out of Draft
-when that is the only thing holding it, and asks GitLab to merge it when every gate is green.
-A second job, `request_fix`, turns a failed pipeline into a note or an issue that the Duo Developer
-Flow account picks up.
+Around that loop, the checks are code that the agents cannot edit away: a new test must fail on the
+old code (`red_check`), changed files are mutated and the tests must notice (`mutation_gate`), SAST
+and secret detection become a blocking decision (`security_gate`), and the files that define the
+rules cannot be changed by a service account (`human_only_files`). Every number comes from a tool
+or the GitLab API, never from an agent.
 
 ## The problem
 
 Several agents on one repository collide on branches and shared files, report results they never
-measured, and write tests that pass whatever the code does. When generating code is cheap, the
-open problem is what comes after it: review, security, tests, release and monitoring. A prompt
-that says "do not weaken the gates" is advice. The gates have to be code that the loop cannot edit
-away.
+measured, and write tests that pass whatever the code does. When generating code is cheap, the open
+problem is what comes after it: review, security, tests, release and monitoring. A prompt that says
+"do not weaken the gates" is advice. The gates have to be code.
 
-## How GitLab is used, stage by stage
+## How GitLab and Duo are used
 
-| Stage | What runs | GitLab feature |
+| Stage | What runs | A Duo-authored merge request through the pipeline |
 |---|---|---|
-| plan | `task_files`, `docs_check`, `duo_config` | Merge request pipelines (`workflow:rules`) |
-| create | `task_delta`, `derived_views`, `web_data` | Merge requests opened by the Developer Flow |
-| verify | `lint`, `typecheck`, `tests`, `red_check`, `mutation_gate` | `rules`, pipeline cache, parallel jobs |
-| secure | `semgrep-sast`, `secret_detection`, `security_gate` | GitLab SAST and secret detection templates |
-| govern | `paper_pdf`, `paper_build`, `human_only_files`, `equivalent_mutants_report` | Merge request author and pusher identity from the API |
-| package | `package_docker`, `package_buildah` (fallback) | Container Registry |
-| configure | `check_configuration`, `terraform_validate` | Protected CI/CD variables |
-| release | `release`, `publish_image`, `deploy_cloud_run` | `release:` keyword with `glab`; `id_tokens` and Workload Identity Federation |
-| monitor | `monitor`, `monitor_live`, `merge_guard`, `request_fix` | Job artifacts; REST API v4 |
+| plan | `task_files`, `docs_check`, `duo_config` | [!79](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/79) |
+| create | `task_delta`, `derived_views`, `web_data` | [!26](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/26) |
+| verify | `lint`, `typecheck`, `tests`, `red_check`, `mutation_gate`, `e2e_local` | [!47](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/47) |
+| secure | `semgrep-sast`, `secret_detection`, `security_gate` | [!77](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/77) |
+| govern | `paper_pdf`, `human_only_files`, `repair_check` | [!78](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/78) |
+| package | `package_docker`, `package_demo_app` | [!75](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/75) |
+| configure | `check_configuration`, `terraform_validate` | [!76](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/76) |
+| release | `release`, `deploy_cloud_run`, `deploy_demo_app`, `e2e_live` | [!80](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/80) |
+| monitor | `monitor_live`, `merge_guard`, `request_fix`, `telemetry_report` | [!81](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/81) |
 
-GitLab Duo Agent Platform: the Developer Flow, started by assigning an issue to its service
-account through the API, opened merge requests that the pipeline then judged. The Fix CI/CD
-Pipeline Flow ran once, started by a person, and only commented. A custom agent, "AFAW merge agent",
-exists in the AI Catalog. The Code Review Flow ran once, on a merge request that a person assigned to it. <Update the session counts from the
-project before submitting.>
+GitLab Duo Agent Platform pieces in the project (the list with service accounts is in the README):
+
+| Piece | What ran |
+|---|---|
+| Developer Flow | Dozens of sessions from issues; three tools written in parallel reached a merge request in 2 to 4 minutes |
+| Fix CI/CD Pipeline Flow | Once by hand; a trigger on failed pipelines exists <Update with the probe result> |
+| Code Review Flow | Three rounds on one merge request, ending in an approval |
+| Custom flow "AFAW loop reporter" | Once: a summary note on a merge request and its issue in 1 min 23 s |
+| Custom agents "AFAW auditor" and "AFAW planner" | Created; not run |
 
 ## What ran, link by link
 
-All of it is listed with links in [`evidence.md`](evidence.md).
-
 | Link | Result |
 |---|---|
-| Issue assigned to the Duo account through the API | Developer Flow started with no click in the UI |
-| Duo opens a merge request | Yes, as Draft |
-| Gates judge it | Yes |
-| Draft cleared and merge requested by `merge_guard` | Nine merge requests, with the token of a person (`AFAW_MERGE_TOKEN`), so GitLab shows that person's name on those notes |
-| Release, deploy to Cloud Run, live check | Ran after the automatic merge |
-| A failed pipeline becomes an issue (`request_fix`) | Yes, issues #15 and #19 to #23 |
-| Duo repairs it | One real defect Duo found in `scripts/mutation_engine.py`, merged by the guard; planted defects repaired with a one-line inverse each |
-| Review by the Code Review Flow | Ran once (session 10028468 on !118); started by a person assigning `@GitLabDuo` as reviewer |
-| Summary comment on the issue | Ran once, started by a person mentioning the AFAW loop reporter (sessions 10028680 and 10028682) |
+| Orchestrator files an issue and assigns it to Duo | Issue #61, in the rehearsal below |
+| Duo opens a merge request | 3 min 15 s after the issue in the rehearsal |
+| Gates judge it | `red_check`, `mutation_gate`, `security_gate`, `e2e_local` and the rest |
+| Draft cleared and merge requested by `merge_guard` | 23 merge requests made only by agents, with the token of a person (`AFAW_MERGE_TOKEN`), so GitLab shows that person's name on the notes |
+| Release, deploy to Cloud Run, live check | Ran after the automatic merge; `e2e_live` passed |
+| A failed live check becomes an issue and Duo repairs it | Three planted bugs found by a browser test and fixed by one Duo session: 23 min 44 s from issue to verified app |
 
-We do not claim Hands-off for the whole loop: the identity that clears Draft and enables the merge
-is a person's token. The decision on the level is taken on 2026-10-26 from that table.
+The whole loop, once, from the orchestrator command: 25 min 19 s from the issue to the verified live
+app, 6.86 GitLab Credits and 0.55 to 5.57 gCO2eq (SCI without embodied emissions and without the
+energy of the model behind Duo).
+
+We do not claim that no person is involved: the token of a person takes the merge request out of
+Draft and requests the merge, a person starts the first command, the Code Review Flow and the summary
+note, and a person writes the rules.
 
 ## Google Cloud
 
-Terraform in `deploy/terraform` creates a Cloud Run service (minimum 0, maximum 2 instances), an
-Artifact Registry repository and a Workload Identity Federation pool for GitLab, with no service
-account keys. The pipeline of `main` deploys it and `monitor_live` proves the commit that is
-running. Live at https://afaw-handsoff-ljm5hefnsq-uc.a.run.app.
+Terraform in `deploy/terraform` creates two Cloud Run services (the dashboard and the demo app that
+the agents change), an Artifact Registry repository and a Workload Identity Federation pool for
+GitLab, with no service account keys. The pipeline of `main` deploys both and the live checks prove
+the commit that is running. Dashboard: https://afaw-handsoff-ljm5hefnsq-uc.a.run.app · Demo app:
+https://afaw-demo-app-ljm5hefnsq-uc.a.run.app.
 
 ## What we measured
 
-Every figure is in [`docs/experiments.md`](../experiments.md) with its source.
-
 | Measure | Result |
 |---|---|
-| Line and branch coverage | 86 to 94 percent after tests written by Duo |
-| Mutation score, `app.py` / `search.py` | 62.2 to 95.6 / 78.0 to 84.7 percent (mutmut in CI) |
+| Merge requests / made only by agents / merged / with a recorded automatic merge | 104 / 36 / 29 / 23 (2026-10-26); median 10.7 minutes from open to merge |
 | Hidden acceptance tests on three tools Duo built | 39 of 39 passed |
 | Planted defects repaired with no test touched | 6 of 6, plus 1 real defect Duo found |
-| Chaos: C1, C3 and a security case | Held |
-| Load test of the live service | 992 requests, no errors |
-| GitLab Credits used | 219.38 of 500, read by hand on 2026-10-25; GitLab exposes no token counts |
+| Chaos | C1, C2, C3, C5, C6 and a security case held |
+| Mutation score, `app.py` / `search.py` | 62.2 to 95.6 / 78.0 to 84.7 percent |
+| Carbon of one development flow | 0.45 to 4.53 gCO2eq over 30 merge requests, stated assumptions |
+| GitLab Credits used | 363.45 of 500 (read by hand); GitLab exposes no token counts |
 
-Nothing here is a claim of savings in speed or money. The carbon figure is an estimate with its
-assumptions listed on the `/environment/` page.
+Nothing here is a claim of savings in speed or money.
 
 ## Challenges
 
 - Fail loudly: a job that cannot get what it needs must be red, not green.
-- Limits of the controls: `human_only_files` lives in `.gitlab-ci.yml`, so the same merge request can edit
-  it away. It is labelled weak. The strong control depends on the role and tier.
-- GitLab documents no cap on Fix CI/CD Pipeline attempts, so the cap of three is counted by our own job.
-- Our own experiments found two defects of ours (task_070, gotcha 0005).
+- Parallel agents picked the same task id several times; the pipeline caught it every time and does
+  not prevent it.
+- Seven merges within a minute made parallel deploys overwrite each other; a deploy lock fixed it.
+- A repair of a planted branch inherits the planted task file and fails a check of its own, which
+  starts a chain of issues; the cap of six open issues stops it.
+- `human_only_files` lives in `.gitlab-ci.yml`, so the same merge request can edit it away. It is
+  labelled weak.
 
 ## What is not done
 
-- The Code Review Flow and the summary comment on the issue each ran, started by a person. No event starts either by itself.
-- The merge uses a person's token. A service account token needs an Owner.
-- The strong control for human-only files and the Maintainer settings in `docs/merge-guard.md`.
-- Chaos faults C2 and C4 to C9 and parts of EXP-04, EXP-05 and EXP-09.
+- The merge and the end of Draft use the token of a person. A service account token needs an Owner.
+- A repair that needs more than one attempt has not happened.
+- Chaos faults C4 (covered by unit tests, not run live) and C7 to C9; the comparison against reading
+  the code is not measured, so the sustainability result is a measured cost, not a saving.
+- The custom agents AFAW auditor and AFAW planner were created and not run.
 
 ## Built with
 
-Python, pytest, mypy, ruff, mutmut, FastAPI, Docker, Terraform, GitLab CI/CD, GitLab Duo Agent Platform,
-GitLab Container Registry, Google Cloud Run, Artifact Registry, Workload Identity Federation.
+Python, FastAPI, pytest, mypy, ruff, mutmut, Playwright, Docker, Terraform, GitLab CI/CD, GitLab Duo
+Agent Platform, GitLab Container Registry, Google Cloud Run, Artifact Registry, Workload Identity
+Federation, Semgrep.
 
 ## Links
 
 Project: https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase ·
+GitHub mirror: https://github.com/agustindiazcano/afaw-engine-gitlab ·
 Original MIT project: https://github.com/agustindiazcano/afaw-anti-fragile-agentic-workflow ·
-Demo video: <DEMO_VIDEO_URL> · Live service: https://afaw-handsoff-ljm5hefnsq-uc.a.run.app ·
+Demo video: <DEMO_VIDEO_URL> · Dashboard: https://afaw-handsoff-ljm5hefnsq-uc.a.run.app ·
 Author: Agustin Diaz-Cano, https://www.agustindiazcano.com/
