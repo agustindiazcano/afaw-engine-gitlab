@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+from html import escape
 from pathlib import Path
 from typing import Any
 
@@ -254,4 +255,4 @@ def test_the_page_says_what_the_evidence_does_not_prove(
     limits = data["handoff"]["limits"]
     assert any("token" in text for text in limits)
     for text in limits:
-        assert text in experiments
+        assert escape(text) in experiments
