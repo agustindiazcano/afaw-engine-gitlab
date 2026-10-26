@@ -365,7 +365,7 @@ per-session figure).
 What this does not show: the defects were planted by us, so it measures the loop, not how often
 Duo meets such defects on its own; the trigger needs a person; one run, not a distribution.
 Credit readings of 2026-10-25/26 (hours not recorded unless stated): 204.26 (about 18:05 GMT-3),
-219.38, 253.40 (about 20:15 GMT-3), 299.70, 309.15, 315.77 (about 22:30 GMT-3), 317.97 (hour not recorded; read before the batch whose first issue was created at 02:09:56 UTC on 2026-10-26) and 341.60 (about 02:30 UTC on 2026-10-26, after the batch), 353.82 and 356.59 (hours not recorded; after the loop reporter and the review rounds of !118) and 363.45 (about 03:50 UTC, after the end to end rehearsal).
+219.38, 253.40 (about 20:15 GMT-3), 299.70, 309.15, 315.77 (about 22:30 GMT-3), 317.97 (hour not recorded; read before the batch whose first issue was created at 02:09:56 UTC on 2026-10-26) and 341.60 (about 02:30 UTC on 2026-10-26, after the batch), 353.82 and 356.59 (hours not recorded; after the loop reporter and the review rounds of !118) and 363.45 (about 03:50 UTC, after the end to end rehearsal), 368.81 (start of the long chain), 387.39 (while it ran) and 396.53 (after it).
 
 ## Parallel batch of Duo sessions (2026-10-26)
 
@@ -472,6 +472,12 @@ the longest note in the summary line and links the running commit.
 
 Carbon of the three flows (`python -m scripts.sci_report`): 12,265 job seconds, 5.32 to 31.93 Wh,
 1.83 to 18.49 gCO2eq (SCI without M, without the energy of the model behind Duo).
+
+Credits read by the human: 368.81 before the chain and 396.53 after it, so **27.72 credits** for the
+three tasks. That window also holds two Duo sessions that a defect of ours caused (`repair_check`
+failed on merge requests that named no issue, and `request_fix` asked Duo to repair it twice), and
+9.14 credits read after the 387.39 reading that we cannot assign to a session: no Duo session was
+launched in that stretch, so they are recorded as unassigned and not given a cause.
 
 Credits: 368.81 at the start. The reading of 387.39 was taken while the first task was running and
 includes two sessions that the `repair_check` job of the pipeline caused by failing on merge requests

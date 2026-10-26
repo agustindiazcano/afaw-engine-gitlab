@@ -219,7 +219,7 @@ GitLab exposes no token counts, so the unit is the GitLab Credit, read by hand f
 | Parallel batch: four sessions, the chain that chaos C2 started, and a review request | 23.63 |
 | Fix CI/CD trigger probe | 5.36 |
 | End to end rehearsal | 6.86 |
-| Long chain of three tasks (368.81 at the start; the reading taken while it ran includes two sessions that a defect of ours caused) | see `experiments.md` for the reading after the chain |
+| Long chain of three tasks (368.81 to 396.53; includes two sessions that a defect of ours caused and 9.14 credits that we cannot assign to a session) | 27.72 |
 
 The carbon of a flow is estimated with the Software Carbon Intensity method (ISO/IEC 21031:2024) from
 measured job seconds, the Cloud Carbon Footprint power range for a 2 vCPU runner (0.71 to 4.26 W per

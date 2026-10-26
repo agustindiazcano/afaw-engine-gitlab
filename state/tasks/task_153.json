@@ -1,0 +1,13 @@
+{
+  "id": "task_153",
+  "title": "Record the credits of the long chain (368.81 to 396.53) in the data file, experiments, evidence, white paper and Devpost text",
+  "role": "architect",
+  "type": "feature",
+  "status": "done",
+  "owner": "agent",
+  "branch": "docs/task-153-chain-cost",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Credits read by the human on 2026-10-26."
+}

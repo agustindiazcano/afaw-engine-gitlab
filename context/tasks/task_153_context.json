@@ -1,0 +1,11 @@
+{
+  "task_id": "task_153",
+  "files_touched": [
+    "tests/tooling/test_stats_pages.py"
+  ],
+  "summary": "The credits of the long chain are recorded: 368.81 to 396.53, so 27.72, including two sessions caused by a defect of ours and 9.14 credits that cannot be assigned to a session. The data file, experiments, evidence, white paper and Devpost text carry 396.53 of 500.",
+  "next": [
+    "Queue the tasks for the demo takes when the human asks",
+    "Replace the video placeholder"
+  ]
+}

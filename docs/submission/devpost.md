@@ -96,7 +96,7 @@ https://afaw-demo-app-ljm5hefnsq-uc.a.run.app.
 | Long chain | Three dependent tasks filed one after another by the orchestrator: each reached a verified live app in 24 to 28 minutes, 1 h 18 min 23 s in total, no repair request |
 | Mutation score, `app.py` / `search.py` | 62.2 to 95.6 / 78.0 to 84.7 percent |
 | Carbon of one development flow | 0.45 to 4.53 gCO2eq over 30 merge requests, stated assumptions |
-| GitLab Credits used | 363.45 of 500 (read by hand); GitLab exposes no token counts |
+| GitLab Credits used | 396.53 of 500 (read by hand); GitLab exposes no token counts |
 
 Nothing here is a claim of savings in speed or money.
 
