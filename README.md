@@ -44,14 +44,45 @@ Several coding agents on one repository fail in predictable ways: they collide o
 
 AFAW Engine runs that part with GitLab Duo flows, while deterministic tools (CI jobs, scripts, security scanners) decide what is acceptable. Principle: **the AI decides, the engine measures.** Every number comes from a deterministic tool, and a value an agent could have made up is rejected where it would be declared.
 
+## What is AFAW, in plain words
+
+Several AI assistants can now write code in the same project at the same time. Left alone, they
+get in each other's way, they say a job is finished when it is not, and nobody can tell how the
+project is doing without reading everything.
+
+AFAW is a small set of rules and checking programs that fixes this:
+
+- **One job, one branch.** Each assistant gets one task and works on its own copy, so two of them
+  do not edit the same thing.
+- **One shared notebook.** Every task, decision and result is written in the repository in the
+  same format. The status board is built by a program from GitLab, not typed by anyone, so a
+  person or an assistant can read how the project is going without guessing.
+- **Nobody marks their own homework.** Ordinary programs check what the assistant says. A new test
+  must fail on the old code. The list of files it says it changed must match the real change. A
+  number it reports must come from a measurement, not from the assistant.
+
+AFAW Engine, this repository, goes one step further for the hackathon: when every check is green a
+program merges the change, with no person clicking; when something breaks, an issue is opened for a
+GitLab Duo assistant to fix; the app is redeployed and a browser test checks the live site.
+
 ## Why use it
 
-Expected, not measured: no figure below has been measured yet.
+What each benefit rests on today. "Measured" means we read the number from GitLab on the day shown
+and the link is in the [evidence](docs/submission/evidence.md) or the
+[experiments](docs/experiments.md).
 
-- **Fewer retries on the agent's machine.** The agent runs only the test it is writing; the pipeline runs the rest in parallel and answers once.
-- **One shared record.** Every task, decision and status has the same format for every person and every agent: the board, the generated `LASTCONTEXT.md` and the decision records.
-- **A new agent starts from one index.** It reads `LASTCONTEXT.md` and follows links to the decisions it needs, instead of reading every file.
-- **Fewer status meetings.** The board and the records answer what was done, what is blocked and why a decision was taken.
+| Without AFAW | With AFAW | Do we know it works? |
+|---|---|---|
+| Assistants overwrite each other | One task, one branch; the pipeline rejects a task number that is already taken | **Partly.** On 2026-10-25 the task-file check failed on clashing task numbers and copied task files four times (issues #48, #49, #51, #52). It caught them; it did not prevent them, because two assistants picked the same number at the same moment |
+| An assistant says "done" and it is not | Programs check the claim: red-first test, mutation check, files changed, live check of the deployed app | **Yes, measured.** Six defects planted on purpose were repaired and none was missed by the checks ([experiments](docs/experiments.md)); a browser test also caught a bug that every earlier test missed |
+| Nobody can tell how the project is going | A board built from the GitLab API with a light for each task | **Yes, with a gap.** It exists and runs; the live dashboard still shows older numbers than the repository |
+| A broken build waits for a person | Failing check, then an issue, then a Duo fix, then an automatic merge and deploy | **Yes, measured.** For the planted bug of 2026-10-26: issue opened at 01:00:37 UTC, fix merged at 01:13:29 UTC, 12 min 52 s |
+| A new assistant must read everything | It starts from one index (`LASTCONTEXT.md`) and a hand-over file | **Not measured.** We expect it saves effort; we have not compared it with reading the code |
+| Running more tests than needed wastes energy | The assistant runs only its own test; the pipeline runs the rest once | **Not measured as a saving.** We measure the cost of a change: see [Sustainability](#sustainability) |
+
+What it does not prove: the undraft and the merge are done with a person's access token, so
+GitLab shows that person's name. The Code Review Flow and the summary comment on the issue never
+ran. A repair that needed more than one attempt has not happened yet.
 
 ## What this variant changes (Hands-off)
 

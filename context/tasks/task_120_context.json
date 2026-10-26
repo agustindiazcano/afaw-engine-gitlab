@@ -1,0 +1,9 @@
+{
+  "task_id": "task_120",
+  "files_touched": [],
+  "summary": "README: a plain-words section on what AFAW is, and the Why use it section rewritten as a table of what each benefit rests on, marking each as measured, partly measured or not measured, plus what the evidence does not prove.",
+  "next": [
+    "Dashboard sections for the hands-off loop, the stages and the repair chain",
+    "Update the Devpost text with the same wording"
+  ]
+}

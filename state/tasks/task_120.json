@@ -1,0 +1,13 @@
+{
+  "id": "task_120",
+  "title": "README: say what AFAW is and what each benefit rests on, in plain words",
+  "role": "architect",
+  "type": "chore",
+  "status": "done",
+  "owner": "agent",
+  "branch": "docs/task-120-plain-readme",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Documents only."
+}
