@@ -56,7 +56,7 @@ away.
 GitLab Duo Agent Platform: the Developer Flow, started by assigning an issue to its service
 account through the API, opened merge requests that the pipeline then judged. The Fix CI/CD
 Pipeline Flow ran once, started by a person, and only commented. A custom agent, "AFAW merge agent",
-exists in the AI Catalog. The Code Review Flow never ran. <Update the session counts from the
+exists in the AI Catalog. The Code Review Flow ran once, on a merge request that a person assigned to it. <Update the session counts from the
 project before submitting.>
 
 ## What ran, link by link
@@ -72,7 +72,8 @@ All of it is listed with links in [`evidence.md`](evidence.md).
 | Release, deploy to Cloud Run, live check | Ran after the automatic merge |
 | A failed pipeline becomes an issue (`request_fix`) | Yes, issues #15 and #19 to #23 |
 | Duo repairs it | One real defect Duo found in `scripts/mutation_engine.py`, merged by the guard; planted defects repaired with a one-line inverse each |
-| Review by the Code Review Flow, summary comment on the issue | Not run |
+| Review by the Code Review Flow | Ran once (session 10028468 on !118); started by a person assigning `@GitLabDuo` as reviewer |
+| Summary comment on the issue | Not run |
 
 We do not claim Hands-off for the whole loop: the identity that clears Draft and enables the merge
 is a person's token. The decision on the level is taken on 2026-10-26 from that table.
@@ -111,7 +112,7 @@ assumptions listed on the `/environment/` page.
 
 ## What is not done
 
-- The Code Review Flow and the summary comment on the issue never ran.
+- The summary comment on the issue never ran. The Code Review Flow ran once, started by a person.
 - The merge uses a person's token. A service account token needs an Owner.
 - The strong control for human-only files and the Maintainer settings in `docs/merge-guard.md`.
 - Chaos faults C2 and C4 to C9 and parts of EXP-04, EXP-05 and EXP-09.

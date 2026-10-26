@@ -25,7 +25,7 @@ request numbers and release tags of that project, read on 2026-10-24 (GMT-3).
 
 ## What is deliberately not claimed
 
-- No automatic review by the Code Review Flow and no summary comment on the issue: neither ran.
+- No automatic review: the Code Review Flow ran once, started by a person assigning `@GitLabDuo` as reviewer. No summary comment on the issue ran.
 - No repair that needed more than one attempt.
 - No Hands-off for the whole loop: the token that clears Draft and enables the merge is a person's.
 - No saving in time or money. The carbon figure is an estimate with its assumptions listed.

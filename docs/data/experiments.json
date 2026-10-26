@@ -1,6 +1,6 @@
 {
-  "as_of": "2026-10-25",
-  "note": "Every figure was read from the GitLab API, a CI job or a command on the date above; see docs/experiments.md for how.",
+  "as_of": "2026-10-26",
+  "note": "Every figure was read from the GitLab API, a CI job or a command on 2026-10-25 or 2026-10-26; the credits and the autonomy counts carry their own reading date. See docs/experiments.md for how.",
   "coverage": {
     "unit": "percent of lines and branches",
     "source": "python -m pytest --cov=src --cov=scripts --cov-branch, on main before and after the five test merge requests",
@@ -363,7 +363,7 @@
     ],
     "limits": [
       "The undraft and the merge use a person's access token, so GitLab shows that person's name.",
-      "The Code Review Flow and the summary comment on the issue never ran.",
+      "The summary comment on the issue never ran. The Code Review Flow ran once, started by a person assigning the reviewer.",
       "No repair has needed more than one attempt yet.",
       "The bugs and the trigger of the benchmark were ours: it measures the loop, not how often Duo meets such bugs."
     ]
