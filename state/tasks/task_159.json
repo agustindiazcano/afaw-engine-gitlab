@@ -1,0 +1,12 @@
+{
+  "id": "task_159",
+  "title": "Demo script rewritten for the filmed run: preparation, launch command, tabs, speech and failure handling",
+  "role": "architect",
+  "type": "chore",
+  "status": "done",
+  "owner": "agent",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "branch": "docs/task-159-demo-script"
+}
