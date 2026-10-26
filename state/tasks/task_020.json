@@ -3,10 +3,10 @@
   "title": "Enable the GitLab Duo flows and run a first real session",
   "role": "architect",
   "type": "chore",
-  "status": "pending",
+  "status": "done",
   "owner": "human",
   "priority": 1,
   "difficulty": 3,
   "blocked_by": [],
-  "notes": "Steps in docs/duo.md: foundational flows at the top-level group (Owner or the organizers), custom agent and flow in the UI, AFAW_BOT_USER_IDS, then a Developer Flow session on an issue. Without a real session the README keeps the Duo rows Planned."
+  "notes": "Steps in docs/duo.md: foundational flows at the top-level group (Owner or the organizers), custom agent and flow in the UI, AFAW_BOT_USER_IDS, then a Developer Flow session on an issue. Without a real session the README keeps the Duo rows Planned. Done: the Developer, Code Review and Fix CI/CD flows ran; the custom agents and the loop reporter were created on 2026-10-26 (README table Duo agents, flows and triggers)."
 }

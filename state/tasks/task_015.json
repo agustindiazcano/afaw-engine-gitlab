@@ -5,8 +5,8 @@
   "type": "feature",
   "status": "backlog",
   "owner": "agent",
-  "priority": 3,
+  "priority": 5,
   "difficulty": 3,
   "blocked_by": [],
-  "notes": "Planned for Sunday 2026-10-26 18:00 GMT-3. Verify the SCI specification and its ISO number before writing; every figure measured or cited, assumptions labelled. README says 'not yet measured' until data exists."
+  "notes": "Planned for Sunday 2026-10-26 18:00 GMT-3. Verify the SCI specification and its ISO number before writing; every figure measured or cited, assumptions labelled. README says 'not yet measured' until data exists. Partly done in task_119 (SCI range per flow); the A/B against reading the code stays open and is not claimed."
 }
