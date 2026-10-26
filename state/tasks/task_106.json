@@ -3,7 +3,7 @@
   "title": "Serialize the deploy jobs of main with a resource group",
   "role": "architect",
   "type": "fix",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "fix/task-106-deploy-lock",
   "priority": 1,

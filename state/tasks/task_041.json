@@ -3,7 +3,7 @@
   "title": "Validate the q parameter of /api/ask",
   "role": "backend",
   "type": "fix",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "fix/task-041-validate-ask-q",
   "priority": 3,

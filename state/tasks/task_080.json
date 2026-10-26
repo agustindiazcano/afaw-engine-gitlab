@@ -3,7 +3,7 @@
   "title": "Dashboard: experiments and environment pages with charts and the measured data",
   "role": "architect",
   "type": "feature",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "feat/task-080-stats-and-environment-pages",
   "priority": 1,

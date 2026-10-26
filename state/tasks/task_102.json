@@ -3,7 +3,7 @@
   "title": "human_only_files: add a --list flag that prints the protected patterns",
   "role": "architect",
   "type": "feature",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "duo/feature/43-human-only-files-list",
   "priority": 3,

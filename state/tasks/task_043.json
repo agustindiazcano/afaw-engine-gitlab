@@ -3,7 +3,7 @@
   "title": "Reject duplicate or empty variable names in check_ci_config",
   "role": "developer",
   "type": "feature",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "feat/task-043-ci-config-name-validation",
   "priority": 3,

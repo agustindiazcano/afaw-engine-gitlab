@@ -3,7 +3,7 @@
   "title": "Run mutmut in the mutation_gate job on the required files",
   "role": "architect",
   "type": "chore",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "chore/task-047-mutation-job",
   "priority": 2,

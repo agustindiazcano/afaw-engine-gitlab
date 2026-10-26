@@ -3,7 +3,7 @@
   "title": "merge_guard ignores the request_fix job, which is skipped on every green pipeline",
   "role": "architect",
   "type": "fix",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "fix/task-070-guard-ignores-request-fix",
   "priority": 1,

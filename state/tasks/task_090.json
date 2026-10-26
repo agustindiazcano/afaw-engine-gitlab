@@ -3,7 +3,7 @@
   "title": "Rewrite the Devpost and Path B texts and the README status tables to the measured state",
   "role": "architect",
   "type": "chore",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "docs/task-090-final-texts",
   "priority": 1,

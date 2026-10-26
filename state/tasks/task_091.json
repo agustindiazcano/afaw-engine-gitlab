@@ -3,7 +3,7 @@
   "title": "A small deployed target app (demo notes) that the Duo flows change through issues",
   "role": "architect",
   "type": "feature",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "feat/task-091-demo-app",
   "priority": 1,

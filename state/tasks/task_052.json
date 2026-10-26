@@ -3,7 +3,7 @@
   "title": "Kill the surviving mutants of src/afaw_web/app.py",
   "role": "architect",
   "type": "chore",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "chore/task-052-web-app-mutants",
   "priority": 2,

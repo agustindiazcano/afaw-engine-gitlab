@@ -3,7 +3,7 @@
   "title": "check_live: optional JSON result file",
   "role": "architect",
   "type": "feature",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "duo/feature/42-check-live-json-result",
   "priority": 3,

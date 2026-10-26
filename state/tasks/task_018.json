@@ -3,7 +3,7 @@
   "title": "AGENTS.md updates and a CI job that compiles the paper PDF",
   "role": "architect",
   "type": "chore",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "docs/task-018-agents-md",
   "priority": 1,

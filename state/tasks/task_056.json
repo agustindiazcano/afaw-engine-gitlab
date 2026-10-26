@@ -3,7 +3,7 @@
   "title": "Raise the coverage of scripts/afaw_state/source.py and scripts/check_task_files.py",
   "role": "architect",
   "type": "chore",
-  "status": "in_progress",
+  "status": "done",
   "owner": "agent",
   "branch": "duo/chore/11-coverage-source-check-task-files",
   "priority": 3,
