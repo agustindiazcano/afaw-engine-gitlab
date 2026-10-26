@@ -1,0 +1,13 @@
+{
+  "id": "task_126",
+  "title": "repair_check: verify that a repair fixes the job that failed",
+  "role": "developer",
+  "type": "feature",
+  "status": "done",
+  "owner": "agent",
+  "branch": "feat/task-126-repair-check",
+  "priority": 2,
+  "difficulty": 2,
+  "blocked_by": [],
+  "notes": "Standard library only; not wired into CI (a person adds the job)."
+}
