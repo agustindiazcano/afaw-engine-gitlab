@@ -1,0 +1,6 @@
+{
+  "task_id": "task_134",
+  "files_touched": [],
+  "summary": "Two jobs: telemetry_report (monitor stage, main only, allowed to fail, writes build/AFAW_TELEMETRY.md) and repair_check (govern stage, merge requests of the Duo flow that say Closes #N, reports which listed jobs are fixed and never fails). The README and docs/duo.md list every Duo agent, flow and trigger with its service account and what ran.",
+  "next": ["Observe the first run of both jobs", "Remove the duplicate Mention trigger of the loop reporter"]
+}

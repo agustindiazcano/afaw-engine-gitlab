@@ -178,6 +178,21 @@ Developer Flow, not that Duo ran inside the stage's job. Times and the burst tha
 rows are in [`docs/experiments.md`](docs/experiments.md#stage-experiments-and-the-burst-exp-05); the undraft
 and the merge are done by `merge_guard` with a person's token, so GitLab shows that person's name.
 
+## Duo agents, flows and triggers
+
+What is configured in the GitLab project, read on 2026-10-26. A person creates agents, flows and triggers in the interface (**AI > Agents**, **AI > Flows**, **AI > Triggers**); the sources are in [`duo/custom-flow.yaml`](duo/custom-flow.yaml) and the other files of that folder, and the rules in [`docs/duo.md`](docs/duo.md).
+
+| Name | Kind | Runs as | Started by | What ran, and when |
+|---|---|---|---|---|
+| Developer Flow | Foundational flow | `duo-developer-gitlab-ai-hackathon` (id 33073386) | A person or a script assigning an issue to the account | Dozens of sessions. Example: issues #37 to #43 became [!75](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/75) to [!81](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/81) in 95 to 132 s |
+| Fix CI/CD Pipeline Flow | Foundational flow | `duo-fix-ci-cd-pipeline-gitlab-ai-hackathon` (id 33073387) | Trigger "AFAW fix on failed pipeline" (event Pipeline events, Failed), created 2026-10-26 | Ran once by hand on 2026-10-24 (pipeline 2985662569). The trigger has not been seen to fire yet |
+| Code Review Flow | Foundational flow | `@GitLabDuo` | A person assigning `@GitLabDuo` as reviewer | Once: [session 10028468](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/automate/agent-sessions/10028468) on [!118](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/118), 2026-10-26, 1 min 51 s, three comments |
+| AFAW loop reporter | Custom flow (`duo/custom-flow.yaml`) | `ai-afaw-loop-reporter-gitlab-ai-hackathon` (id 43732366) | Trigger on Mention: a person mentions the account in a merge request or issue | Once: [!110](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/110), sessions 10028680 and 10028682, 2026-10-26, 1 min 23 s. Two sessions started for one mention, so every note is posted twice |
+| AFAW auditor | Custom agent (`duo/custom-agent.md`) | Chat in the Duo sidebar | A person, from a merge request | Created 2026-10-26; not run yet |
+| AFAW planner | Custom agent (`duo/custom-planner.md`) | Chat in the Duo sidebar | A person, from an issue | Created 2026-10-26; not run yet |
+
+Code, not agents, does the rest of the loop: `scripts/orchestrator.py` picks the next task and files the issue, `request_fix` opens an issue when a pipeline fails, `repair_check` compares the jobs an issue lists with the jobs of its repair, `merge_guard` decides and performs the merge, `telemetry_report` writes the event report and `handoff` writes the hand-over file for the next session.
+
 ## Hands-off status
 
 | Link of the loop | Status |
