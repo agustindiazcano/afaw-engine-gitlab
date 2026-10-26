@@ -69,4 +69,9 @@ def create_app() -> FastAPI:
             notes.append(note)
             return note
 
+    @app.delete("/api/notes", status_code=204)
+    def clear_notes() -> None:
+        with lock:
+            notes.clear()
+
     return app

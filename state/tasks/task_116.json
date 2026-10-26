@@ -1,0 +1,13 @@
+{
+  "id": "task_116",
+  "title": "Demo app: summary line, clear-all control and hint (three defects planted for the bug benchmark)",
+  "role": "architect",
+  "type": "feature",
+  "status": "done",
+  "owner": "agent",
+  "branch": "feat/task-116-demo-summary-strip",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "The page ships with a count that is one too high, a clear control whose handler does nothing and a hint whose text colour equals the card background. The existing unit and e2e tests do not see them; task_117 adds the live checks that do."
+}

@@ -46,6 +46,10 @@ animation:fade .25s ease-out}
 @media (prefers-reduced-motion: reduce){li{animation:none}}
 #empty{margin:var(--space-24) 0 0;padding:var(--space-16);text-align:center;color:var(--muted);
 border:1px dashed var(--border);border-radius:var(--space-8)}
+#clear{color:var(--primary);cursor:pointer;text-decoration:underline;font-size:.875rem}
+.stats{display:flex;justify-content:space-between;align-items:center;margin:var(--space-24) 0 0;
+color:var(--muted);font-size:.875rem}
+.hint{margin:var(--space-8) 0 0;font-size:.875rem;color:var(--surface)}
 footer{margin-top:var(--space-24);color:var(--muted);font-size:.75rem;overflow-wrap:anywhere}
 [hidden]{display:none!important}
 </style></head>
@@ -63,6 +67,9 @@ height="40" rx="10"/><path class="mark-fg" d="M11 20.5l6 6L29 14"/></svg>
 <p class="meta"><span id="count" aria-live="polite">0/200</span></p>
 <p id="err" class="error" role="alert" hidden></p>
 </form>
+<p class="stats"><span id="stats" aria-live="polite"></span>
+<span id="clear" role="button" tabindex="0">Clear all</span></p>
+<p class="hint">Tip: notes are kept only while the instance runs.</p>
 <ul id="n"></ul>
 <p id="empty" hidden>No notes yet. Add the first one.</p>
 <footer>Notes live in memory and are lost when the instance stops.
@@ -77,7 +84,9 @@ function fail(m){err.textContent=m;err.hidden=false}
 async function load(){const r=await fetch('/api/notes');const d=await r.json();
 const ul=$('n');ul.replaceChildren();
 for(const x of d){const li=document.createElement('li');li.textContent=x.text;ul.append(li)}
-$('empty').hidden=d.length>0}
+$('empty').hidden=d.length>0;
+$('stats').textContent=(d.length+1)+' notes'}
+$('clear').addEventListener('click',()=>{});
 input.addEventListener('input',()=>{err.hidden=true;sync()});
 $('f').addEventListener('submit',async e=>{e.preventDefault();
 if(input.value.trim()==='')return;
