@@ -1,0 +1,11 @@
+{
+  "task_id": "task_135",
+  "files_touched": [
+    "scripts/afaw_state/stats_pages.py",
+    "tests/tooling/test_stats_pages.py"
+  ],
+  "summary": "experiments.md has the parallel batch (three tools written by Duo in parallel, merged by the guard) and the C2 chain; the data file has chaos row C2 and credits 341.60; the page shows credits with two decimals.",
+  "next": [
+    "Wire repair_check, telemetry_report and handoff in the pipeline (a person edits .gitlab-ci.yml)"
+  ]
+}
