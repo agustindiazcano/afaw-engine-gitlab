@@ -1,0 +1,12 @@
+{
+  "id": "task_118",
+  "title": "Repair e2e_live: summary count, clear-all handler and hint colour on the demo page",
+  "role": "architect",
+  "type": "fix",
+  "status": "done",
+  "owner": "agent",
+  "branch": "fix/task-118-summary-strip-defects",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": []
+}
