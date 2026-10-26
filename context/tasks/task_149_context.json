@@ -1,0 +1,9 @@
+{
+  "task_id": "task_149",
+  "files_touched": [],
+  "summary": "docs/whitepaper/afaw-engine.md: the problem, the design, the results of the experiments with their sources, the cost and carbon, the limits and how to reproduce. It cites the original AFAW paper by DOI and does not edit it.",
+  "next": [
+    "Add the long chain result",
+    "Refresh the autonomy counts before submitting"
+  ]
+}
