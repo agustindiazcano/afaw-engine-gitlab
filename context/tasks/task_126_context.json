@@ -1,0 +1,11 @@
+{
+  "task_id": "task_126",
+  "files_touched": [
+    "scripts/repair_check.py",
+    "tests/tooling/test_repair_check.py"
+  ],
+  "summary": "scripts/repair_check.py: failed_jobs() reads the job names under 'Failed jobs:' in an autoheal issue; check() marks each as fixed (last attempt is success), still_failing or missing (no job of that name ran); the CLI reads issue and merge request pipeline jobs from the GitLab API v4 and exits 0 ok, 1 not ok, 2 unreadable (fails closed). Standard library only; 29 tests.",
+  "next": [
+    "A person wires a CI job that runs python -m scripts.repair_check (not added here)."
+  ]
+}
