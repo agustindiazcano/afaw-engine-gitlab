@@ -1,0 +1,13 @@
+{
+  "id": "task_119",
+  "title": "sci_report: SCI range per merged merge request and for all flows, from API job seconds",
+  "role": "architect",
+  "type": "feature",
+  "status": "done",
+  "owner": "agent",
+  "branch": "feat/task-119-sci-report",
+  "priority": 1,
+  "difficulty": 2,
+  "blocked_by": [],
+  "notes": "EXP-09. The dashboard indicator and the README sections come in the next commits of this branch."
+}

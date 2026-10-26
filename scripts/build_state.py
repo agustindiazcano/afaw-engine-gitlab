@@ -17,7 +17,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from scripts.afaw_state import stats_pages
+from scripts.afaw_state import eco, stats_pages
 from scripts.afaw_state.source import git_runner, read_experiments, read_source
 from scripts.afaw_state.views import StateError, build
 
@@ -42,6 +42,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--ref", default="origin/main")
     parser.add_argument("--out", default="build/state", type=Path)
     parser.add_argument("--facts", type=Path, help="facts.json from collect_facts.py (optional)")
+    parser.add_argument("--sci", type=Path, help="sci.json from sci_report.py (optional)")
     parser.add_argument(
         "--as-of",
         help="reference time, ISO 8601 with time zone (default: commit time of --ref). "
@@ -65,6 +66,9 @@ def main(argv: list[str] | None = None) -> int:
         print(exc, file=sys.stderr)
         return 1
 
+    if args.sci:
+        sci = json.loads(args.sci.read_text(encoding="utf-8"))
+        outputs["dashboard.html"] = eco.inject(outputs["dashboard.html"], sci)
     outputs.update(stats_pages.extra_outputs(read_experiments(git_runner, args.ref)))
     prepare_out(args.out)
     for rel, content in outputs.items():
