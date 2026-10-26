@@ -1,0 +1,13 @@
+{
+  "id": "task_122",
+  "title": "Experiments page: the hands-off loop with autonomy counts, nine stages, repair chain and limits",
+  "role": "architect",
+  "type": "feature",
+  "status": "done",
+  "owner": "agent",
+  "branch": "feat/task-122-handoff-panel",
+  "priority": 1,
+  "difficulty": 2,
+  "blocked_by": [],
+  "notes": "Data in docs/data/experiments.json under handoff; every figure read from the GitLab API."
+}

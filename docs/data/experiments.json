@@ -249,5 +249,116 @@
       "observed": "Issues #32 to #34 were opened for task_files failures of the repair branches; the cap of 6 open issues held; the guard merged one of those repairs (!65), which added only task files, and the operator cancelled its task",
       "held": true
     }
-  ]
+  ],
+  "handoff": {
+    "as_of": "2026-10-26",
+    "autonomy": {
+      "merge_requests": 83,
+      "merged": 66,
+      "agent_only": 29,
+      "agent_only_merged": 22,
+      "guard_merged": 16,
+      "median_minutes": 24.6,
+      "read_on": "2026-10-25"
+    },
+    "stages": [
+      {
+        "stage": "plan",
+        "issue": 37,
+        "mr": 79,
+        "what": "check_task_files counts the task files it checked"
+      },
+      {
+        "stage": "create",
+        "issue": 6,
+        "mr": 26,
+        "what": "Developer Flow wrote a documentation file from an issue"
+      },
+      {
+        "stage": "verify",
+        "issue": 19,
+        "mr": 47,
+        "what": "Duo found and fixed a real bug in the mutation engine"
+      },
+      {
+        "stage": "secure",
+        "issue": 38,
+        "mr": 77,
+        "what": "security_gate writes a JSON summary"
+      },
+      {
+        "stage": "package",
+        "issue": 39,
+        "mr": 75,
+        "what": "HEALTHCHECK for the demo app image"
+      },
+      {
+        "stage": "release",
+        "issue": 40,
+        "mr": 80,
+        "what": "release_notes builds a release description"
+      },
+      {
+        "stage": "configure",
+        "issue": 41,
+        "mr": 76,
+        "what": "check_ci_config prints a summary line"
+      },
+      {
+        "stage": "monitor",
+        "issue": 42,
+        "mr": 81,
+        "what": "check_live can write a JSON result file"
+      },
+      {
+        "stage": "govern",
+        "issue": 43,
+        "mr": 78,
+        "what": "human_only_files can list the protected files"
+      }
+    ],
+    "chain": [
+      {
+        "link": "Test merged (trigger, by a person)",
+        "utc": "00:47:14",
+        "since": "n/a"
+      },
+      {
+        "link": "e2e_live fails on main",
+        "utc": "01:00:02",
+        "since": "12 min 48 s"
+      },
+      {
+        "link": "request_fix opens issue #54",
+        "utc": "01:00:37",
+        "since": "35 s"
+      },
+      {
+        "link": "Duo opens its merge request (!101)",
+        "utc": "01:03:53",
+        "since": "3 min 16 s"
+      },
+      {
+        "link": "merge_guard merges it",
+        "utc": "01:13:29",
+        "since": "9 min 36 s"
+      },
+      {
+        "link": "Repaired app deployed",
+        "utc": "01:23:10",
+        "since": "9 min 41 s"
+      },
+      {
+        "link": "e2e_live passes",
+        "utc": "01:24:21",
+        "since": "1 min 11 s"
+      }
+    ],
+    "limits": [
+      "The undraft and the merge use a person's access token, so GitLab shows that person's name.",
+      "The Code Review Flow and the summary comment on the issue never ran.",
+      "No repair has needed more than one attempt yet.",
+      "The bugs and the trigger of the benchmark were ours: it measures the loop, not how often Duo meets such bugs."
+    ]
+  }
 }

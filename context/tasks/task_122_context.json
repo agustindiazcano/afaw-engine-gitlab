@@ -1,0 +1,12 @@
+{
+  "task_id": "task_122",
+  "files_touched": [
+    "scripts/afaw_state/stats_pages.py",
+    "tests/tooling/test_stats_pages.py"
+  ],
+  "summary": "The experiments page has a Hands-off loop section: counts of merge requests made by agents, the nine stages each with its issue and Duo merge request, the repair chain with time per link, and what the evidence does not prove. The data is under handoff in docs/data/experiments.json.",
+  "next": [
+    "Refresh the autonomy counts before submitting",
+    "Clear the stale in_progress status of merged tasks on the main dashboard"
+  ]
+}

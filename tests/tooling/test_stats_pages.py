@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+from html import escape
 from pathlib import Path
 from typing import Any
 
@@ -212,3 +213,46 @@ def test_the_nav_links_to_both_pages() -> None:
 
     nav = brand.nav()
     assert 'href="/experiments/"' in nav and 'href="/environment/"' in nav
+
+
+# ------------------------------------------------------------------ the hands-off panel
+
+
+def test_the_experiments_page_has_the_hands_off_loop_section(experiments: str) -> None:
+    assert "Hands-off loop" in experiments
+
+
+def test_every_stage_is_listed_with_its_merge_request(
+    experiments: str, data: dict[str, Any]
+) -> None:
+    stages = data["handoff"]["stages"]
+    assert [s["stage"] for s in stages] == [
+        "plan", "create", "verify", "secure", "package", "release", "configure", "monitor",
+        "govern",
+    ]
+    for stage in stages:
+        assert f"!{stage['mr']}" in experiments and f"#{stage['issue']}" in experiments
+
+
+def test_the_autonomy_numbers_come_from_the_data_file(
+    experiments: str, data: dict[str, Any]
+) -> None:
+    a = data["handoff"]["autonomy"]
+    assert f"{a['agent_only']} of {a['merge_requests']}" in experiments
+    assert str(a["median_minutes"]) in experiments
+
+
+def test_the_repair_chain_is_listed_link_by_link(experiments: str, data: dict[str, Any]) -> None:
+    chain = data["handoff"]["chain"]
+    assert len(chain) >= 6
+    for link in chain:
+        assert link["link"] in experiments and link["utc"] in experiments
+
+
+def test_the_page_says_what_the_evidence_does_not_prove(
+    experiments: str, data: dict[str, Any]
+) -> None:
+    limits = data["handoff"]["limits"]
+    assert any("token" in text for text in limits)
+    for text in limits:
+        assert escape(text) in experiments

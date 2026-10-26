@@ -158,6 +158,33 @@ def _page(title: str, intro: str, body: str) -> str:
     )
 
 
+def _handoff(h: Mapping[str, Any]) -> str:
+    """The hands-off loop: autonomy counts, the nine stages, the repair chain and the limits."""
+    a = h["autonomy"]
+    tiles = (
+        _tile(f"{a['agent_only']} of {a['merge_requests']}", "Merge requests made only by agents")
+        + _tile(str(a["guard_merged"]), "Agent-only, merged with a recorded automatic merge")
+        + _tile(str(a["median_minutes"]), "Median minutes, open to merge (agent-only, merged)")
+    )
+    stages = _table(
+        ["Stage", "Issue", "Merge request", "What Duo changed"],
+        [[s["stage"], f"#{s['issue']}", f"!{s['mr']}", s["what"]] for s in h["stages"]],
+        "The nine stages, each with a merge request written by Duo",
+    )
+    chain = _table(
+        ["Link", "Time (UTC)", "Since the previous link"],
+        [[c["link"], c["utc"], c["since"]] for c in h["chain"]],
+        "Repair chain: a failing live check to a repaired, redeployed app",
+    )
+    limits = "".join(f"<li>{escape(text)}</li>" for text in h["limits"])
+    return (
+        f"<h2>Hands-off loop</h2>"
+        f'<p class="meta">Counts read from the GitLab API on {escape(a["read_on"])}.</p>'
+        f'<div class="tiles">{tiles}</div>{stages}{chain}'
+        f"<h3>What this does not prove</h3><ul>{limits}</ul>"
+    )
+
+
 def experiments_page(data: Mapping[str, Any]) -> str:
     """Coverage, mutation score and timings of the experiments, with the merges by the guard."""
     builds = data["hard_builds"]
@@ -220,6 +247,7 @@ def experiments_page(data: Mapping[str, Any]) -> str:
     body = (
         f'<div class="tiles">{tiles}</div><h2>Charts</h2>{charts}'
         f"<h2>Merges and builds</h2>{merges}{hard}"
+        f"{_handoff(data['handoff'])}"
         f"<h2>Chaos and security</h2>{chaos_table(data['chaos'])}"
         f'<p class="note">{escape(data["note"])}</p>'
     )
