@@ -195,7 +195,10 @@ def experiments_page(data: Mapping[str, Any]) -> str:
     tiles = (
         _tile(f"{passed} of {total}", "Hidden acceptance tests passed")
         + _tile(f"{repairs['repaired']} of {repairs['planted']}", "Planted defects repaired")
-        + _tile(str(len(data["guard_merges"])), "Merges made by merge_guard")
+        + _tile(
+            str(data["handoff"]["autonomy"]["guard_merged"]),
+            "Merges by merge_guard (agent-only, automatic merge recorded)",
+        )
         + _tile(f"{credits['used']} of {credits['budget']}", "GitLab Credits used, read by hand")
     )
     cov, mut, mins = data["coverage"], data["mutation"], data["minutes"]
@@ -228,7 +231,7 @@ def experiments_page(data: Mapping[str, Any]) -> str:
     merges = _table(
         ["Merge request", "Merged (UTC)"],
         [[f"!{m['mr']}", m["merged_utc"]] for m in data["guard_merges"]],
-        "Merge requests merged by merge_guard with no click",
+        "The first nine merges by merge_guard, with their times",
     )
     hard = _table(
         ["Tool", "Merge request", "Hidden tests", "Tests Duo wrote", "Coverage by them (%)"],

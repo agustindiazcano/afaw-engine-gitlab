@@ -1,0 +1,13 @@
+{
+  "id": "task_125",
+  "title": "Autonomy statistics of 2026-10-26 and one number for the merges made by the guard",
+  "role": "architect",
+  "type": "chore",
+  "status": "done",
+  "owner": "agent",
+  "branch": "feat/task-125-autonomy-refresh",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "The tile of the experiments page now reads the same count as the autonomy panel."
+}

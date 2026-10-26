@@ -1,0 +1,10 @@
+{
+  "task_id": "task_125",
+  "files_touched": [
+    "tests/tooling/test_stats_pages.py"
+  ],
+  "summary": "Autonomy statistics read from the API on 2026-10-26: 104 merge requests, 36 made only by agents, 29 of those merged, 23 with a recorded automatic merge, median 10.7 minutes. The experiments page tile for the merges by the guard reads the same count as the autonomy panel instead of a list of nine.",
+  "next": [
+    "Run python -m scripts.autonomy_stats again before submitting"
+  ]
+}
