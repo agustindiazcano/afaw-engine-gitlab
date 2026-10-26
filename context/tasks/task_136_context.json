@@ -1,0 +1,13 @@
+{
+  "task_id": "task_136",
+  "files_touched": [
+    "src/notes_app/app.py",
+    "src/notes_app/static/index.html",
+    "tests/notes/test_app.py",
+    "tests/notes/test_page.py"
+  ],
+  "summary": "Added DELETE /api/notes/{note_id} to the demo app: 204 and only that note is removed, 404 with the detail 'Note not found' for an unknown id. Ids now come from a counter, so a new note never reuses the id of a note that still exists; clear all still empties the store and restarts the counter. The page shows a Delete control on each note, a span with role=button (not a button element), keyboard operable; selectors and brand colour are unchanged. Tests first (6 added tests failed on the old code, red_check OK); 44 unit tests pass and the 12 browser tests of e2e/test_notes_app.py pass against a local uvicorn.",
+  "next": [
+    "Run e2e/test_notes_live.py against the deployed service after the merge"
+  ]
+}

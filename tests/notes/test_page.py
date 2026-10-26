@@ -114,3 +114,12 @@ def test_the_hint_text_colour_differs_from_the_card_background(html: str) -> Non
     colour = re.search(r"(?<![-\w])color:([^;}]+)", hint.group(0))
     assert colour is not None
     assert colour.group(1).strip() != "var(--surface)"
+
+
+def test_each_note_has_a_delete_control_that_is_not_a_button(html: str) -> None:
+    # The browser tests select the page's single <button>, so the control must be another element.
+    assert "createElement('span')" in html
+    assert "method:'DELETE'" in html
+    assert "/api/notes/" in html
+    assert html.count("<button") == 1
+    assert "createElement('button')" not in html

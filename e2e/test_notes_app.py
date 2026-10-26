@@ -104,3 +104,16 @@ def test_a_failed_save_shows_an_alert_and_keeps_the_text(page: Page, notes_url: 
     page.click("button")
     expect(page.get_by_role("alert")).to_be_visible()
     expect(page.locator("#t")).to_have_value("keep me")
+
+
+def test_a_deleted_note_disappears_and_the_other_remains(page: Page, notes_url: str) -> None:
+    keep = f"keep {uuid.uuid4().hex[:8]}"
+    drop = f"drop {uuid.uuid4().hex[:8]}"
+    page.goto(notes_url)
+    for text in (keep, drop):
+        page.fill("#t", text)
+        page.click("button")
+        expect(page.locator("#n li", has_text=text)).to_be_visible()
+    page.locator("#n li", has_text=drop).locator(".del").click()
+    expect(page.locator("#n li", has_text=drop)).to_have_count(0)
+    expect(page.locator("#n li", has_text=keep)).to_be_visible()
