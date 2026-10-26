@@ -198,6 +198,9 @@ def test_session_start_prints_the_handoff_file(tmp_path: Path) -> None:
     assert "main has moved" not in context
 
 
+@pytest.mark.characterization(
+    reason="the hook printed nothing about a handoff before the file existed; guards that"
+)
 def test_session_start_is_silent_without_a_handoff_file(tmp_path: Path) -> None:
     _git_project(tmp_path)
     context = _session(tmp_path, _ok_runner(tmp_path))["context"]
