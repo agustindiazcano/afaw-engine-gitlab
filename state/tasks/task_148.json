@@ -1,0 +1,13 @@
+{
+  "id": "task_148",
+  "title": "Record the Fix CI/CD trigger probe and chaos C7",
+  "role": "architect",
+  "type": "chore",
+  "status": "done",
+  "owner": "agent",
+  "branch": "docs/task-148-trigger-probe",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Documents and the chaos table of the data file."
+}

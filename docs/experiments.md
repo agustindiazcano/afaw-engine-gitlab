@@ -258,10 +258,11 @@ On the CI runner with mutmut 3.8.0, the whole suite including the tests Duo wrot
 | C2 | A test that calls new code in a mutation-critical file and asserts nothing | `mutation_gate` fails and the flow writes real assertions without touching the code | `mutation_gate` failed; `request_fix` opened [#58](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/work_items/58) 6 min 43 s after the push; Duo opened [!114](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/114) two minutes later with 9 value-checked cases and a zero-whole guard test, no change to the code; the branch carries the planted probe, so the merge request was closed unmerged | Yes |
 | C5 | `AFAW_BOT_USER_IDS` is empty | The guard cannot tell a service account from a person and does not merge | Read only on the open Duo merge request [!122](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/122): the verdict lists "AFAW_BOT_USER_IDS is empty: a service account cannot be told from a person"; with the two ids set that reason is gone. The switch was off | Yes |
 | C6 | A person's merge request | The guard never merges it: merge no, reason identity | On [!121](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/121) the verdict was merge: no with two identity reasons (the head pipeline was started by a person, a commit is authored by a person); exit code 0, nothing merged | Yes |
+| C7 | A job is cancelled in the middle of its run | The pipeline does not turn green by itself; a retry recovers it | `web_data` of the pipeline of [!123](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/123) was cancelled at 03:59:48 UTC and retried at 03:59:55; the retried job succeeded, the pipeline ended in success at 04:08:52 and the merge request merged | Yes |
 | N1 | A repair merge request fails a check of its own (task files of a planted branch) | The chain of issues stops at the cap of 6 open autoheal issues | Issues #32 to #34 were opened for `task_files` failures of the repair branches; the cap held; the guard merged one of those repairs (!65), which added only task files, and the operator cancelled its task | Yes |
 | B1 | Merge requests of the flow held by the guard itself | Merged when every gate is green | The guard counted the skipped `request_fix` job as a failure and held !40 and !43 (found by the experiment, fixed in task_070) | No, then fixed |
 
-Not run live: C4 (the guard acts only when every other job is green, so an invalid token cannot be provoked on a real merge request; `tests/tooling/test_merge_guard.py` covers the refusals), C7 to C9. The credits used
+Not run live: C4 (the guard acts only when every other job is green, so an invalid token cannot be provoked on a real merge request; `tests/tooling/test_merge_guard.py` covers the refusals), C8 and C9 (a flaky test and a failed deploy: the second could take the live demo app down). The credits used
 by C1, C2, C3 and S1 are inside the totals of the next table, not separate.
 
 ### Credits
@@ -430,3 +431,21 @@ after, so **6.86 credits**; the window held no other Duo session.
 
 What this does not show: one run, one kind of task (a small feature with a written specification),
 and a main pipeline that also deployed an unrelated documentation merge (!121) 9 minutes earlier.
+
+## Trigger of the Fix CI/CD Pipeline Flow (2026-10-26)
+
+A person created the trigger "AFAW fix on failed pipeline" (event Pipeline events, status Failed) in
+**AI > Triggers**. To test it, the branch `demo/task-139-fix-trigger` was pushed at 03:53:47 UTC with
+a file that fails `lint` on purpose (an unused import).
+
+| Link | Time (UTC) | Evidence |
+|---|---|---|
+| Pipeline fails (`lint` red) | 04:00:50 | [pipeline 2987817218](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/pipelines/2987817218) |
+| `request_fix` opens issue #62 for the Developer Flow | 04:00:45 | [#62](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/work_items/62) |
+| The trigger starts the Fix CI/CD Pipeline Flow, which opens !125 | 04:02:33 (1 min 43 s after the failure) | [!125](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/125), commits by `Duo Fix CI/CD Pipeline` |
+| The Developer Flow, from the issue, opens !126 | 04:03:33 (2 min 43 s) | [!126](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/126) |
+| `task_files` fails on the repair branch; issue #63 and !127 follow | 04:03:44 and 04:05:45 | [#63](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/work_items/63), [!127](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/127) |
+
+Both flows removed the same unused import, so the trigger and `request_fix` duplicate each other and
+the cost doubles. The author closed #62, #63, !125, !126 and !127 and deleted the branch at about
+04:11 UTC. The trigger works. The project keeps `request_fix` as the repair path, and the recommendation is to leave the trigger off outside a demonstration.
