@@ -1,0 +1,9 @@
+{
+  "task_id": "task_159",
+  "files_touched": [],
+  "summary": "docs/submission/demo-script.md lists the preparation (terminal, token, tabs), the launch command, the speech per segment, what to do when a job fails during the run, and what to hand back after recording. It no longer asks for scripts.demo on or quotes numbers to say aloud.",
+  "next": [
+    "Record the filmed run",
+    "Replace the video placeholder"
+  ]
+}
