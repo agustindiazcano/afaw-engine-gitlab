@@ -370,11 +370,13 @@ def test_repair_check_reports_on_the_merge_requests_of_the_flow_only(ci: dict[st
     # Not in the monitor stage: merge_guard waits for that stage and must not see this job pending.
     assert job["stage"] == "govern"
     rule = job["rules"][0]["if"]
-    assert 'merge_request_event' in rule and "duo/" in rule
+    assert "merge_request_event" in rule and r"/^duo\//" in rule
     script = _script(job)
     assert "python -m scripts.repair_check" in script
     assert '--mr "$CI_MERGE_REQUEST_IID"' in script
-    assert "Closes #" in script  # the issue number comes from the merge request description
+    # The issue number comes from the merge request description. A space before "#" would start a
+    # YAML comment and cut the line, so the pattern must survive the parser whole.
+    assert "grep -oE 'Closes[[:space:]]#[0-9]+'" in script
     assert "|| echo" in script  # it reports; a job that did not run here is not a failure
     assert not job.get("allow_failure")
     assert "AFAW_MERGE_TOKEN" not in str(job)
