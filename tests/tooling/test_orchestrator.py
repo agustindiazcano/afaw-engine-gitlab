@@ -78,3 +78,70 @@ def test_main_with_no_candidate_prints_null(
 
 def test_main_fails_loudly_on_a_missing_view(tmp_path: Path) -> None:
     assert main(["--pending", str(tmp_path / "missing.json")]) == 2
+
+
+# ------------------------------------------------------------------ filing the issue (--create)
+
+
+class FakeIssueApi:
+    def __init__(self, open_issues: list[dict[str, Any]] | None = None) -> None:
+        self.open_issues = open_issues or []
+        self.created: list[dict[str, Any]] = []
+
+    def labeled_issues(self, label: str) -> list[dict[str, Any]]:
+        return self.open_issues
+
+    def user_id(self, username: str) -> int:
+        return 33073386
+
+    def create_issue(self, title: str, description: str, assignee_id: int, label: str) -> None:
+        self.created.append(
+            {"title": title, "description": description, "assignee": assignee_id, "label": label}
+        )
+
+
+def test_the_issue_names_the_task_and_carries_the_rules() -> None:
+    from scripts.orchestrator import issue_text, issue_title, marker
+
+    task = _t("task_77", title="Add a stats endpoint", priority=2, role="architect")
+    assert issue_title(task) == "feat(task_77): Add a stats endpoint"
+    text = issue_text(task)
+    assert "task_77" in text and "Add a stats endpoint" in text
+    assert "strict TDD" in text and "red_check" in text
+    assert ".gitlab-ci.yml" in text  # the files it must not touch
+    assert marker("task_77") in text
+
+
+def test_create_files_one_issue_for_the_flow() -> None:
+    from scripts.orchestrator import LABEL, create_issue
+
+    api = FakeIssueApi()
+    assert create_issue(api, _t("task_77")) == "created"
+    assert len(api.created) == 1
+    assert api.created[0]["assignee"] == 33073386 and api.created[0]["label"] == LABEL
+
+
+def test_create_does_not_file_the_same_task_twice() -> None:
+    from scripts.orchestrator import create_issue, marker
+
+    api = FakeIssueApi([{"description": f"text {marker('task_77')}"}])
+    assert create_issue(api, _t("task_77")) == "exists"
+    assert api.created == []
+
+
+def test_main_create_without_a_token_fails_closed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    view = tmp_path / "pending.json"
+    view.write_text(json.dumps([_t("task_7")]), encoding="utf-8")
+    monkeypatch.delenv("AFAW_MERGE_TOKEN", raising=False)
+    monkeypatch.delenv("GITLAB_TOKEN", raising=False)
+    assert main(["--pending", str(view), "--create", "--project", "1"]) == 2
+    assert "token" in capsys.readouterr().err
+
+
+def test_main_without_create_never_writes(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    view = tmp_path / "pending.json"
+    view.write_text(json.dumps([_t("task_7")]), encoding="utf-8")
+    monkeypatch.setenv("GITLAB_TOKEN", "x")
+    assert main(["--pending", str(view)]) == 0
