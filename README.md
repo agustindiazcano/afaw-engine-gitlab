@@ -120,7 +120,7 @@ flowchart LR
     E -- green --> O[Observe<br/>dashboard, experiments,<br/>environment]
 ```
 
-Not in the diagram: the review by the Code Review Flow, which ran once on a merge request that a person assigned to it, and a summary comment on the issue, which has not run.
+Not in the diagram: the review by the Code Review Flow, which ran once on a merge request that a person assigned to it, and a summary comment on the issue, which ran once on a merge request that a person mentioned it on.
 
 ## Hackathon requirements and status
 
