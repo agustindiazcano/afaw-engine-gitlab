@@ -1,6 +1,8 @@
 {
   "task_id": "task_121",
-  "files_touched": [],
+  "files_touched": [
+    "tests/tooling/test_stats_pages.py"
+  ],
   "summary": "Bug benchmark recorded: three defects planted in the demo app, found by e2e_live, repaired by one Duo session and redeployed; time per link read from the GitLab API and 6.62 credits (309.15 to 315.77). The experiments page now shows 315.77 of 500.",
   "next": [
     "Dashboard sections for the hands-off loop",
