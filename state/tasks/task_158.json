@@ -1,0 +1,12 @@
+{
+  "id": "task_158",
+  "title": "Record the test take for the demo video (45 min 23 s, 14.81 credits, a cut API response) and align the README",
+  "role": "architect",
+  "type": "chore",
+  "status": "done",
+  "owner": "agent",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "branch": "docs/task-158-test-take"
+}

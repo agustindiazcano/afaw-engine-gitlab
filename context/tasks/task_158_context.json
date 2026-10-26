@@ -1,0 +1,12 @@
+{
+  "task_id": "task_158",
+  "files_touched": [
+    "tests/tooling/test_stats_pages.py"
+  ],
+  "summary": "The test take of 2026-10-26 (task_154, issue #67, 45 min 23 s, 14.81 credits, a cut API response that stopped web_data and the fix of task_157) is recorded in experiments, evidence, the white paper and the Devpost text; credits are 412.91 of 500; the README no longer says the summary comment never ran.",
+  "next": [
+    "Record the filmed take (task_155) with the credit reading after it",
+    "Replace the video placeholder",
+    "Synchronize with GitHub"
+  ]
+}

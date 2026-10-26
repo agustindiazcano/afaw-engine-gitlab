@@ -365,7 +365,7 @@ per-session figure).
 What this does not show: the defects were planted by us, so it measures the loop, not how often
 Duo meets such defects on its own; the trigger needs a person; one run, not a distribution.
 Credit readings of 2026-10-25/26 (hours not recorded unless stated): 204.26 (about 18:05 GMT-3),
-219.38, 253.40 (about 20:15 GMT-3), 299.70, 309.15, 315.77 (about 22:30 GMT-3), 317.97 (hour not recorded; read before the batch whose first issue was created at 02:09:56 UTC on 2026-10-26) and 341.60 (about 02:30 UTC on 2026-10-26, after the batch), 353.82 and 356.59 (hours not recorded; after the loop reporter and the review rounds of !118) and 363.45 (about 03:50 UTC, after the end to end rehearsal), 368.81 (start of the long chain), 387.39 (while it ran) and 396.53 (after it).
+219.38, 253.40 (about 20:15 GMT-3), 299.70, 309.15, 315.77 (about 22:30 GMT-3), 317.97 (hour not recorded; read before the batch whose first issue was created at 02:09:56 UTC on 2026-10-26) and 341.60 (about 02:30 UTC on 2026-10-26, after the batch), 353.82 and 356.59 (hours not recorded; after the loop reporter and the review rounds of !118) and 363.45 (about 03:50 UTC, after the end to end rehearsal), 368.81 (start of the long chain), 387.39 (while it ran) 396.53 (after it), 398.10, 405.35 and 412.91 (before, during and after the test take for the demo video).
 
 ## Parallel batch of Duo sessions (2026-10-26)
 
@@ -487,3 +487,41 @@ readings above).
 
 What this does not show: three small tasks with written specifications on one application, started
 by one command of the author, one run.
+
+## Test take for the demo video (2026-10-26)
+
+A trial of the run that is filmed: `python -m scripts.orchestrator --create` filed the issue of
+`task_154` (mark a note as done, in the API and on the page) and assigned it to the Developer Flow.
+
+| Link | Time (UTC) | Since the issue |
+|---|---|---|
+| Issue #67 filed by the orchestrator | 17:02:02 | n/a |
+| Merge request !137 opened by Duo | 17:08:44 | 6 min 42 s |
+| `merge_guard` merges | 17:23:15 | 21 min 13 s |
+| `web_data` fails on `main` (`IncompleteRead`) | 17:27:30 | 25 min 28 s |
+| `web_data` passes on its third try | 17:41:00 | 38 min 58 s |
+| `deploy_cloud_run`, `deploy_demo_app` | 17:43:43, 17:46:14 | 41 min 41 s to the first |
+| `e2e_live` passes | 17:47:25 | **45 min 23 s** |
+
+The live app answers `PATCH /api/notes/{id}` with 200 and `done: true`, and 404 for an unknown id
+(checked by hand, then the note was deleted).
+
+What went wrong, and what it shows. `web_data` read a page of the GitLab API and the response was
+cut (`http.client.IncompleteRead`, 28,878 bytes read, then 28,819 on the retry). `http_get_json` did
+not retry that error, so the job failed on `main` and `request_fix` opened issue #68 and assigned it
+to Duo at 17:28:03. We first took it for a passing network fault and closed the issue at 17:29:18;
+Duo session 10075080 had started at 17:28:04 and finished at 17:31:07 anyway, so closing an issue
+does not stop a session that has started. The second retry also failed, and the third passed. The
+same URL answered in full six times out of six from a local machine, so the cut seems to depend on
+the runner; that is not verified. The fix is `task_157` (!138): a cut response is retried with the
+same backoff as a network error, test first. After it, the `main` pipeline passed with `web_data`
+green on its first try (18:19:45 to `e2e_live` at 18:25:48).
+
+Credits read by the human: 398.10 before the take, 405.35 during it and 412.91 after, so **14.81
+credits** for the window. It holds the session of the planted-by-accident repair (issue #68) and two
+`duo_workflow` pipelines (17:39:31 and 17:49:47) that we did not launch and could not identify; the
+credits of each session are not exposed, so the split is not known. The 1.57 credits between 396.53
+and 398.10 are also unassigned.
+
+What this does not show: one run, one kind of task, and a fault that the next filmed take may not
+repeat.

@@ -220,6 +220,7 @@ GitLab exposes no token counts, so the unit is the GitLab Credit, read by hand f
 | Fix CI/CD trigger probe | 5.36 |
 | End to end rehearsal | 6.86 |
 | Long chain of three tasks (368.81 to 396.53; includes two sessions that a defect of ours caused and 9.14 credits that we cannot assign to a session) | 27.72 |
+| Test take for the demo video (398.10 to 412.91; includes a repair session for a cut API response and two sessions we could not identify) | 14.81 |
 
 The carbon of a flow is estimated with the Software Carbon Intensity method (ISO/IEC 21031:2024) from
 measured job seconds, the Cloud Carbon Footprint power range for a 2 vCPU runner (0.71 to 4.26 W per
