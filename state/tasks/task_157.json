@@ -1,0 +1,13 @@
+{
+  "id": "task_157",
+  "title": "Retry a GitLab API response that is cut in the middle (IncompleteRead) in the state facts reader",
+  "role": "architect",
+  "type": "bugfix",
+  "status": "done",
+  "owner": "agent",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "branch": "fix/task-157-retry-incomplete-read",
+  "notes": "web_data failed on main at 2026-10-26 17:27 UTC with http.client.IncompleteRead, which http_get_json did not retry."
+}

@@ -7,6 +7,7 @@ tested on recorded API payloads; the I/O is at the edges (``Git``, ``GitHub``,
 
 from __future__ import annotations
 
+import http.client
 import json
 import math
 import subprocess
@@ -316,8 +317,9 @@ def http_get_json(
     attempts: int = 4,
     timeout: float = 30,
 ) -> Any:
-    """GET a JSON document with a timeout; 429, 5xx and network errors are retried with
-    exponential backoff (1 s, 2 s, 4 s, ...). Other HTTP errors are raised as they are."""
+    """GET a JSON document with a timeout; 429, 5xx, network errors and responses cut in the
+    middle are retried with exponential backoff (1 s, 2 s, 4 s, ...). Other HTTP errors are
+    raised as they are."""
     last = "no attempt"
     for attempt in range(attempts):
         if attempt:
@@ -329,8 +331,8 @@ def http_get_json(
             if error.code != 429 and error.code < 500:
                 raise
             last = f"HTTP {error.code}"
-        except (urllib.error.URLError, TimeoutError) as error:
-            last = f"network error: {error}"
+        except (urllib.error.URLError, TimeoutError, http.client.HTTPException) as error:
+            last = f"network error: {error!r}"
     raise FactsError(f"GET {url.split('?')[0]} failed after {attempts} attempts ({last})")
 
 

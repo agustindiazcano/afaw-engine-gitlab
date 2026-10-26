@@ -1,5 +1,6 @@
 """GitLab facts: pure parsers on recorded payloads of the public project, HTTP injected."""
 
+import http.client
 import io
 import json
 import urllib.error
@@ -331,6 +332,27 @@ def test_network_errors_are_retried_too():
         return Body(b"[]")
 
     assert http_get_json("https://x/y", {}, opener=flaky, sleep=lambda s: None) == []
+
+
+def test_a_response_cut_in_the_middle_is_retried():
+    attempts = []
+
+    class Cut:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc):
+            return False
+
+        def read(self, *args):
+            raise http.client.IncompleteRead(b"[1,", 40)
+
+    def flaky(req, timeout):
+        attempts.append(1)
+        return Cut() if len(attempts) < 2 else Body(b"[]")
+
+    assert http_get_json("https://x/y", {}, opener=flaky, sleep=lambda s: None) == []
+    assert len(attempts) == 2
 
 
 # ------------------------------------------------------------------ choosing the forge
