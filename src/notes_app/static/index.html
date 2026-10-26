@@ -49,7 +49,7 @@ border:1px dashed var(--border);border-radius:var(--space-8)}
 #clear{color:var(--primary);cursor:pointer;text-decoration:underline;font-size:.875rem}
 .stats{display:flex;justify-content:space-between;align-items:center;margin:var(--space-24) 0 0;
 color:var(--muted);font-size:.875rem}
-.hint{margin:var(--space-8) 0 0;font-size:.875rem;color:var(--surface)}
+.hint{margin:var(--space-8) 0 0;font-size:.875rem;color:var(--muted)}
 footer{margin-top:var(--space-24);color:var(--muted);font-size:.75rem;overflow-wrap:anywhere}
 [hidden]{display:none!important}
 </style></head>
@@ -85,8 +85,11 @@ async function load(){const r=await fetch('/api/notes');const d=await r.json();
 const ul=$('n');ul.replaceChildren();
 for(const x of d){const li=document.createElement('li');li.textContent=x.text;ul.append(li)}
 $('empty').hidden=d.length>0;
-$('stats').textContent=(d.length+1)+' notes'}
-$('clear').addEventListener('click',()=>{});
+$('stats').textContent=d.length+' notes'}
+async function clearAll(){try{const r=await fetch('/api/notes',{method:'DELETE'});
+if(!r.ok)throw 0;await load()}catch(_){fail('Could not clear the notes. Try again.')}}
+$('clear').addEventListener('click',clearAll);
+$('clear').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();clearAll()}});
 input.addEventListener('input',()=>{err.hidden=true;sync()});
 $('f').addEventListener('submit',async e=>{e.preventDefault();
 if(input.value.trim()==='')return;
