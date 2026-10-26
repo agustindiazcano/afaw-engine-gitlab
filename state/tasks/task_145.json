@@ -1,0 +1,13 @@
+{
+  "id": "task_145",
+  "title": "Queue the chain of three dependent demo tasks (task_142 to task_144)",
+  "role": "architect",
+  "type": "chore",
+  "status": "done",
+  "owner": "agent",
+  "branch": "chore/task-145-chain-tasks",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "For the long chain experiment (EXP-04): the orchestrator picks each task only when its blocker is done."
+}

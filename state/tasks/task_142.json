@@ -1,0 +1,12 @@
+{
+  "id": "task_142",
+  "title": "Demo app: GET /api/stats returns the number of notes and the length of the longest note",
+  "role": "architect",
+  "type": "feature",
+  "status": "pending",
+  "owner": "agent",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Acceptance. GET /api/stats returns {\"count\": N, \"longest\": L} where N is the number of notes and L the length in characters of the longest note, 0 and 0 for an empty store; it reflects adds and deletes immediately; it takes no query parameters. Unit tests cover empty, one, several and after a delete. Tests first: unit tests in tests/notes/ and, for the page, a Playwright test in e2e/test_notes_app.py. Keep the selectors #t #f #n #v, a single <button> element and the brand colour #0b5fff. The existing browser tests and e2e/test_notes_live.py must keep passing. Do not touch .gitlab-ci.yml."
+}
