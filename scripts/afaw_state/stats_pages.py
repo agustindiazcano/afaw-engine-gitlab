@@ -189,11 +189,32 @@ def _handoff(h: Mapping[str, Any]) -> str:
         f"{r['gco2eq_high']} gCO2eq (SCI without M, Duo model energy not measured). "
         f"{escape(r['changed'])}.</p>"
     )
+    c = h["long_chain"]
+    long_chain = _table(
+        ["Task", "Issue", "Merge request", "Issue to MR", "MR to merge", "Issue to verified app"],
+        [
+            [
+                f"{t['task']}: {t['what']}",
+                f"#{t['issue']}",
+                f"!{t['mr']}",
+                t["issue_to_mr"],
+                t["mr_to_merge"],
+                t["issue_to_verified"],
+            ]
+            for t in c["tasks"]
+        ],
+        c["title"],
+    ) + (
+        f'<p class="meta">Three tasks in {escape(c["total"])}; {escape(c["gap_between_tasks"])}. '
+        f"{c['job_seconds']} job seconds, {c['energy_wh_low']} to {c['energy_wh_high']} Wh, "
+        f"{c['gco2eq_low']} to {c['gco2eq_high']} gCO2eq (SCI without M, Duo model energy not "
+        f"measured). {escape(c['credits_note'])}.</p>"
+    )
     limits = "".join(f"<li>{escape(text)}</li>" for text in h["limits"])
     return (
         f"<h2>Hands-off loop</h2>"
         f'<p class="meta">Counts read from the GitLab API on {escape(a["read_on"])}.</p>'
-        f'<div class="tiles">{tiles}</div>{stages}{chain}{rehearsal}'
+        f'<div class="tiles">{tiles}</div>{stages}{chain}{rehearsal}{long_chain}'
         f"<h3>What this does not prove</h3><ul>{limits}</ul>"
     )
 

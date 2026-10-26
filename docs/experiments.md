@@ -449,3 +449,35 @@ a file that fails `lint` on purpose (an unused import).
 Both flows removed the same unused import, so the trigger and `request_fix` duplicate each other and
 the cost doubles. The author closed #62, #63, !125, !126 and !127 and deleted the branch at about
 04:11 UTC. The trigger works. The project keeps `request_fix` as the repair path, and the recommendation is to leave the trigger off outside a demonstration.
+
+## Long chain of dependent tasks (2026-10-26, EXP-04)
+
+Three tasks, each blocked by the previous one (`blocked_by`), were queued in
+[!124](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/124). A driver script ran the loop unattended: it asked
+`scripts.orchestrator` for the next task, ran `--create` to file the issue, waited for the merge
+request to merge, waited for `e2e_live` on the pipeline of the merge, and asked again. The author
+started the driver once, at 04:15:04 UTC. The orchestrator picked each task only after its blocker
+was merged.
+
+| Task | Issue | Merge request | Issue to merge request | Merge request to merge | Issue to verified live app |
+|---|---|---|---|---|---|
+| `task_142`: `GET /api/stats` | [#64](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/work_items/64) | [!129](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/129) | 1 min 46 s | 10 min 39 s | 24 min 15 s |
+| `task_143`: the stats in the summary line of the page | [#65](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/work_items/65) | [!131](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/131) | 2 min 03 s | 10 min 26 s | 24 min 18 s |
+| `task_144`: the footer links the commit to its GitLab page | [#66](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/work_items/66) | [!132](https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/merge_requests/132) | 1 min 49 s | 11 min 23 s | 28 min 05 s |
+
+Total: 1 h 18 min 23 s for the three tasks. The orchestrator filed the next issue 57 s and 47 s after
+the live check of the previous task. All commits of the three merge requests are authored by
+`Duo Developer`; no merge request needed a repair request. The live app serves `/api/stats`, shows
+the longest note in the summary line and links the running commit.
+
+Carbon of the three flows (`python -m scripts.sci_report`): 12,265 job seconds, 5.32 to 31.93 Wh,
+1.83 to 18.49 gCO2eq (SCI without M, without the energy of the model behind Duo).
+
+Credits: 368.81 at the start. The reading of 387.39 was taken while the first task was running and
+includes two sessions that the `repair_check` job of the pipeline caused by failing on merge requests
+of the Fix CI/CD probe (task_150 fixed it); the dashboard showed the same number again later, so
+the credits of the whole chain are the difference to the reading taken after it ended (see the
+readings above).
+
+What this does not show: three small tasks with written specifications on one application, started
+by one command of the author, one run.
