@@ -139,3 +139,23 @@ def test_each_note_has_a_delete_control_that_is_not_a_button(html: str) -> None:
     assert "/api/notes/" in html
     assert html.count("<button") == 1
     assert "createElement('button')" not in html
+
+
+COMMIT_URL = (
+    "https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/commit/"
+)
+
+
+def test_the_footer_links_the_commit_to_its_gitlab_page(html: str) -> None:
+    assert COMMIT_URL in html
+    assert "createElement('a')" in html
+    assert re.search(r"\.href=COMMIT_URL\+v\.commit_sha", html)
+
+
+def test_the_commit_link_opens_in_the_same_tab_with_noopener(html: str) -> None:
+    assert re.search(r"\.rel='noopener'", html)
+    assert "target" not in html.replace("targetless", "")
+
+
+def test_the_commit_text_stays_plain_when_the_version_is_unknown(html: str) -> None:
+    assert re.search(r"v\.commit_sha(\s*)!==(\s*)'unknown'", html)

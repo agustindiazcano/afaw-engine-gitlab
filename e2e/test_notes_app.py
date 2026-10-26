@@ -10,6 +10,9 @@ from e2e.conftest import RESULTS
 
 BRAND = "rgb(11, 95, 255)"
 WHITE = "rgb(255, 255, 255)"
+COMMIT_URL = (
+    "https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/commit/"
+)
 
 
 def test_a_note_added_in_the_page_appears_in_the_list(page: Page, notes_url: str) -> None:
@@ -31,6 +34,19 @@ def test_a_blank_note_cannot_be_added(page: Page, notes_url: str) -> None:
 def test_the_page_shows_the_release_and_the_commit(page: Page, notes_url: str) -> None:
     page.goto(notes_url)
     expect(page.locator("#v")).to_contain_text("commit")
+
+
+def test_the_commit_in_the_footer_links_to_its_gitlab_page(page: Page, notes_url: str) -> None:
+    sha = page.request.get(f"{notes_url}/api/version").json()["commit_sha"]
+    page.goto(notes_url)
+    expect(page.locator("#v")).to_contain_text("commit")
+    link = page.locator("#v a")
+    if sha == "unknown":
+        expect(link).to_have_count(0)
+        return
+    expect(link).to_have_attribute("href", f"{COMMIT_URL}{sha}")
+    expect(link).to_have_attribute("rel", "noopener")
+    expect(link).not_to_have_attribute("target", "_blank")
 
 
 def test_the_add_button_has_the_brand_colours(page: Page, notes_url: str) -> None:
