@@ -1,0 +1,13 @@
+{
+  "id": "task_115",
+  "title": "Orchestrator: pick the next task in code from the pending view (ADR 0010) and propose the handoff ADR (0011)",
+  "role": "architect",
+  "type": "feature",
+  "status": "done",
+  "owner": "agent",
+  "branch": "feat/task-115-orchestrator",
+  "priority": 1,
+  "difficulty": 2,
+  "blocked_by": [],
+  "notes": "ADR 0011 is proposed here; its script is task_111."
+}

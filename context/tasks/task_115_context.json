@@ -1,0 +1,13 @@
+{
+  "task_id": "task_115",
+  "files_touched": [
+    "scripts/orchestrator.py",
+    "tests/tooling/test_orchestrator.py"
+  ],
+  "summary": "ADR 0010 (orchestrator picks the next task in code) and ADR 0011 (context handoff, proposed). scripts/orchestrator.py selects the next task from build/state/pending.json: status pending or backlog, owner agent, no open blocker, ordered by priority, difficulty and id. 8 tests, all failing on the old code (red_check). No credits are spent by the pick.",
+  "next": [
+    "Create the issue text for the selected task and assign it to the Developer Flow (a Duo agent or a script)",
+    "task_111: scripts/handoff.py and the session-start hook (ADR 0011)",
+    "Measure the comparison against reading the code in EXP-09"
+  ]
+}
