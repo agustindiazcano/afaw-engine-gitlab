@@ -61,6 +61,14 @@ def create_app() -> FastAPI:
         with lock:
             return list(reversed(notes))
 
+    @app.get("/api/stats")
+    def stats() -> dict[str, int]:
+        with lock:
+            return {
+                "count": len(notes),
+                "longest": max((len(str(n["text"])) for n in notes), default=0),
+            }
+
     @app.post("/api/notes", status_code=201)
     def add_note(body: NoteIn) -> dict[str, int | str]:
         nonlocal next_id
