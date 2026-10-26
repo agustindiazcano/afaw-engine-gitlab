@@ -94,3 +94,21 @@ def test_the_page_names_the_app_and_loads_the_notes(client: TestClient) -> None:
 def test_the_page_styles_the_button_with_the_brand_colour(client: TestClient) -> None:
     # The end to end tests read this colour from the rendered page, so a wrong colour is caught.
     assert "#0b5fff" in client.get("/").text
+
+
+def test_delete_clears_every_note(client: TestClient) -> None:
+    client.post("/api/notes", json={"text": "one"})
+    client.post("/api/notes", json={"text": "two"})
+    response = client.delete("/api/notes")
+    assert response.status_code == 204
+    assert client.get("/api/notes").json() == []
+
+
+def test_delete_on_an_empty_store_is_still_204(client: TestClient) -> None:
+    assert client.delete("/api/notes").status_code == 204
+
+
+def test_ids_restart_after_a_delete(client: TestClient) -> None:
+    client.post("/api/notes", json={"text": "one"})
+    client.delete("/api/notes")
+    assert client.post("/api/notes", json={"text": "again"}).json()["id"] == 1
