@@ -54,6 +54,7 @@ border:1px dashed var(--border);border-radius:var(--space-8)}
 color:var(--muted);font-size:.875rem}
 .hint{margin:var(--space-8) 0 0;font-size:.875rem;color:var(--muted)}
 footer{margin-top:var(--space-24);color:var(--muted);font-size:.75rem;overflow-wrap:anywhere}
+footer a{color:var(--focus)}
 [hidden]{display:none!important}
 </style></head>
 <body><main>
@@ -113,7 +114,11 @@ if(!r.ok){fail(r.status===409?'The store is full.':'Could not save the note. Try
 sync();return}
 input.value='';sync();await load()}
 catch(_){fail('Could not save the note. Check your connection and try again.');sync()}});
+const COMMIT_URL='https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase/-/commit/';
 fetch('/api/version').then(r=>r.json()).then(v=>{
-$('v').textContent='Release '+v.release_tag+', commit '+v.commit_sha}).catch(()=>{});
+$('v').textContent='Release '+v.release_tag+', commit ';
+if(v.commit_sha!=='unknown'){const a=document.createElement('a');
+a.href=COMMIT_URL+v.commit_sha;a.rel='noopener';a.textContent=v.commit_sha;$('v').append(a)}
+else $('v').append(v.commit_sha)}).catch(()=>{});
 load().catch(()=>fail('Could not load the notes.'));
 </script></body></html>
