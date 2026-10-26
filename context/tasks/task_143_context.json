@@ -1,0 +1,11 @@
+{
+  "task_id": "task_143",
+  "files_touched": [
+    "src/notes_app/static/index.html",
+    "tests/notes/test_page.py"
+  ],
+  "summary": "The summary line #stats on the notes page now reads GET /api/stats on every load, which follows each add, delete and clear, and shows '3 notes, longest 42 characters' or '0 notes' for an empty list. Page tests check the fetch, the wording and that every change ends in load(); a Playwright test adds two notes of known length and checks the text; the live post-deploy test accepts the new wording.",
+  "next": [
+    "Run the Playwright tests in CI (e2e_local); they could not run in this session"
+  ]
+}
