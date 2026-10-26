@@ -1,0 +1,13 @@
+{
+  "id": "task_124",
+  "title": "CLAUDE.md wording rule: no honest/honestly and no generic praise words",
+  "role": "architect",
+  "type": "chore",
+  "status": "done",
+  "owner": "agent",
+  "branch": "docs/task-124-wording-rule",
+  "priority": 2,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Documents only."
+}

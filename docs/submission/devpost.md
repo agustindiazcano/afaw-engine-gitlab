@@ -104,7 +104,7 @@ assumptions listed on the `/environment/` page.
 ## Challenges
 
 - Fail loudly: a job that cannot get what it needs must be red, not green.
-- Honest controls: `human_only_files` lives in `.gitlab-ci.yml`, so the same merge request can edit
+- Limits of the controls: `human_only_files` lives in `.gitlab-ci.yml`, so the same merge request can edit
   it away. It is labelled weak. The strong control depends on the role and tier.
 - GitLab documents no cap on Fix CI/CD Pipeline attempts, so the cap of three is counted by our own job.
 - Our own experiments found two defects of ours (task_070, gotcha 0005).

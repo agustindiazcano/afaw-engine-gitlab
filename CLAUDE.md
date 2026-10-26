@@ -43,3 +43,14 @@ delivery is the fallback, not the design.
   `docs/experiments.md`; the delivery or deployment modes of the merge are in `docs/autohealing.md`.
 * **Data:** every figure in those tables is read from the API or a log in the same session. LLM
   tokens are not exposed by GitLab Duo; the unit is the GitLab Credit, read by hand.
+
+## Wording
+* Never use the words "honest", "honestly" or "honesty" anywhere in the project: not in
+  documentation, code comments, commit messages, merge requests, issues, the README or the Devpost
+  text.
+* Do not use generic adjectives or adverbs that praise or vouch for the work instead of describing
+  it, for example: robust, powerful, seamless, cutting-edge, comprehensive, innovative, brilliant,
+  amazing, truly, really, actually, clearly, simply. Say what the thing does and give the measured
+  number.
+* State a limit as a plain fact ("the merge uses a person's token"), not as a declaration of
+  candour.

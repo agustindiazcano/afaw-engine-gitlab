@@ -1,0 +1,6 @@
+{
+  "task_id": "task_124",
+  "files_touched": [],
+  "summary": "CLAUDE.md has a Wording section: the words honest, honestly and honesty and generic praise adjectives are not used anywhere in the project. The two existing uses (ADR 0004 and the Devpost text) were reworded.",
+  "next": []
+}
