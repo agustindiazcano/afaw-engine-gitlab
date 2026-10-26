@@ -281,13 +281,13 @@
   "handoff": {
     "as_of": "2026-10-26",
     "autonomy": {
-      "merge_requests": 104,
-      "merged": 83,
-      "agent_only": 36,
-      "agent_only_merged": 29,
-      "guard_merged": 23,
-      "median_minutes": 10.7,
-      "read_on": "2026-10-26"
+      "merge_requests": 132,
+      "merged": 106,
+      "agent_only": 47,
+      "agent_only_merged": 36,
+      "guard_merged": 30,
+      "median_minutes": 10.5,
+      "read_on": "2026-10-26, after the long chain"
     },
     "stages": [
       {
@@ -448,6 +448,47 @@
       "gco2eq_low": 0.55,
       "gco2eq_high": 5.57,
       "changed": "8 files in 3 commits, all authored by Duo Developer: the API, the page, unit tests, a browser test, docs/demo-app.md and the task files"
+    },
+    "long_chain": {
+      "title": "Long chain: three dependent tasks, each filed by the orchestrator after the previous one was merged and verified live",
+      "date": "2026-10-26",
+      "tasks": [
+        {
+          "task": "task_142",
+          "what": "GET /api/stats",
+          "issue": 64,
+          "mr": 129,
+          "issue_to_mr": "1 min 46 s",
+          "mr_to_merge": "10 min 39 s",
+          "issue_to_verified": "24 min 15 s"
+        },
+        {
+          "task": "task_143",
+          "what": "stats in the summary line of the page",
+          "issue": 65,
+          "mr": 131,
+          "issue_to_mr": "2 min 03 s",
+          "mr_to_merge": "10 min 26 s",
+          "issue_to_verified": "24 min 18 s"
+        },
+        {
+          "task": "task_144",
+          "what": "footer links the commit to its GitLab page",
+          "issue": 66,
+          "mr": 132,
+          "issue_to_mr": "1 min 49 s",
+          "mr_to_merge": "11 min 23 s",
+          "issue_to_verified": "28 min 05 s"
+        }
+      ],
+      "total": "1 h 18 min 23 s",
+      "gap_between_tasks": "57 s and 47 s from the live check to the next issue",
+      "job_seconds": 12265,
+      "energy_wh_low": 5.32,
+      "energy_wh_high": 31.93,
+      "gco2eq_low": 1.83,
+      "gco2eq_high": 18.49,
+      "credits_note": "Credits of the chain: see the readings in experiments.md"
     }
   }
 }

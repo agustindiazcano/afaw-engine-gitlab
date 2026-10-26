@@ -1,0 +1,13 @@
+{
+  "id": "task_149",
+  "title": "White paper of AFAW Engine, citing the original AFAW paper",
+  "role": "architect",
+  "type": "chore",
+  "status": "done",
+  "owner": "agent",
+  "branch": "docs/task-149-whitepaper",
+  "priority": 2,
+  "difficulty": 2,
+  "blocked_by": [],
+  "notes": "Markdown in docs/whitepaper/; the original paper in docs/paper/ is not edited and paper_pdf keeps passing."
+}

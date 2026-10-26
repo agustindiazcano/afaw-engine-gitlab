@@ -274,3 +274,15 @@ def test_the_end_to_end_rehearsal_is_listed_link_by_link(
         assert escape(link["link"]) in experiments and link["utc"] in experiments
     assert str(rehearsal["credits_used"]) in experiments
     assert "gCO2eq" in experiments
+
+
+def test_the_long_chain_lists_every_task_with_its_issue_and_merge_request(
+    experiments: str, data: dict[str, Any]
+) -> None:
+    chain = data["handoff"]["long_chain"]
+    assert len(chain["tasks"]) == 3
+    for task in chain["tasks"]:
+        assert f"#{task['issue']}" in experiments and f"!{task['mr']}" in experiments
+        assert task["task"] in experiments
+    assert chain["total"] in experiments
+    assert "gCO2eq" in experiments

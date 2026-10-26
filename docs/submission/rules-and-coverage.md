@@ -53,7 +53,7 @@ Self-assessment from the evidence. It is not a score.
 | Innovation/Idea | "The AI decides, the engine measures"; identity by commit author and pipeline user; red-first | |
 | Presentation | Script written | No video |
 
-## Level of autonomy: the feature path ran on 23 merge requests made only by agents with no click after the issue; the repair path ran for three kinds of failure
+## Level of autonomy: the feature path ran on 30 merge requests made only by agents with no click after the issue; the repair path ran for three kinds of failure
 
 The 13 links are the rows of the table in [`evidence.md`](evidence.md#hands-off-loop-link-by-link).
 
@@ -61,7 +61,7 @@ The 13 links are the rows of the table in [`evidence.md`](evidence.md#hands-off-
 |---|---|---|
 | Assisted | Yes | A person starts every flow and merges |
 | Supervised | Yes, with the issue-to-merge-request and deploy parts | A person starts the flow, marks the draft ready and approves; the gates, the deploy and the monitor ran on their own |
-| Hands-off | **Mostly, with three gaps**: the feature path (issue, Duo merge request, gates, undraft, merge, release, deploy, monitor) ran on 23 merge requests made only by agents (read on 2026-10-26); the repair path (failure, issue opened by `request_fix`, Duo merge request, merge by the guard, redeploy, green live check) ran end to end for a mutation engine defect (#19 to !47) and for three planted bugs found by a live browser test (#54 to !101, 23 min 44 s). The Code Review Flow and the summary comment on the issue each ran once, started by a person. Not run: a repair that needed more than one attempt, and the Fix CI/CD trigger on failed pipelines. The identity of the undraft and the merge is a person's token | A level is claimed only with evidence per link |
+| Hands-off | **Mostly, with three gaps**: the feature path (issue, Duo merge request, gates, undraft, merge, release, deploy, monitor) ran on 30 merge requests made only by agents (read on 2026-10-26); the repair path (failure, issue opened by `request_fix`, Duo merge request, merge by the guard, redeploy, green live check) ran end to end for a mutation engine defect (#19 to !47) and for three planted bugs found by a live browser test (#54 to !101, 23 min 44 s). The Code Review Flow and the summary comment on the issue each ran once, started by a person. Not run: a repair that needed more than one attempt, and the Fix CI/CD trigger on failed pipelines. The identity of the undraft and the merge is a person's token | A level is claimed only with evidence per link |
 
 The decision between Hands-off and Supervised is made on 2026-10-26 14:00 from the evidence table.
 

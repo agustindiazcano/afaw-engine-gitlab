@@ -1,0 +1,13 @@
+{
+  "id": "task_141",
+  "title": "Devpost text rewritten for the measured loop",
+  "role": "architect",
+  "type": "chore",
+  "status": "done",
+  "owner": "agent",
+  "branch": "docs/task-141-devpost",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "notes": "Documents only. The sentence about the Fix CI/CD trigger and the video URL are filled later."
+}
