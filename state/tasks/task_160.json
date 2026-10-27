@@ -1,0 +1,12 @@
+{
+  "id": "task_160",
+  "title": "Demo video link in the README and the Devpost text",
+  "role": "architect",
+  "type": "chore",
+  "status": "done",
+  "owner": "agent",
+  "priority": 1,
+  "difficulty": 1,
+  "blocked_by": [],
+  "branch": "docs/task-160-video-link"
+}

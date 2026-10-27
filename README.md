@@ -16,7 +16,7 @@ AFAW Engine is the entry of the AFAW (Anti-Fragile Agentic Workflow) method to t
 - Autonomy track: **Best Hands-off Agent**
 - Also targeted: **Most Stages Covered**, **Google Cloud bonus** (Cloud Run)
 - Optional, only if measured: **Most Environmentally Impactful** (see [Sustainability](#sustainability))
-- Demo video: <DEMO_VIDEO_URL>
+- Demo video: https://youtu.be/42C2ZQdyujw
 - Live dashboard (Google Cloud Run): https://afaw-handsoff-ljm5hefnsq-uc.a.run.app
 - Demo app that the Duo agents change (Google Cloud Run): https://afaw-demo-app-ljm5hefnsq-uc.a.run.app
 - Source of truth: https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase (a mirror is kept at https://github.com/agustindiazcano/afaw-engine-gitlab)
@@ -131,7 +131,7 @@ Not in the diagram: the review by the Code Review Flow, which ran once on a merg
 | MIT License visible in the repository | Done | [`LICENSE`](LICENSE); the project API reports the license key `mit` |
 | Visible CI/CD pipeline history showing the automation | Done | Pipelines of the project, including failed ones, and the repairs that followed them; the failures on `main` are explained in [limits](#guardrails-and-known-limits) |
 | Text description | In progress | Derived from this README; see [`docs/submission/devpost.md`](docs/submission/devpost.md) and [`docs/submission/rules-and-coverage.md`](docs/submission/rules-and-coverage.md) |
-| Demo video under 3 minutes, YouTube, no third-party trademarks or copyrighted music | Planned | <DEMO_VIDEO_URL> |
+| Demo video under 3 minutes, YouTube, no third-party trademarks or copyrighted music | Planned | https://youtu.be/42C2ZQdyujw |
 | Path B: what was added or changed since Oct 5, 2026 | Done | [Added since Oct 5](#added-on-or-after-oct-5-2026) |
 | Path B: deployed project URL, kept live until about Nov 16 | Done | https://afaw-handsoff-ljm5hefnsq-uc.a.run.app (`/health` answered `ok` on Oct 24, 2026) |
 | Path B: URL of the original MIT project | Done | Link at the top |
@@ -297,7 +297,7 @@ The base method was committed on Sep 29 and 30, 2026. Since Oct 5, from `git log
 | Design (end-to-end workflow) | [The loop](#what-this-variant-changes-hands-off) and [Hands-off status](#hands-off-status), stated link by link |
 | Potential impact | Governance of agent-written code for teams that already generate code and need review, security and release to keep up |
 | Innovation | Merge approval moved from each merge to the policy, with deterministic gates and identity checks as compensating controls ([ADR 0007](docs/adr/0007-engine-approves-each-merge-human-approves-the-policy.md)) |
-| Presentation | Demo video <DEMO_VIDEO_URL> |
+| Presentation | Demo video https://youtu.be/42C2ZQdyujw |
 
 ## Dashboard
 

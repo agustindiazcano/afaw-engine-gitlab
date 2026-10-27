@@ -1,0 +1,9 @@
+{
+  "task_id": "task_160",
+  "files_touched": [],
+  "summary": "The placeholder for the demo video is replaced by the YouTube link in README.md (three places) and docs/submission/devpost.md.",
+  "next": [
+    "Record the filmed run in experiments.md and evidence.md",
+    "Check the status of the video row in the README requirements table"
+  ]
+}

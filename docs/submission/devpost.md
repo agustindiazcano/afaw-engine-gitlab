@@ -130,5 +130,5 @@ Federation, Semgrep.
 Project: https://gitlab.com/gitlab-ai-hackathon/transcend-october-2026/43344247/showcase ·
 GitHub mirror: https://github.com/agustindiazcano/afaw-engine-gitlab ·
 Original MIT project: https://github.com/agustindiazcano/afaw-anti-fragile-agentic-workflow ·
-Demo video: <DEMO_VIDEO_URL> · Dashboard: https://afaw-handsoff-ljm5hefnsq-uc.a.run.app ·
+Demo video: https://youtu.be/42C2ZQdyujw · Dashboard: https://afaw-handsoff-ljm5hefnsq-uc.a.run.app ·
 Author: Agustin Diaz-Cano, https://www.agustindiazcano.com/
