@@ -15,7 +15,7 @@ AFAW Engine is the entry of the AFAW (Anti-Fragile Agentic Workflow) method to t
 - Path: **B, Bring Your Own** (existing MIT project, imported to GitLab)
 - Autonomy track: **Best Hands-off Agent**
 - Also targeted: **Most Stages Covered**, **Google Cloud bonus** (Cloud Run)
-- Optional, only if measured: **Most Environmentally Impactful** (see [Sustainability](#sustainability))
+- Opted in: **Most Environmentally Impactful** (one measured optimization, 0.038 to 0.382 gCO2eq saved per mutation run; see [Sustainability](#sustainability))
 - Demo video: https://youtu.be/42C2ZQdyujw
 - Live dashboard (Google Cloud Run): https://afaw-handsoff-ljm5hefnsq-uc.a.run.app
 - Demo app that the Duo agents change (Google Cloud Run): https://afaw-demo-app-ljm5hefnsq-uc.a.run.app
@@ -136,7 +136,7 @@ Not in the diagram: the review by the Code Review Flow, which ran once on a merg
 | Path B: deployed project URL, kept live until about Nov 16 | Done | https://afaw-handsoff-ljm5hefnsq-uc.a.run.app (`/health` answered `ok` on Oct 24, 2026) |
 | Path B: URL of the original MIT project | Done | Link at the top |
 | Google Cloud bonus: deployment code in the repository and public URL | Done | `deploy/terraform` ([`cloud_run.tf`](deploy/terraform/cloud_run.tf)), [`docs/google-cloud.md`](docs/google-cloud.md) |
-| Most Environmentally Impactful (opt-in, SCI) | Measured, partial; the human decides the opt-in on 2026-10-26 14:00 | [Sustainability](#sustainability) |
+| Most Environmentally Impactful (opt-in, SCI) | Measured, partial; opted in with one measured optimization | [Sustainability](#sustainability) |
 
 ## The nine stages
 
@@ -269,7 +269,9 @@ Design choice: the agent runs only the test it is writing, and the full check su
 
 Intended metric: Software Carbon Intensity, `SCI = (O + M) per R` with `O = E x I`, as the Green Software Foundation specification defines it (E energy in kWh, I carbon intensity in gCO2eq per kWh, M embodied emissions, R the functional unit). Here R is one merged merge request. Inputs task 010 captures per merge request: CI job seconds and minutes, pipelines and retries (Done). Inputs we must assume and declare: runner power draw, grid carbon intensity, embodied emissions. The ISO number of the specification is not stated here because it was not confirmed.
 
-Status (2026-10-25): **first measurement taken, partial.** `scripts/sci_report.py` reads the job seconds of every merged merge request (its own pipelines plus the `main` pipeline of its merge commit) from the public GitLab API and gives a range of gCO2eq, never a point. On the 30 most recent flows (2026-10-25): 89,312 job seconds, 39 to 233 Wh and 13.3 to 134.6 gCO2eq in total, about 0.44 to 4.49 gCO2eq per flow. The range is wide because power per vCPU (0.71 to 4.26 W, Cloud Carbon Footprint) and grid intensity (343 to 579 gCO2eq/kWh, Google Cloud 2025, the two hosted-runner regions) are assumptions. It is **SCI without M**: embodied emissions are not estimated, and the energy of the model behind GitLab Duo is not measured. The same measurement runs in the `web_data` job on every pipeline and appears as the indicator at the top of the [dashboard](https://afaw-handsoff-ljm5hefnsq-uc.a.run.app/live/); the mutation tool change (mutmut 56 s against cosmic-ray 309 s, one run) is the one measured optimization. A comparison of AFAW against reading the code is **not measured**: it stays a hypothesis. The Most Environmentally Impactful prize is opt-in and the human decides on 2026-10-26 14:00 from [`docs/experiments.md`](docs/experiments.md) (EXP-09).
+Status (2026-10-25): **first measurement taken, partial.** `scripts/sci_report.py` reads the job seconds of every merged merge request (its own pipelines plus the `main` pipeline of its merge commit) from the public GitLab API and gives a range of gCO2eq, never a point. On the 30 most recent flows (2026-10-25): 89,312 job seconds, 39 to 233 Wh and 13.3 to 134.6 gCO2eq in total, about 0.44 to 4.49 gCO2eq per flow. The range is wide because power per vCPU (0.71 to 4.26 W, Cloud Carbon Footprint) and grid intensity (343 to 579 gCO2eq/kWh, Google Cloud 2025, the two hosted-runner regions) are assumptions. It is **SCI without M**: embodied emissions are not estimated, and the energy of the model behind GitLab Duo is not measured. The same measurement runs in the `web_data` job on every pipeline and appears as the indicator at the top of the [dashboard](https://afaw-handsoff-ljm5hefnsq-uc.a.run.app/live/); the mutation tool change (mutmut 56 s against cosmic-ray 309 s, one run) is the one measured optimization. A comparison of AFAW against reading the code is **not measured**: it stays a hypothesis. The Most Environmentally Impactful prize is opt-in; the entry opts in with the one measured optimization below, from [`docs/experiments.md`](docs/experiments.md) (EXP-09).
+
+Measured optimization (2026-10-25, `docs/submission/mutation-tools-measurement.md`): the mutation gate runs mutmut instead of cosmic-ray. On the same GitLab.com shared runner (`saas-linux-small-amd64`, 2 vCPUs) against `src/afaw_web`, the whole job took 56.08 s with mutmut and 309.34 s with cosmic-ray, so mutmut saves 253.26 s per run. With the assumptions above (E = seconds / 3600 x 2 vCPUs x 0.71 to 4.26 W x PUE 1.1; I = 343 to 579 gCO2eq/kWh) that is 0.110 to 0.659 Wh and 0.038 to 0.382 gCO2eq per run, SCI without M. The two tools did not do equal work (mutmut: 104 mutants, score 71.2 percent; cosmic-ray: 240 mutants, 77.1 percent) and each ran once or twice, so this is a measured difference and not a statistical claim. The effect of path filters, of running only the new or modified files through the mutation gate, and of scaling Cloud Run to zero is not quantified.
 
 ## Added on or after Oct 5, 2026
 
