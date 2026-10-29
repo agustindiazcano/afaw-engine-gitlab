@@ -37,7 +37,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python -m pip install --upgrade pip && pip install --group dev pytest-asyncio mutmut==3.8.0
+      - run: python -m pip install --upgrade pip && pip install --group dev pytest-asyncio mutmut==3.8.0 "pytest==8.4.2"
       - name: mutmut on src/afaw_web
         run: |
           printf '[mutmut]\nsource_paths=src/afaw_web/\nonly_mutate=src/afaw_web/app.py\n  src/afaw_web/search.py\npytest_add_cli_args_test_selection=tests/web\n' > setup.cfg
