@@ -488,6 +488,11 @@ DOI [10.5281/zenodo.23050310](https://doi.org/10.5281/zenodo.23050310). Author: 
 
 MIT
 
+## Autor
+
+Agustin Diaz-Cano
+MS Candidate, Systems Engineering
+
 ---
 
 Built for the [GitLab Transcend Hackathon, Life After Code](https://gitlab-transcend.devpost.com/). Author: [Agustin Diaz-Cano](https://www.agustindiazcano.com/).
