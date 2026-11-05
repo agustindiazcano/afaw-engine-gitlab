@@ -491,7 +491,7 @@ MIT
 ## Autor
 
 Agustin Diaz-Cano
-MS Candidate, Systems Engineering
+MS Candidate, Systems Engineering (UTN FRBA, Argentina)
 
 ---
 
